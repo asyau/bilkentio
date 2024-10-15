@@ -1,6 +1,5 @@
 package com.example.bilkentio_backend.guide.entity;
 
-
 import com.example.bilkentio_backend.user.entity.User;
 import jakarta.persistence.*;
 
