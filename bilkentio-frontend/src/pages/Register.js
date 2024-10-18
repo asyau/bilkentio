@@ -17,30 +17,21 @@ function Register() {
         }
 
         try {
-            console.log('Sending request to backend...');
             const response = await axios.post('http://localhost:8080/auth/register', {
                 username,
                 password,
             });
 
-            console.log('Response received:', response);
-
-            // Check if response data is available
             if (response && response.status === 200) {
-                setSuccessMessage(response.data); // Assuming backend sends a success message
+                setSuccessMessage(response.data);
                 setError('');
                 alert('Registration successful! Please log in.');
-                window.location.href = '/login'; // Redirect to login page
+                window.location.href = '/login';
             } else {
                 setError('Unexpected response from the server.');
-                console.error('Unexpected response:', response);
             }
         } catch (err) {
-            // Log the error for better debugging
-            console.error('Error during registration:', err);
-
             if (err.response) {
-                console.error('Error response from backend:', err.response);
                 setError(err.response.data || 'Registration failed. Try again.');
             } else {
                 setError('Network error or server is unreachable.');
@@ -50,33 +41,42 @@ function Register() {
 
     return (
         <div className="register-container">
-            <h1>Register</h1>
-            <form onSubmit={handleRegister}>
-                {error && <p className="error">{error}</p>}
-                {successMessage && <p className="success">{successMessage}</p>}
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
+            <div className="logo-container">
+                <img 
+                    src="https://upload.wikimedia.org/wikipedia/tr/e/ee/Bilkent%C3%9Cniversitesi-logo.png" 
+                    alt="Bilkent University Logo" 
+                    className="logo"
                 />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Register</button>
-            </form>
+            </div>
+            <div className="form-container">
+                <h1>Register</h1>
+                <form onSubmit={handleRegister}>
+                    {error && <p className="error">{error}</p>}
+                    {successMessage && <p className="success">{successMessage}</p>}
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                    />
+                    <button type="submit" className="landing-button">Register</button>
+                </form>
+            </div>
         </div>
     );
 }

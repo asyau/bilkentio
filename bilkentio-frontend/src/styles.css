@@ -1,0 +1,171 @@
+/* Add this to your CSS file, e.g., src/styles.css */
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background: linear-gradient(135deg, #fff 50%, #e6f2ff 50%);
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+.container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+h1 {
+    text-align: center;
+    color: #ff0000; /* Vibrant red */
+    margin-bottom: 24px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #ff0000; /* Vibrant red */
+}
+
+button {
+    padding: 12px;
+    background-color: #ff0000; /* Vibrant red */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+
+.error {
+    color: #ff0000; /* Vibrant red */
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.success {
+    color: #00cc00; /* Vibrant green */
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+header {
+  background-color: #d32f2f;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+footer {
+  background-color: #ff0000; /* Vibrant red */
+  padding: 15px;
+  color: white;
+  text-align: center;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.landing-container {
+  text-align: center;
+  padding: 40px 20px;
+  min-height: calc(100vh - 70px); /* Subtract footer height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* This will center items horizontally */
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 200px;
+  height: auto;
+}
+
+.landing-title {
+  color: #ff0000; /* Vibrant red */
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  width: 100%; /* Ensure full width */
+}
+
+.landing-subtitle {
+  color: #0066cc; /* Blue for contrast */
+  font-size: 1.2em;
+  margin-bottom: 30px;
+  width: 100%; /* Ensure full width */
+}
+
+.blue-accent {
+  color: #0066cc; /* Blue accent color */
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px; /* Increased gap between buttons */
+  margin-top: 30px;
+}
+
+.landing-button {
+  padding: 15px 30px; /* Increased padding for larger buttons */
+  font-size: 20px; /* Slightly larger font size */
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 150px; /* Ensure minimum width for buttons */
+}
+
+.login-container, .register-container {
+  text-align: center;
+  padding: 40px 20px;
+  min-height: calc(100vh - 70px); /* Subtract footer height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-container {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}

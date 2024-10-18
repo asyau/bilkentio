@@ -15,10 +15,9 @@ function Login() {
                 password,
             });
 
-            // Save JWT token to localStorage
             localStorage.setItem('token', response.data.jwt);
             alert('Login successful!');
-            window.location.href = '/'; // Redirect to home page or dashboard
+            window.location.href = '/';
         } catch (error) {
             setError('Incorrect username or password.');
         }
@@ -26,25 +25,34 @@ function Login() {
 
     return (
         <div className="login-container">
-            <h1>Login</h1>
-            <form onSubmit={handleLogin}>
-                {error && <p className="error">{error}</p>}
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
+            <div className="logo-container">
+                <img 
+                    src="https://upload.wikimedia.org/wikipedia/tr/e/ee/Bilkent%C3%9Cniversitesi-logo.png" 
+                    alt="Bilkent University Logo" 
+                    className="logo"
                 />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Login</button>
-            </form>
+            </div>
+            <div className="form-container">
+                <h1>Login</h1>
+                <form onSubmit={handleLogin}>
+                    {error && <p className="error">{error}</p>}
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <button type="submit" className="landing-button">Login</button>
+                </form>
+            </div>
         </div>
     );
 }

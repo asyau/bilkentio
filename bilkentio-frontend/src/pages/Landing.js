@@ -6,8 +6,15 @@ function Landing() {
 
     return (
         <div className="landing-container">
-            <h1>Welcome to Our App</h1>
-            <p>Please select an option:</p>
+            <div className="logo-container">
+                <img 
+                    src="https://upload.wikimedia.org/wikipedia/tr/e/ee/Bilkent%C3%9Cniversitesi-logo.png" 
+                    alt="Bilkent University Logo" 
+                    className="logo"
+                />
+            </div>
+            <h1 className="landing-title">Welcome to <span className="blue-accent">Bilkent</span>IO</h1>
+            <p className="landing-subtitle">Your gateway to seamless campus connectivity</p>
             <div className="button-container">
                 <button onClick={() => navigate('/login')} className="landing-button">
                     Login
