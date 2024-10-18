@@ -23,8 +23,8 @@ public class User {
 
     @Column(unique = true, nullable = false)
     private String username;
-
-    @Column(nullable = false)
+    
+    @Column(name = "name_surname")
     private String nameSurname;
 
     @Column(nullable = false)

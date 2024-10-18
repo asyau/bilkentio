@@ -1,10 +1,12 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './styles.css'; 
+import './styles/styles.css'; 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import CRUD from './pages/crud';
+
 
 function App() {
   return (
@@ -14,6 +16,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/crud" element={<CRUD />} />
         </Routes>
       </Router>
       <footer>

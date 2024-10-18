@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class UserService {
@@ -18,10 +20,13 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     public User saveUser(User newUser) {
         User user = new User();
         user.setUsername(newUser.getUsername());
         user.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        user.setNameSurname(newUser.getNameSurname());
         user.setRoles(Collections.singleton("ROLE_USER")); // Default role
         return userRepository.save(user);
     }
@@ -50,11 +55,16 @@ public class UserService {
     }
 
     public boolean deleteUser(Long id) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    userRepository.delete(user);
-                    return true;
-                })
-                .orElse(false);
+        try {
+            Optional<User> userOptional = userRepository.findById(id);
+            if (userOptional.isPresent()) {
+                userRepository.delete(userOptional.get());
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            logger.error("Error deleting user with id " + id, e);
+            throw e;
+        }
     }
 }

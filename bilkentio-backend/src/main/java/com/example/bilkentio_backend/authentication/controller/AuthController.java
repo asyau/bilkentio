@@ -5,6 +5,7 @@ import com.example.bilkentio_backend.authentication.response.AuthenticationRespo
 import com.example.bilkentio_backend.authentication.service.CustomUserDetailsService;
 import com.example.bilkentio_backend.user.entity.User;
 import com.example.bilkentio_backend.user.repository.UserRepository;
+import com.example.bilkentio_backend.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -39,6 +41,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody User user) throws Exception {
@@ -65,21 +70,23 @@ public class AuthController {
         logger.info("Registration attempt for user: {}", newUser.getUsername());
 
         // Check if username already exists
-        if (userRepository.findByUsername(newUser.getUsername()).isPresent()) {
+        if (userService.isUsernameTaken(newUser.getUsername())) {
             logger.warn("Registration failed: Username '{}' already exists", newUser.getUsername());
             return ResponseEntity
                     .badRequest()
                     .body("Error: Username is already taken!");
         }
 
-        // Create new user's account
-        User user = new User();
-        user.setUsername(newUser.getUsername());
-        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        user.setRoles(Collections.singleton("ROLE_USER")); // Default role
+        // If name and surname are not provided, generate default ones
+        if (newUser.getNameSurname() == null || newUser.getNameSurname().isEmpty()) {
+            String defaultName = "User_" + UUID.randomUUID().toString().substring(0, 8);
+            newUser.setNameSurname(defaultName);
+            logger.info("Generated default name and surname: {}", defaultName);
+        }
 
-        userRepository.save(user);
-        logger.info("User registered successfully: {}", newUser.getUsername());
+        // Create new user's account using UserService
+        User savedUser = userService.saveUser(newUser);
+        logger.info("User registered successfully: {}", savedUser.getUsername());
 
         return ResponseEntity.ok("User registered successfully!");
     }

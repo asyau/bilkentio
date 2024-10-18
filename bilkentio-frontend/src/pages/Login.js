@@ -1,11 +1,13 @@
 // src/pages/Login.js
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -17,7 +19,7 @@ function Login() {
 
             localStorage.setItem('token', response.data.jwt);
             alert('Login successful!');
-            window.location.href = '/';
+            navigate('/crud'); // Navigate to the CRUD page
         } catch (error) {
             setError('Incorrect username or password.');
         }
