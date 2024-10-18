@@ -25,6 +25,9 @@ public class User {
     private String username;
 
     @Column(nullable = false)
+    private String nameSurname;
+
+    @Column(nullable = false)
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
