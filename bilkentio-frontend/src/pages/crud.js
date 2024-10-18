@@ -6,6 +6,7 @@ function CRUD() {
     const [users, setUsers] = useState([]);
     const [newUser, setNewUser] = useState({ username: '', nameSurname: '', password: '' });
     const [editingUser, setEditingUser] = useState(null);
+    const [passwordChange, setPasswordChange] = useState({ id: null, oldPassword: '', newPassword: '' });
 
     useEffect(() => {
         fetchUsers();
@@ -56,6 +57,23 @@ function CRUD() {
             fetchUsers();
         } catch (error) {
             console.error('Error deleting user:', error);
+        }
+    };
+
+    const changePassword = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post(`http://localhost:8080/api/users/${passwordChange.id}/change-password`, {
+                oldPassword: passwordChange.oldPassword,
+                newPassword: passwordChange.newPassword
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            alert('Password changed successfully');
+            setPasswordChange({ id: null, oldPassword: '', newPassword: '' });
+        } catch (error) {
+            console.error('Error changing password:', error);
+            alert('Failed to change password. Please check your old password and try again.');
         }
     };
 
@@ -119,8 +137,29 @@ function CRUD() {
                                     <div className="user-actions">
                                         <button onClick={() => setEditingUser(user)}>Edit</button>
                                         <button onClick={() => deleteUser(user.id)}>Delete</button>
+                                        <button onClick={() => setPasswordChange({ ...passwordChange, id: user.id })}>Change Password</button>
                                     </div>
                                 </div>
+                            )}
+                            {passwordChange.id === user.id && (
+                                <form onSubmit={changePassword} className="password-change-form">
+                                    <input
+                                        type="password"
+                                        placeholder="Old Password"
+                                        value={passwordChange.oldPassword}
+                                        onChange={(e) => setPasswordChange({...passwordChange, oldPassword: e.target.value})}
+                                        required
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="New Password"
+                                        value={passwordChange.newPassword}
+                                        onChange={(e) => setPasswordChange({...passwordChange, newPassword: e.target.value})}
+                                        required
+                                    />
+                                    <button type="submit">Change Password</button>
+                                    <button onClick={() => setPasswordChange({ id: null, oldPassword: '', newPassword: '' })}>Cancel</button>
+                                </form>
                             )}
                         </li>
                     ))}

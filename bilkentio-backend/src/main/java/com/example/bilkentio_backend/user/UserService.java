@@ -67,4 +67,17 @@ public class UserService {
             throw e;
         }
     }
+
+    public boolean changePassword(Long userId, String oldPassword, String newPassword) {
+        return userRepository.findById(userId)
+                .map(user -> {
+                    if (passwordEncoder.matches(oldPassword, user.getPassword())) {
+                        user.setPassword(passwordEncoder.encode(newPassword));
+                        userRepository.save(user);
+                        return true;
+                    }
+                    return false;
+                })
+                .orElse(false);
+    }
 }
