@@ -1,28 +1,47 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import './styles/styles.css'; 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import CRUD from './pages/crud';
+import Guide from './pages/Guide';
+import Individual from './pages/individual';
 
+// Create a wrapper component to use useLocation
+function AppContent() {
+  const location = useLocation();
+  const hideFooterPaths = ['/register', '/login', '/guide', '/individual']; // Add any paths where you don't want the footer
+  const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
+
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/crud" element={<CRUD />} />
+        <Route path="/guide" element={<Guide />} />
+        <Route path="/individual" element={<Individual />} />
+      </Routes>
+      {shouldShowFooter && (
+        <footer>
+          <p>
+            <span className="material-icons" style={{ fontSize: '16px', marginRight: '8px' }}>copyright</span>
+            2023 BilkentIO - All rights reserved
+          </p>
+        </footer>
+      )}
+    </div>
+  );
+}
 
 function App() {
   return (
-    <div>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/crud" element={<CRUD />} />
-        </Routes>
-      </Router>
-      <footer>
-        <p>© 2023 BilkentIO - All rights reserved</p>
-      </footer>
-    </div>
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
