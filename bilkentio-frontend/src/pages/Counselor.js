@@ -37,7 +37,7 @@ const cities = [
     'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak'
   ];
 
-const Guide = () => {
+const Counselor = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showTourHistory, setShowTourHistory] = useState(false);
