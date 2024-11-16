@@ -29,13 +29,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configure CORS
-            .csrf(csrf -> csrf.disable()) // Disable CSRF
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/user/**").hasRole("USER")
-                .requestMatchers("/api/guide/**").hasRole("GUIDE")
+                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
+                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR")
+                .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR")
+                .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

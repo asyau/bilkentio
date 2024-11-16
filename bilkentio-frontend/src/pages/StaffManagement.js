@@ -21,6 +21,7 @@ const StaffForm = ({ staff, onClose, fetchStaffMembers, roles }) => {
           {
             username: formData.username,
             nameSurname: formData.nameSurname,
+            roles: [`ROLE_${formData.role.toUpperCase()}`],
             ...(formData.password && { password: formData.password })
           },
           {
@@ -89,7 +90,6 @@ const StaffForm = ({ staff, onClose, fetchStaffMembers, roles }) => {
               required
               value={formData.role}
               onChange={(e) => setFormData({...formData, role: e.target.value})}
-              disabled={staff !== null}
             >
               {roles.map(role => (
                 <option key={role} value={role}>
