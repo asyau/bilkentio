@@ -90,4 +90,16 @@ public class AuthController {
 
         return ResponseEntity.ok("User registered successfully!");
     }
+
+    @GetMapping("/getRole")
+    public ResponseEntity<?> getUserRole(@RequestHeader("Authorization") String token) {
+        try {
+            String username = jwtUtil.extractUsername(token.substring(7)); // Remove "Bearer " prefix
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            return ResponseEntity.ok(Collections.singletonMap("roles", userDetails.getAuthorities()));
+        } catch (Exception e) {
+            logger.error("Error getting user role", e);
+            return ResponseEntity.status(401).body("Error getting user role");
+        }
+    }
 }

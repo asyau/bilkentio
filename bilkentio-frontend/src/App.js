@@ -9,11 +9,12 @@ import CRUD from './pages/crud';
 import StaffManagement from './pages/StaffManagement';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
+import Unauthorized from './components/Unauthorized';
 
 // Create a wrapper component to use useLocation
 function AppContent() {
   const location = useLocation();
-  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement']; // Add any paths where you don't want the footer
+  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized'];
 
   const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
 
@@ -27,6 +28,7 @@ function AppContent() {
         <Route path="/counselor" element={<Counselor />} />
         <Route path="/individual" element={<Individual />} />
         <Route path="/staffmanagement" element={<StaffManagement />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
       </Routes>
       {shouldShowFooter && (
         <footer>
