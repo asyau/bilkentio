@@ -25,33 +25,42 @@
 
 .staff-list {
   padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .staff-card {
   background: white;
   border-radius: 8px;
-  padding: 20px;
+  padding: 15px 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.staff-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
 }
 
 .staff-info h3 {
-  margin: 0 0 10px 0;
-  color: #1a73e8;
+  margin: 0;
+  min-width: 200px;
 }
 
 .staff-info p {
-  margin: 5px 0;
-  color: #555;
+  margin: 0;
+  min-width: 150px;
 }
 
 .staff-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
 }
 
