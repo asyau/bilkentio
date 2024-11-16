@@ -10,11 +10,15 @@ import StaffManagement from './pages/StaffManagement';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
 import Unauthorized from './components/Unauthorized';
+import AdminAnalytics from './pages/AdminAnalytics';
+//import AdminDashboard from './pages/AdminDashboard';
+//import AcceptRejectForms from './pages/AcceptRejectForms';
+//import PuantajScores from './pages/PuantajScores';
 
 // Create a wrapper component to use useLocation
 function AppContent() {
   const location = useLocation();
-  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized'];
+  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized', '/admin'];
 
   const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
 
@@ -29,12 +33,17 @@ function AppContent() {
         <Route path="/individual" element={<Individual />} />
         <Route path="/staffmanagement" element={<StaffManagement />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/admin">
+         
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="staff" element={<StaffManagement />} />
+        </Route>
       </Routes>
       {shouldShowFooter && (
         <footer>
           <p>
             <span className="material-icons" style={{ fontSize: '16px', marginRight: '8px' }}>copyright</span>
-            2023 BilkentIO - All rights reserved
+            2024 BilkentIO - All rights reserved
           </p>
         </footer>
       )}

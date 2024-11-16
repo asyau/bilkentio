@@ -1,0 +1,126 @@
+.analytics-container {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.analytics-container h1 {
+  margin-bottom: 2rem;
+  color: #2c3e50;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.stat-content h3 {
+  color: #6c757d;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.stat-change {
+  font-size: 0.9rem;
+  color: #00c853;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon.staff {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.stat-icon.tours {
+  background-color: #e8f5e9;
+  color: #43a047;
+}
+
+.stat-icon.students {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.stat-icon .material-icons {
+  font-size: 24px;
+}
+
+.chart-section {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.chart-header h2 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.month-selector {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  background-color: white;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.chart-container {
+  height: 400px;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-content {
+  flex: 1;
+  margin-left: 250px;
+  background-color: #f8f9fa;
+  transition: margin-left 0.3s ease;
+}
+
+.admin-sidebar.collapsed + .admin-content {
+  margin-left: 70px;
+}
+
+.analytics-container {
+  padding: 2rem;
+} 
