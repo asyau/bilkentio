@@ -316,4 +316,4 @@ const Counselor = () => {
   );
 };
 
-export default Guide;
+export default Counselor;
