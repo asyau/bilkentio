@@ -1,0 +1,158 @@
+.tour-history-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tour-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tour-list-header {
+  margin-top: 2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #eee;
+}
+
+.tour-list-header h3 {
+  color: #333;
+  margin: 0;
+}
+
+.tour-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tour-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-weight: normal;
+}
+
+.tour-info p {
+  margin: 0.2rem 0;
+  color: #666;
+}
+
+.tour-info p:first-of-type {
+  font-weight: bold;
+}
+
+.feedback-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.feedback-btn:hover {
+  background-color: #0056b3;
+}
+
+.feedback-status {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.form-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.selected-tour-info {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.cancel-btn,
+.submit-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.submit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.upcoming {
+  background-color: #f8f9fa;
+}
+
+.tour-history-container h2 {
+  font-weight: bold;
+} 
