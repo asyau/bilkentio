@@ -43,15 +43,24 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public Optional<User> updateUser(Long id, User userDetails) {
+    public Optional<User> updateUser(Long id, User updatedUser) {
         return userRepository.findById(id)
-                .map(user -> {
-                    user.setUsername(userDetails.getUsername());
-                    user.setNameSurname(userDetails.getNameSurname());
-                    // Don't update password here for security reasons
-                    // If you need to update password, create a separate method with proper validation
-                    return userRepository.save(user);
-                });
+            .map(user -> {
+                user.setUsername(updatedUser.getUsername());
+                user.setNameSurname(updatedUser.getNameSurname());
+                
+                // Update role if provided
+                if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
+                    user.setRoles(updatedUser.getRoles());
+                }
+                
+                // Update password if provided
+                if (updatedUser.getPassword() != null) {
+                    user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+                }
+                
+                return userRepository.save(user);
+            });
     }
 
     public boolean deleteUser(Long id) {
@@ -79,5 +88,18 @@ public class UserService {
                     return false;
                 })
                 .orElse(false);
+    }
+
+    public User createUserWithRole(User newUser, String role) {
+        User user = new User();
+        user.setUsername(newUser.getUsername());
+        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        user.setNameSurname(newUser.getNameSurname());
+        
+        // Set role based on parameter
+        String roleWithPrefix = "ROLE_" + role.toUpperCase();
+        user.setRoles(Collections.singleton(roleWithPrefix));
+        
+        return userRepository.save(user);
     }
 }
