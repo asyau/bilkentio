@@ -1,22 +1,10 @@
 // src/GuideMode.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/GuideMode.css';
 import TourHistory from '../components/TourHistory';
-
-const daysOfWeek = [
-  { date: '18 Kasım', day: 'Pazartesi' },
-  { date: '19 Kasım', day: 'Salı' },
-  { date: '20 Kasım', day: 'Çarşamba' },
-  { date: '21 Kasım', day: 'Perşembe' },
-  { date: '22 Kasım', day: 'Cuma' },
-  { date: '23 Kasım', day: 'Cumartesi' },
-];
-
-const timeSlots = [
-  { time: '11:00 - 12:00', status: 'unavailable' },
-  { time: '13:00 - 14:00', status: 'form-requested' },
-  { time: '16:00 - 17:00', status: 'available' }
-];
+import axios from 'axios';
+import { format, addDays } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const schools = [
   'TED Ankara College',
@@ -38,34 +26,106 @@ const cities = [
   ];
 
 const Counselor = () => {
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showTourHistory, setShowTourHistory] = useState(false);
+  const [myForms, setMyForms] = useState([]);
+  const [showMyForms, setShowMyForms] = useState(false);
+  const [days, setDays] = useState([]);
+  const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const getSlotClass = (status) => {
-    switch(status) {
-      case 'unavailable':
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      // Decode JWT token to get user info
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      setUser(decodedToken);
+      fetchMyForms(decodedToken.id); // Fetch forms when user is loaded
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    fetchWeekDays(currentWeekStart);
+  }, [currentWeekStart]);
+
+  const fetchWeekDays = async (date) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      const response = await axios.get(`http://localhost:8080/api/days/week?date=${formattedDate}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && Array.isArray(response.data)) {
+        setDays(response.data);
+      } else {
+        console.error('Invalid data format received:', response.data);
+        setDays([]);
+      }
+    } catch (error) {
+      console.error('Error fetching days:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      }
+      setDays([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrevWeek = () => {
+    const newDate = new Date(currentWeekStart);
+    newDate.setDate(newDate.getDate() - 7);
+    setCurrentWeekStart(newDate);
+  };
+
+  const handleNextWeek = () => {
+    const newDate = new Date(currentWeekStart);
+    newDate.setDate(newDate.getDate() + 7);
+    setCurrentWeekStart(newDate);
+  };
+
+  const getSlotClass = (slot) => {
+    switch(slot.status) {
+      case 'UNAVAILABLE':
         return 'time-slot unavailable';
-      case 'form-requested':
+      case 'FORM_REQUESTED':
         return 'time-slot form-requested';
       default:
         return 'time-slot available';
     }
   };
 
-  const handleSlotClick = (status, time, date) => {
-    if (status === 'unavailable') {
+  const handleSlotClick = (slot, day) => {
+    if (slot.status === 'UNAVAILABLE') {
       alert('This slot is not available');
       return;
     }
     
-    if (status === 'form-requested') {
+    if (slot.status === 'FORM_REQUESTED') {
       if (!window.confirm('A form has already been requested for this slot. Would you still like to apply?')) {
         return;
       }
     }
     
-    setSelectedSlot({ time, date });
+    setSelectedSlot({ ...slot, day });
     setShowForm(true);
   };
 
@@ -84,10 +144,39 @@ const Counselor = () => {
       agreeToTerms: false
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      console.log('Form submitted:', formData);
-      onClose();
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const response = await axios.post('http://localhost:8080/api/forms', {
+          ...formData,
+          slotId: selectedSlot.id,
+        }, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('Form submitted:', response.data);
+        fetchWeekDays(currentWeekStart);
+        if (user) {
+          fetchMyForms(user.id);
+        }
+        onClose();
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        if (error.response?.status === 401) {
+          navigate('/login');
+        } else {
+          alert('Failed to submit form. Please try again.');
+        }
+      }
     };
 
     return (
@@ -229,12 +318,37 @@ const Counselor = () => {
     );
   };
 
+  const fetchMyForms = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await axios.get('http://localhost:8080/api/forms/my-forms', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMyForms(response.data);
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
     <div className="guide-mode-container">
       <div className="sidebar">
         <div className="user-profile">
           <span className="material-icons profile-icon">account_circle</span>
-          <h3>Welcome, User!</h3>
+          <h3>Welcome, {user?.sub || 'User'}!</h3>
         </div>
         
         <nav className="sidebar-nav">
@@ -252,55 +366,68 @@ const Counselor = () => {
             <span className="material-icons">history</span>
             Tour History
           </button>
+          <button 
+            className={`sidebar-btn ${showMyForms ? 'active' : ''}`}
+            onClick={() => setShowMyForms(true)}
+          >
+            <span className="material-icons">history</span>
+            My Forms
+          </button>
         </nav>
         
-        <button className="logout-btn">
+        <button className="logout-btn" onClick={handleLogout}>
           <span className="material-icons">logout</span>
           Log out
         </button>
       </div>
 
       <div className="main-content">
-        {showTourHistory ? (
-          <TourHistory />
-        ) : (
+        {!showTourHistory && !showMyForms && (
           <>
             <div className="schedule-header">
-              <button className="nav-button prev-week">
+              <button className="nav-button prev-week" onClick={handlePrevWeek}>
                 <span className="material-icons">chevron_left</span>
-                Önceki Hafta
+                Previous Week
               </button>
-              <span className="date-range">18 Kasım 2024 - 24 Kasım 2024</span>
-              <button className="nav-button next-week">
-                Sonraki Hafta
+              <span className="date-range">
+                {format(currentWeekStart, 'dd MMM yyyy')} - {format(addDays(currentWeekStart, 6), 'dd MMM yyyy')}
+              </span>
+              <button className="nav-button next-week" onClick={handleNextWeek}>
+                Next Week
                 <span className="material-icons">chevron_right</span>
               </button>
             </div>
             
             <div className="weekly-schedule">
-              {daysOfWeek.map((day, dayIndex) => (
-                <div key={dayIndex} className="day-column">
-                  <div className="day-header">
-                    <div>{day.date}</div>
-                    <div>{day.day}</div>
-                  </div>
-                  {timeSlots.map((slot, slotIndex) => (
-                    <div 
-                      key={slotIndex} 
-                      className={getSlotClass(slot.status)}
-                      onClick={() => handleSlotClick(slot.status, slot.time, day.date)}
-                    >
-                      <span>{slot.time}</span>
-                      {slot.status === 'form-requested' && (
-                        <span className="material-icons status-icon">description</span>
-                      )}
-                      {slot.status === 'unavailable' && (
-                        <span className="material-icons status-icon">block</span>
-                      )}
+              {loading ? (
+                <div className="loading-spinner">Loading...</div>
+              ) : days.length > 0 ? (
+                days.map((day) => (
+                  <div key={day.id} className="day-column">
+                    <div className="day-header">
+                      <div>{format(new Date(day.date), 'dd MMM')}</div>
+                      <div>{format(new Date(day.date), 'EEEE')}</div>
                     </div>
-                  ))}
-                </div>
-              ))}
+                    {day.slots && day.slots.map((slot) => (
+                      <div 
+                        key={slot.id} 
+                        className={getSlotClass(slot)}
+                        onClick={() => handleSlotClick(slot, day)}
+                      >
+                        <span>{slot.time}</span>
+                        {slot.status === 'FORM_REQUESTED' && (
+                          <span className="material-icons status-icon">description</span>
+                        )}
+                        {slot.status === 'UNAVAILABLE' && (
+                          <span className="material-icons status-icon">block</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))
+              ) : (
+                <div className="no-days-message">No available days for this week</div>
+              )}
             </div>
           </>
         )}
@@ -311,6 +438,43 @@ const Counselor = () => {
           onClose={() => setShowForm(false)}
           slot={selectedSlot}
         />
+      )}
+
+      {showMyForms && (
+        <div className="my-forms-container">
+          <h2>My Form Submissions</h2>
+          <div className="forms-list">
+            {myForms.map(form => (
+              <div key={form.id} className="form-card">
+                <div className="form-header">
+                  <h3>{form.schoolName || 'No School Name'}</h3>
+                  <span className={`status-badge ${form.state?.toLowerCase()}`}>
+                    {form.state}
+                  </span>
+                </div>
+                <div className="form-details">
+                  <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
+                  <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
+                  <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
+                  <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
+                  <p><strong>Leader Role:</strong> {form.groupLeaderRole || 'Not specified'}</p>
+                  <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
+                  <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
+                  <p><strong>City:</strong> {form.city || 'Not specified'}</p>
+                  {form.expectations && (
+                    <p><strong>Expectations:</strong> {form.expectations}</p>
+                  )}
+                  {form.specialRequirements && (
+                    <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
+                  )}
+                  {form.visitorNotes && (
+                    <p><strong>Notes:</strong> {form.visitorNotes}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

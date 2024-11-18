@@ -16,10 +16,8 @@ function Login() {
                 username,
                 password,
             });
-
             localStorage.setItem('token', response.data.jwt);
-            alert('Login successful!');
-            navigate('/crud'); // Navigate to the CRUD page
+            navigate('/crud');
         } catch (error) {
             setError('Incorrect username or password.');
         }

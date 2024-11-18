@@ -10,11 +10,11 @@ import StaffManagement from './pages/StaffManagement';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
 import Unauthorized from './components/Unauthorized';
-
+import Advisor from './pages/Advisor';
 // Create a wrapper component to use useLocation
 function AppContent() {
   const location = useLocation();
-  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized'];
+  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized',"/advisor"];
 
   const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
 
@@ -29,6 +29,7 @@ function AppContent() {
         <Route path="/individual" element={<Individual />} />
         <Route path="/staffmanagement" element={<StaffManagement />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/advisor" element={<Advisor />} />
       </Routes>
       {shouldShowFooter && (
         <footer>
