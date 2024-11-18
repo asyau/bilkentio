@@ -8,7 +8,7 @@
   left: 0;
   top: 0;
   z-index: 1000;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease-in-out;
 }
 
 .admin-sidebar.collapsed {
@@ -17,8 +17,13 @@
 }
 
 .sidebar-placeholder {
-  width: 70px;
+  width: 250px;
   flex-shrink: 0;
+  transition: width 0.3s ease-in-out;
+}
+
+.sidebar-placeholder.collapsed {
+  width: 70px;
 }
 
 .logo-section {
@@ -73,7 +78,7 @@
 }
 
 .admin-sidebar.collapsed .nav-item {
-  justify-content: center;
+  justify-content: left;
   padding: 0.8rem;
 }
 

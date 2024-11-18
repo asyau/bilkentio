@@ -24,10 +24,7 @@ const AdminSidebar = () => {
         </button>
         
         <nav className="sidebar-nav">
-          <NavLink to="/admin/dashboard" className="nav-item" title="Dashboard">
-            <span className="material-icons">dashboard</span>
-            {!isCollapsed && <span>Dashboard</span>}
-          </NavLink>
+          
           
           <NavLink to="/admin/analytics" className="nav-item" title="Analytics">
             <span className="material-icons">analytics</span>
@@ -50,7 +47,7 @@ const AdminSidebar = () => {
           </NavLink>
         </nav>
       </div>
-      {isCollapsed && <div className="sidebar-placeholder" />}
+      <div className={`sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />
     </>
   );
 };

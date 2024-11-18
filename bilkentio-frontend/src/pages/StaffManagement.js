@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Unauthorized from '../components/Unauthorized';
 import '../styles/StaffManagement.css';
 import { checkAdminRole } from '../utils/roleCheck';
+import AdminSidebar from '../components/AdminSidebar';
 
 const StaffForm = ({ staff, onClose, fetchStaffMembers, roles }) => {
   const [formData, setFormData] = useState({
@@ -190,77 +191,71 @@ const StaffManagement = () => {
   }
 
   return (
-    <div className="staff-management-container">
-      <div className="sidebar">
-        <div className="user-profile">
-          <span className="material-icons profile-icon">admin_panel_settings</span>
-          <h3>Staff Management</h3>
-        </div>
-        
-        <nav className="sidebar-nav">
-          <button 
-            className={`sidebar-btn ${selectedRole === 'all' ? 'active' : ''}`}
-            onClick={() => handleRoleFilter('all')}
-          >
-            <span className="material-icons">group</span>
-            All Staff
-          </button>
-          {roles.map(role => (
-            <button
-              key={role}
-              className={`sidebar-btn ${selectedRole === role ? 'active' : ''}`}
-              onClick={() => handleRoleFilter(role)}
-            >
-              <span className="material-icons">person</span>
-              {role.charAt(0).toUpperCase() + role.slice(1)}s
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      <div className="main-content">
-        <div className="staff-header">
-          <h2>Staff Members</h2>
-          <button className="add-staff-btn" onClick={() => setShowAddForm(true)}>
-            <span className="material-icons">add</span>
-            Add Staff Member
-          </button>
-        </div>
-
-        <div className="staff-list">
-          {filteredStaff.map(staff => (
-            <div key={staff.id} className="staff-card">
-              <div className="staff-info">
-                <h3>{staff.nameSurname}</h3>
-                <p><strong>Username:</strong> {staff.username}</p>
-                <p><strong>Role:</strong> {staff.roles.map(role => 
-                  role.replace('ROLE_', '').toLowerCase()
-                ).join(', ')}</p>
-              </div>
-              <div className="staff-actions">
-                <button onClick={() => setEditingStaff(staff)} className="edit-btn">
-                  <span className="material-icons">edit</span>
+    <div className="admin-layout">
+      <AdminSidebar />
+      <div className="admin-content">
+        <div className="staff-management-container">
+          <div className="staff-header">
+            <div className="filter-section">
+              <div className="role-filter">
+                <button 
+                  className={`role-btn ${selectedRole === 'all' ? 'active' : ''}`}
+                  onClick={() => handleRoleFilter('all')}
+                >
+                  All Staff
                 </button>
-                <button onClick={() => handleDeleteStaff(staff.id)} className="delete-btn">
-                  <span className="material-icons">delete</span>
-                </button>
+                {roles.map(role => (
+                  <button
+                    key={role}
+                    className={`role-btn ${selectedRole === role ? 'active' : ''}`}
+                    onClick={() => handleRoleFilter(role)}
+                  >
+                    {role.charAt(0).toUpperCase() + role.slice(1)}s
+                  </button>
+                ))}
               </div>
             </div>
-          ))}
+            <button className="add-staff-btn" onClick={() => setShowAddForm(true)}>
+              <span className="material-icons">add</span>
+              Add Staff
+            </button>
+          </div>
+
+          <div className="staff-list">
+            {filteredStaff.map(staff => (
+              <div key={staff.id} className="staff-card">
+                <div className="staff-info">
+                  <h3>{staff.nameSurname}</h3>
+                  <p><strong>Username:</strong> {staff.username}</p>
+                  <p><strong>Role:</strong> {staff.roles.map(role => 
+                    role.replace('ROLE_', '').toLowerCase()
+                  ).join(', ')}</p>
+                </div>
+                <div className="staff-actions">
+                  <button onClick={() => setEditingStaff(staff)} className="edit-btn">
+                    <span className="material-icons">edit</span>
+                  </button>
+                  <button onClick={() => handleDeleteStaff(staff.id)} className="delete-btn">
+                    <span className="material-icons">delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {(showAddForm || editingStaff) && (
+            <StaffForm
+              staff={editingStaff}
+              onClose={() => {
+                setShowAddForm(false);
+                setEditingStaff(null);
+              }}
+              fetchStaffMembers={fetchStaffMembers}
+              roles={roles}
+            />
+          )}
         </div>
       </div>
-
-      {(showAddForm || editingStaff) && (
-        <StaffForm
-          staff={editingStaff}
-          onClose={() => {
-            setShowAddForm(false);
-            setEditingStaff(null);
-          }}
-          fetchStaffMembers={fetchStaffMembers}
-          roles={roles}
-        />
-      )}
     </div>
   );
 };
