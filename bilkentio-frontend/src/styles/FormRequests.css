@@ -6,25 +6,26 @@
 .forms-list {
   display: grid;
   gap: 20px;
-  padding: 20px;
+  padding: 30px;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .form-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .form-header {
-  border-bottom: 1px solid #eee;
+  border-bottom: 3px solid #eee;
   margin-bottom: 15px;
   padding-bottom: 15px;
 }
 
 .form-header h3 {
-  margin: 0;
+  margin-top: 0px;
+  margin-bottom: 5px;
   color: #333;
 }
 
@@ -67,24 +68,28 @@
 }
 
 .status-filters {
+  margin-top: 15px;
+  margin-left: 40px;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
 }
 
 .filter-btn {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  background-color: white;
+  color: #2c3e50;
   cursor: pointer;
-  background-color: #f0f0f0;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .filter-btn.active {
-  background-color: #007bff;
+  background-color: #1a73e8;
   color: white;
+  border-color: #1a73e8;
 }
 
 .status-badge {

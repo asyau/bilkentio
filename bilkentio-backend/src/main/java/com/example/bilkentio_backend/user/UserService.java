@@ -1,5 +1,13 @@
 package com.example.bilkentio_backend.user;
 
+import com.example.bilkentio_backend.admin.entity.Admin;
+import com.example.bilkentio_backend.advisor.entity.Advisor;
+import com.example.bilkentio_backend.coordinator.entity.Coordinator;
+import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
+import com.example.bilkentio_backend.guide.entity.Guide;
+import com.example.bilkentio_backend.guide.repository.GuideRepository;
+import com.example.bilkentio_backend.individual.entity.Individual;
+import com.example.bilkentio_backend.president.entity.President;
 import com.example.bilkentio_backend.user.entity.User;
 import com.example.bilkentio_backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +29,8 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    @Autowired
+    private GuideRepository guideRepository;
 
     public User saveUser(User newUser) {
         User user = new User();
@@ -91,15 +101,27 @@ public class UserService {
     }
 
     public User createUserWithRole(User newUser, String role) {
-        User user = new User();
+        // Create the appropriate entity based on role
+        User user = switch (role.toLowerCase()) {
+            case "admin" -> new Admin();
+            case "advisor" -> new Advisor();
+            case "guide" -> new Guide();
+            case "president" -> new President();
+            case "coordinator" -> new Coordinator();
+            case "individual" -> new Individual();
+            case "counselor" -> new GuidanceCounselor();
+            default -> throw new IllegalArgumentException("Invalid role: " + role);
+        };
+
+        // Set common properties
         user.setUsername(newUser.getUsername());
         user.setPassword(passwordEncoder.encode(newUser.getPassword()));
         user.setNameSurname(newUser.getNameSurname());
-        
-        // Set role based on parameter
+
+        // Set role
         String roleWithPrefix = "ROLE_" + role.toUpperCase();
         user.setRoles(Collections.singleton(roleWithPrefix));
-        
+
         return userRepository.save(user);
     }
 }

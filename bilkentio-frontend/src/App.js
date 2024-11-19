@@ -11,10 +11,12 @@ import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
 import Unauthorized from './components/Unauthorized';
 import AdminAnalytics from './pages/AdminAnalytics';
-import Advisor from './pages/Advisor';
+import FormRequests from './pages/FormRequests';
+import PuantajScores from './pages/PuantajScores';
+
 function AppContent() {
   const location = useLocation();
-  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized', '/admin','/advisor'];
+  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized', '/admin','/FormRequests',"/counselor"];
   const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
   return (
     <div>
@@ -30,8 +32,9 @@ function AppContent() {
         <Route path="/admin">
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="staff" element={<StaffManagement />} />
+          <Route path="scores" element={<PuantajScores />} />
         </Route>
-        <Route path="/advisor" element={<Advisor />} />
+        <Route path="/form-request" element={<FormRequests />} />
       </Routes>
       {shouldShowFooter && (
         <footer>
