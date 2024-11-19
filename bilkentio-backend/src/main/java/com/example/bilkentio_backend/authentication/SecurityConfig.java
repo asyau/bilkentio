@@ -15,12 +15,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -36,7 +38,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
-                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR")
+                .requestMatchers("/api/advisors/**", "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR")
                 .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR")
                 .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
                 .anyRequest().authenticated()

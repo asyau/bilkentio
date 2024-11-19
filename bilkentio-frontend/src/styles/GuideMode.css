@@ -119,6 +119,7 @@
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  min-height: 400px;
 }
 
 .day-column {
@@ -409,5 +410,27 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 4px;
   resize: vertical;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  width: 100%;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.no-days-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  width: 100%;
+  font-size: 1.2em;
+  color: #666;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
   

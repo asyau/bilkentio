@@ -11,17 +11,11 @@ import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
 import Unauthorized from './components/Unauthorized';
 import AdminAnalytics from './pages/AdminAnalytics';
-//import AdminDashboard from './pages/AdminDashboard';
-//import AcceptRejectForms from './pages/AcceptRejectForms';
-//import PuantajScores from './pages/PuantajScores';
-
-// Create a wrapper component to use useLocation
+import Advisor from './pages/Advisor';
 function AppContent() {
   const location = useLocation();
-  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized', '/admin'];
-
+  const hideFooterPaths = ['/register', '/login', '/guide', '/individual', '/staffmanagement', '/unauthorized', '/admin','/advisor'];
   const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
-
   return (
     <div>
       <Routes>
@@ -34,10 +28,10 @@ function AppContent() {
         <Route path="/staffmanagement" element={<StaffManagement />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/admin">
-         
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="staff" element={<StaffManagement />} />
         </Route>
+        <Route path="/advisor" element={<Advisor />} />
       </Routes>
       {shouldShowFooter && (
         <footer>
