@@ -45,6 +45,11 @@ const AdminSidebar = () => {
             <span className="material-icons">grade</span>
             {!isCollapsed && <span>View Puantaj Scores</span>}
           </NavLink>
+          
+          <NavLink to="/admin/tours" className="nav-item" title="Tour Management">
+            <span className="material-icons">map</span>
+            {!isCollapsed && <span>Tour Management</span>}
+          </NavLink>
         </nav>
       </div>
       <div className={`sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />

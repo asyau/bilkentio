@@ -13,6 +13,8 @@ import Unauthorized from './components/Unauthorized';
 import AdminAnalytics from './pages/AdminAnalytics';
 import FormRequests from './pages/FormRequests';
 import PuantajScores from './pages/PuantajScores';
+import TourManagement from './pages/TourManagement';
+import TourDetails from './pages/TourDetails';
 
 function AppContent() {
   const location = useLocation();
@@ -33,6 +35,8 @@ function AppContent() {
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="scores" element={<PuantajScores />} />
+          <Route path="tours" element={<TourManagement />} />
+          <Route path="tours/:tourId" element={<TourDetails />} />
         </Route>
         <Route path="/form-request" element={<FormRequests />} />
       </Routes>

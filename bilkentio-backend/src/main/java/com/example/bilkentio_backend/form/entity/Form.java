@@ -48,5 +48,12 @@ public class Form {
     public String getSlotTime() {
         return linkedSlot != null ? linkedSlot.getTime() : null;
     }
+
+    @Override
+    public String toString() {
+        return "Form{" +
+            "id=" + id +
+            '}';
+    }
 }
 
