@@ -4,6 +4,9 @@ import com.example.bilkentio_backend.form.entity.Form;
 import com.example.bilkentio_backend.form.enums.FormState;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Data
 public class FormResponseDTO {
     private Long id;
@@ -21,6 +24,7 @@ public class FormResponseDTO {
     private String slotDate;
     private String slotTime;
     private String submittedByUsername;
+    private String submissionDate; // Changed to String to hold the formatted value
 
     public static FormResponseDTO fromEntity(Form form) {
         FormResponseDTO dto = new FormResponseDTO();
@@ -36,18 +40,24 @@ public class FormResponseDTO {
         dto.setVisitorNotes(form.getVisitorNotes());
         dto.setCity(form.getCity());
         dto.setState(form.getState());
-        
+
+        // Format submissionDate
+        if (form.getSubmissionDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+            dto.setSubmissionDate(form.getSubmissionDate().format(formatter));
+        }
+
         if (form.getLinkedSlot() != null) {
             if (form.getLinkedSlot().getDay() != null) {
                 dto.setSlotDate(form.getLinkedSlot().getDay().getDate().toString());
             }
             dto.setSlotTime(form.getLinkedSlot().getTime());
         }
-        
+
         if (form.getSubmittedBy() != null) {
             dto.setSubmittedByUsername(form.getSubmittedBy().getUsername());
         }
-        
+
         return dto;
     }
-} 
+}
