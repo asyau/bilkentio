@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "forms")
@@ -40,13 +44,23 @@ public class Form {
     @JoinColumn(name = "linked_slot_id")
     private TimeSlot linkedSlot;
 
+    // Getter for submissionDate
+    @Getter
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime submissionDate;
+
     public String getSlotDate() {
-        return linkedSlot != null && linkedSlot.getDay() != null ? 
-            linkedSlot.getDay().getDate().toString() : null;
+        return linkedSlot != null && linkedSlot.getDay() != null ?
+                linkedSlot.getDay().getDate().toString() : null;
     }
 
     public String getSlotTime() {
         return linkedSlot != null ? linkedSlot.getTime() : null;
     }
-}
 
+    // Optional method to format the submission date as a String
+    public String getFormattedSubmissionDate() {
+        return submissionDate != null ? submissionDate.toString() : null;
+    }
+}

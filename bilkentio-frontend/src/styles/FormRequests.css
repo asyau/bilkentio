@@ -15,6 +15,25 @@
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  height: auto;
+  min-height: 180px;
+}
+
+.form-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.form-card.expanded {
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  height: auto;
+}
+
+.form-card:not(.expanded) {
+  height: 180px;
+  overflow: hidden;
 }
 
 .form-header {
@@ -170,4 +189,28 @@
   margin: 0;
   color: #2c3e50;
   font-size: 1.2rem;
-} 
+}
+
+.form-basic-info {
+  margin: 10px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-details {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
