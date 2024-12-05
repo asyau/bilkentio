@@ -64,9 +64,9 @@ public class Form {
             "id=" + id +
             '}';
     }
-  }
-    // Optional method to format the submission date as a String
+
     public String getFormattedSubmissionDate() {
         return submissionDate != null ? submissionDate.toString() : null;
     }
-}
+    
+  }

@@ -10,4 +10,5 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     List<Tour> findByStatus(TourStatus status);
     List<Tour> findByAssignedGuidesId(Long guideId);
     List<Tour> findByCounselorId(Long counselorId);
+    List<Tour> findByCounselorUsername(String counselorUsername);
 } 

@@ -2,6 +2,7 @@ package com.example.bilkentio_backend.authentication.controller;
 
 import com.example.bilkentio_backend.authentication.JwtUtil;
 import com.example.bilkentio_backend.authentication.response.AuthenticationResponse;
+import com.example.bilkentio_backend.authentication.request.LoginRequest;
 import com.example.bilkentio_backend.authentication.service.CustomUserDetailsService;
 import com.example.bilkentio_backend.user.entity.User;
 import com.example.bilkentio_backend.user.repository.UserRepository;
@@ -9,12 +10,16 @@ import com.example.bilkentio_backend.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -46,23 +51,20 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody User user) throws Exception {
-        logger.info("Login attempt for user: {}", user.getUsername());
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
-            logger.info("Authentication successful for user: {}", user.getUsername());
-        } catch (BadCredentialsException e) {
-            logger.error("Authentication failed for user: {}", user.getUsername(), e);
-            return ResponseEntity.status(401).body("Incorrect username or password");
-        }
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
-        final String jwt = jwtUtil.generateToken(userDetails);
-        logger.info("JWT token generated for user: {}", user.getUsername());
-        System.out.println(jwt);
-        return ResponseEntity.ok(new AuthenticationResponse(jwt));
+            final User user = userRepository.findByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            final String jwt = jwtUtil.generateToken(user);
+
+            return ResponseEntity.ok(new AuthenticationResponse(jwt));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        }
     }
 
     @PostMapping("/register")

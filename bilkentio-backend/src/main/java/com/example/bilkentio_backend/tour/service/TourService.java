@@ -8,8 +8,6 @@ import com.example.bilkentio_backend.guide.repository.GuideRepository;
 import com.example.bilkentio_backend.tour.entity.Tour;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.tour.repository.TourRepository;
-import com.example.bilkentio_backend.user.entity.User;
-import com.example.bilkentio_backend.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,31 +33,19 @@ public class TourService {
     @Autowired
     private FormRepository formRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    public Tour createTourFromForm(Long formId, int requiredGuides, String submittedBy) {
+    public Tour createTourFromForm(Long formId, int requiredGuides) {
         logger.debug("Creating tour for formId: {}, requiredGuides: {}, submittedBy: {}", 
-            formId, requiredGuides, submittedBy);
+            formId, requiredGuides);
         
         Form form = formRepository.findById(formId)
             .orElseThrow(() -> new EntityNotFoundException("Form not found"));
-            
         logger.debug("Found form: {} with state: {}", form.getId(), form.getState());
-            
-        if (!FormState.APPROVED.equals(form.getState())) {
-            logger.warn("Attempted to create tour for non-approved form: {}", form.getId());
-            throw new IllegalStateException("Cannot create tour for non-approved form");
-        }
-            
-        User submitter = userRepository.findByUsername(submittedBy)
-            .orElseThrow(() -> new EntityNotFoundException("Submitter not found"));
-            
-        logger.debug("Found submitter: {}", submitter);
+        
+        logger.debug("Found submitter: {}", form.getSubmittedBy());
 
         Tour tour = new Tour();
         tour.setForm(form);
-        tour.setCounselor(submitter);
+        tour.setCounselor(form.getSubmittedBy());
         tour.setDate(LocalDate.parse(form.getSlotDate()));
         tour.setTime(form.getSlotTime());
         tour.setGroupSize(form.getGroupSize());
@@ -142,8 +128,13 @@ public class TourService {
         tour.setStatus(TourStatus.CANCELLED);
         tour.setCancellationReason(cancellationReason);
         
+        Form form = tour.getForm();
+        form.setState(FormState.DENIED);
+        formRepository.save(form);
+
         tour.getAssignedGuides().clear();
         
         return tourRepository.save(tour);
     }
+
 } 
