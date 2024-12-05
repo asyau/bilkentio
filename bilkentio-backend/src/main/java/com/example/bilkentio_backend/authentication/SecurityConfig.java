@@ -17,6 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 
@@ -37,8 +38,12 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR")
+                .requestMatchers(HttpMethod.GET, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE", "COUNSELOR")
+                .requestMatchers(HttpMethod.POST, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
+                .requestMatchers(HttpMethod.PUT, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR")
+                .requestMatchers("/api/tours/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE")
                 .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
-                .requestMatchers("/api/advisors/**", "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR")
                 .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR")
                 .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
                 .anyRequest().authenticated()

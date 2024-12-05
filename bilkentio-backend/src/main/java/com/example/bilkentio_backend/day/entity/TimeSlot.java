@@ -37,5 +37,14 @@ public class TimeSlot {
     public TimeSlot(String time) {
         this.time = time;
     }
+
+    @Override
+    public String toString() {
+        return "TimeSlot{" +
+            "id=" + id +
+            ", time='" + time + '\'' +
+            ", status=" + status +
+            '}';
+    }
 }
 

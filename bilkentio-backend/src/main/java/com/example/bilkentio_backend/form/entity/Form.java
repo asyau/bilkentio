@@ -58,7 +58,13 @@ public class Form {
     public String getSlotTime() {
         return linkedSlot != null ? linkedSlot.getTime() : null;
     }
-
+    @Override
+    public String toString() {
+        return "Form{" +
+            "id=" + id +
+            '}';
+    }
+  }
     // Optional method to format the submission date as a String
     public String getFormattedSubmissionDate() {
         return submissionDate != null ? submissionDate.toString() : null;

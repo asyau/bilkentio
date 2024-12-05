@@ -12,8 +12,12 @@ import Unauthorized from './components/Unauthorized';
 import AdminAnalytics from './pages/AdminAnalytics';
 import FormRequests from './pages/FormRequests';
 import PuantajScores from './pages/PuantajScores';
+
+import TourManagement from './pages/TourManagement';
+import TourDetails from './pages/TourDetails';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
+
 
 import PresidentDashboard from './pages/president/Dashboard';
 import CoordinatorDashboard from './pages/coordinator/Dashboard';
@@ -31,6 +35,14 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
+          <Route path="/admin">
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="staff" element={<StaffManagement />} />
+          <Route path="scores" element={<PuantajScores />} />
+          <Route path="tours" element={<TourManagement />} />
+          <Route path="tours/:tourId" element={<TourDetails />} />
+        </Route>
+
         {/* Role-specific Routes */}
         <Route path="/president/*" element={<PresidentDashboard />} />
         <Route path="/coordinator/*" element={<CoordinatorDashboard />} />
@@ -38,12 +50,6 @@ function App() {
         <Route path="/guide/*" element={<GuideDashboard />} />
         <Route path="/counselor/*" element={<Counselor />} />
         <Route path="/individual/*" element={<Individual />} />
-
-        {/* Admin Routes */}
-        <Route path="/admin/*" element={<AdminDashboard />} />
-        <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        <Route path="/admin/staff" element={<StaffManagement />} />
-        <Route path="/admin/scores" element={<PuantajScores />} />
 
         {/* Legacy Routes - Keep if still needed */}
         <Route path="/crud" element={<CRUD />} />

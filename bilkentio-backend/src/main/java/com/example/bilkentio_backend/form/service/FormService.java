@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FormService {
@@ -43,6 +44,7 @@ public class FormService {
         Form form = formRepository.findById(formId)
             .orElseThrow(() -> new RuntimeException("Form not found"));
 
+        System.out.println("Updating form " + formId + " state from " + form.getState() + " to " + newState);
         form.setState(newState);
         TimeSlot slot = form.getLinkedSlot();
 
@@ -56,7 +58,9 @@ public class FormService {
         }
 
         slotRepository.save(slot);
-        return formRepository.save(form);
+        Form savedForm = formRepository.save(form);
+        System.out.println("Form saved with state: " + savedForm.getState());
+        return savedForm;
     }
 
     public List<Form> getPendingForms() {
@@ -78,5 +82,9 @@ public class FormService {
     public List<Form> getMyForms() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return formRepository.findBySubmittedBy_Username(username);
+    }
+
+    public Optional<Form> getFormById(Long id) {
+        return formRepository.findById(id);
     }
 }

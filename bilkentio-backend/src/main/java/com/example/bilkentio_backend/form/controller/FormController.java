@@ -57,7 +57,9 @@ public class FormController {
             @PathVariable Long formId,
             @RequestParam FormState newState) {
         Form updatedForm = formService.updateFormStatus(formId, newState);
-        return ResponseEntity.ok(FormResponseDTO.fromEntity(updatedForm));
+        FormResponseDTO response = FormResponseDTO.fromEntity(updatedForm);
+        System.out.println("Updated form state: " + response.getState());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/pending")
@@ -109,5 +111,13 @@ public class FormController {
             .map(FormResponseDTO::fromEntity)
             .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN', 'COUNSELOR')")
+    public ResponseEntity<Form> getFormById(@PathVariable Long id) {
+        return formService.getFormById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 }

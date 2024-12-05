@@ -1,0 +1,109 @@
+.tour-management-container {
+  padding: 20px;
+}
+
+.status-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.status-filters button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+.status-filters button.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.tours-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.tour-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tour-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.tour-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+}
+
+.status-badge.guides_pending {
+  background-color: #ffd700;
+  color: #856404;
+}
+
+.status-badge.waiting_to_finish {
+  background-color: #b8daff;
+  color: #004085;
+}
+
+.status-badge.finished {
+  background-color: #c3e6cb;
+  color: #155724;
+}
+
+.status-badge.given_feedback {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.tour-details {
+  margin-bottom: 15px;
+}
+
+.tour-details p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.tour-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.tour-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+}
+
+.tour-actions button.cancel {
+  background-color: #dc3545;
+}
+
+.tour-actions button:hover {
+  opacity: 0.9;
+} 

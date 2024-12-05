@@ -69,17 +69,86 @@ const FormRequests = () => {
         return;
       }
 
-      await axios.put(`http://localhost:8080/api/forms/${formId}/status`, null, {
-        params: { newState: action },
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (action === 'APPROVED') {
+        // Prompt for required guides
+        const requiredGuides = prompt('Enter the number of required guides for this tour:');
+        if (!requiredGuides || isNaN(requiredGuides) || requiredGuides < 1) {
+          alert('Please enter a valid number of guides (minimum 1)');
+          return;
+        }
+        
+        try {
+          // First update form status
+          const updateResponse = await axios.put(`http://localhost:8080/api/forms/${formId}/status`, null, {
+            params: { newState: action },
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (updateResponse.data.state !== 'APPROVED') {
+            throw new Error('Form status update failed');
+          }
+          
+          // After successful form approval, create the tour
+          const createTour = async () => {
+            try {
+              const decodedToken = JSON.parse(atob(token.split('.')[1]));
+              console.log('Creating tour for form:', updateResponse.data);
+              
+              const response = await axios.post(
+                'http://localhost:8080/api/tours',
+                {
+                  formId: formId,
+                  requiredGuides: parseInt(requiredGuides),
+                  submittedBy: decodedToken.sub
+                },
+                {
+                  headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              
+              console.log('Tour created successfully:', response.data);
+              alert('Form approved and tour created successfully!');
+            } catch (error) {
+              console.error('Error creating tour:', error);
+              alert(`Failed to create tour: ${error.response?.data || error.message}`);
+              
+              // Revert form status if tour creation fails
+              await axios.put(`http://localhost:8080/api/forms/${formId}/status`, null, {
+                params: { newState: 'PENDING' },
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              
+              // Refresh form data
+              await fetchForms();
+            }
+          };
+          
+          // Call createTour after form approval
+          await createTour();
+          
+        } catch (error) {
+          console.error('Error approving form:', error);
+          alert(`Failed to approve form: ${error.response?.data || error.message}`);
+          return;
+        }
+      } else {
+        // Just update form status for denial
+        await axios.put(`http://localhost:8080/api/forms/${formId}/status`, null, {
+          params: { newState: action },
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+
       fetchForms();
     } catch (error) {
       console.error('Error updating form status:', error);
       if (error.response?.status === 401) {
         navigate('/login');
       } else {
-        alert('Failed to update form status');
+        alert(`Failed to update form status: ${error.response?.data?.message || error.message}`);
       }
     }
   };

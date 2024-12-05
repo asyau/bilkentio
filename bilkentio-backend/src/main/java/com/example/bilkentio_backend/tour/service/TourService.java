@@ -1,0 +1,149 @@
+package com.example.bilkentio_backend.tour.service;
+
+import com.example.bilkentio_backend.form.entity.Form;
+import com.example.bilkentio_backend.form.enums.FormState;
+import com.example.bilkentio_backend.form.repository.FormRepository;
+import com.example.bilkentio_backend.guide.entity.Guide;
+import com.example.bilkentio_backend.guide.repository.GuideRepository;
+import com.example.bilkentio_backend.tour.entity.Tour;
+import com.example.bilkentio_backend.tour.enums.TourStatus;
+import com.example.bilkentio_backend.tour.repository.TourRepository;
+import com.example.bilkentio_backend.user.entity.User;
+import com.example.bilkentio_backend.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class TourService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TourService.class);
+
+    @Autowired
+    private TourRepository tourRepository;
+
+    @Autowired
+    private GuideRepository guideRepository;
+
+    @Autowired
+    private FormRepository formRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public Tour createTourFromForm(Long formId, int requiredGuides, String submittedBy) {
+        logger.debug("Creating tour for formId: {}, requiredGuides: {}, submittedBy: {}", 
+            formId, requiredGuides, submittedBy);
+        
+        Form form = formRepository.findById(formId)
+            .orElseThrow(() -> new EntityNotFoundException("Form not found"));
+            
+        logger.debug("Found form: {} with state: {}", form.getId(), form.getState());
+            
+        if (!FormState.APPROVED.equals(form.getState())) {
+            logger.warn("Attempted to create tour for non-approved form: {}", form.getId());
+            throw new IllegalStateException("Cannot create tour for non-approved form");
+        }
+            
+        User submitter = userRepository.findByUsername(submittedBy)
+            .orElseThrow(() -> new EntityNotFoundException("Submitter not found"));
+            
+        logger.debug("Found submitter: {}", submitter);
+
+        Tour tour = new Tour();
+        tour.setForm(form);
+        tour.setCounselor(submitter);
+        tour.setDate(LocalDate.parse(form.getSlotDate()));
+        tour.setTime(form.getSlotTime());
+        tour.setGroupSize(form.getGroupSize());
+        tour.setRequiredGuides(requiredGuides);
+        tour.setSchoolName(form.getSchoolName());
+        tour.setExpectations(form.getExpectations());
+        tour.setSpecialRequirements(form.getSpecialRequirements());
+        tour.setVisitorNotes(form.getVisitorNotes());
+        tour.setCity(form.getCity());
+        
+        logger.info("Successfully created tour: {}", tour);
+        return tourRepository.save(tour);
+    }
+
+    public List<Tour> getToursByStatus(TourStatus status) {
+        return tourRepository.findByStatus(status);
+    }
+
+    public Optional<Tour> getTourById(Long id) {
+        return tourRepository.findById(id);
+    }
+
+    @Transactional
+    public Tour assignGuide(Long tourId, Long guideId) {
+        Tour tour = tourRepository.findById(tourId)
+            .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
+            
+        Guide guide = guideRepository.findById(guideId)
+            .orElseThrow(() -> new EntityNotFoundException("Guide not found"));
+
+        tour.getAssignedGuides().add(guide);
+        
+        if (tour.getAssignedGuides().size() >= tour.getRequiredGuides()) {
+            tour.setStatus(TourStatus.WAITING_TO_FINISH);
+        }
+        
+        return tourRepository.save(tour);
+    }
+
+    @Transactional
+    public Tour updateTourStatus(Long tourId, TourStatus newStatus) {
+        Tour tour = tourRepository.findById(tourId)
+            .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
+            
+        tour.setStatus(newStatus);
+        return tourRepository.save(tour);
+    }
+
+    @Transactional
+    public Tour addFeedback(Long tourId, String feedback, Integer rating) {
+        Tour tour = tourRepository.findById(tourId)
+            .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
+            
+        tour.setFeedback(feedback);
+        tour.setRating(rating);
+        tour.setStatus(TourStatus.GIVEN_FEEDBACK);
+        
+        return tourRepository.save(tour);
+    }
+
+    public List<Tour> getToursByGuide(Long guideId) {
+        return tourRepository.findByAssignedGuidesId(guideId);
+    }
+
+    public List<Tour> getToursByCounselor(Long counselorId) {
+        return tourRepository.findByCounselorId(counselorId);
+    }
+
+    @Transactional
+    public Tour cancelTour(Long tourId, String cancellationReason) {
+        Tour tour = tourRepository.findById(tourId)
+            .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
+            
+        if (tour.getStatus() == TourStatus.WAITING_TO_FINISH || 
+            tour.getStatus() == TourStatus.FINISHED || 
+            tour.getStatus() == TourStatus.GIVEN_FEEDBACK) {
+            throw new IllegalStateException("Cannot cancel a tour that has already started or finished");
+        }
+        
+        tour.setStatus(TourStatus.CANCELLED);
+        tour.setCancellationReason(cancellationReason);
+        
+        tour.getAssignedGuides().clear();
+        
+        return tourRepository.save(tour);
+    }
+} 
