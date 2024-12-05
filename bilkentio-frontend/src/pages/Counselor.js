@@ -1,7 +1,6 @@
 // src/GuideMode.js
 import React, { useState, useEffect } from 'react';
 import '../styles/GuideMode.css';
-import TourHistory from '../components/TourHistory';
 import axios from 'axios';
 import { format, addDays } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -36,6 +35,26 @@ const Counselor = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [tours, setTours] = useState([]);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [selectedTour, setSelectedTour] = useState(null);
+  const [feedback, setFeedback] = useState({ feedback: '', rating: 0 });
+
+  const StarRating = ({ rating, onRatingChange }) => {
+    return (
+      <div className="star-rating">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={`material-icons star ${star <= rating ? 'filled' : ''}`}
+            onClick={() => onRatingChange(star)}
+          >
+            {star <= rating ? 'star' : 'star_border'}
+          </span>
+        ))}
+      </div>
+    );
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -343,6 +362,60 @@ const Counselor = () => {
     navigate('/login');
   };
 
+  const fetchTours = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `http://localhost:8080/api/tours/counselor/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setTours(response.data);
+    } catch (error) {
+      console.error('Error fetching tours:', error);
+    }
+  };
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (feedback.rating === 0) {
+      alert('Please provide a rating');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `http://localhost:8080/api/tours/${selectedTour.id}/feedback`,
+        feedback,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setShowFeedbackForm(false);
+      setSelectedTour(null);
+      setFeedback({ feedback: '', rating: 0 });
+      console.log(user)
+      if (user) {
+        fetchTours(user.userId);
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert('Failed to submit feedback');
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'GUIDES_PENDING': return 'status-badge pending';
+      case 'WAITING_TO_FINISH': return 'status-badge in-progress';
+      case 'FINISHED': return 'status-badge finished';
+      case 'GIVEN_FEEDBACK': return 'status-badge feedback';
+      case 'CANCELLED': return 'status-badge cancelled';
+      default: return 'status-badge';
+    }
+  };
+
   return (
     <div className="guide-mode-container">
       <div className="sidebar">
@@ -361,14 +434,24 @@ const Counselor = () => {
           </button>
           <button 
             className={`sidebar-btn ${showTourHistory ? 'active' : ''}`}
-            onClick={() => setShowTourHistory(true)}
+            onClick={() => {
+              setShowTourHistory(true);
+              setShowMyForms(false);
+              console.log(user)
+              if (user) {
+                fetchTours(user.userId);
+              }
+            }}
           >
             <span className="material-icons">history</span>
             Tour History
           </button>
           <button 
             className={`sidebar-btn ${showMyForms ? 'active' : ''}`}
-            onClick={() => setShowMyForms(true)}
+            onClick={() => {
+              setShowMyForms(true);
+              setShowTourHistory(false);
+            }}
           >
             <span className="material-icons">history</span>
             My Forms
@@ -382,7 +465,7 @@ const Counselor = () => {
       </div>
 
       <div className="main-content">
-        {!showTourHistory && !showMyForms && (
+        {!showTourHistory && !showMyForms ? (
           <>
             <div className="schedule-header">
               <button className="nav-button prev-week" onClick={handlePrevWeek}>
@@ -430,6 +513,84 @@ const Counselor = () => {
               )}
             </div>
           </>
+        ) : showTourHistory ? (
+          <div className="tour-history-container">
+            <h2>My Tours</h2>
+            <div className="tour-list">
+              {tours.map(tour => (
+                <div key={tour.id} className="tour-item">
+                  <div className="tour-info">
+                    <h3>{tour.schoolName}</h3>
+                    <p>Date: {tour.date} at {tour.time}</p>
+                    <p>Group Size: {tour.groupSize}</p>
+                    <p>Guides: {tour.assignedGuides?.length || 0}/{tour.requiredGuides}</p>
+                    {tour.feedback && (
+                      <div className="feedback-status">
+                        <p>Feedback: {tour.feedback}</p>
+                        <p>Rating: {tour.rating}/5</p>
+                      </div>
+                    )}
+                    {tour.status === 'CANCELLED' && tour.cancellationReason && (
+                      <p className="cancellation-reason">
+                        <strong>Cancelled:</strong> {tour.cancellationReason}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <span className={getStatusBadgeClass(tour.status)}>
+                      {tour.status.replace('_', ' ')}
+                    </span>
+                    {tour.status === 'FINISHED' && !tour.feedback && (
+                      <button 
+                        className="feedback-btn"
+                        onClick={() => {
+                          setSelectedTour(tour);
+                          setShowFeedbackForm(true);
+                        }}
+                      >
+                        Give Feedback
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="my-forms-container">
+            <h2>My Form Submissions</h2>
+            <div className="forms-list">
+              {myForms.map(form => (
+                <div key={form.id} className="form-card">
+                  <div className="form-header">
+                    <h3>{form.schoolName || 'No School Name'}</h3>
+                    <span className={`status-badge ${form.state?.toLowerCase()}`}>
+                      {form.state}
+                    </span>
+                  </div>
+                  <div className="form-details">
+                    <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
+                    <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
+                    <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
+                    <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
+                    <p><strong>Leader Role:</strong> {form.groupLeaderRole || 'Not specified'}</p>
+                    <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
+                    <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
+                    <p><strong>City:</strong> {form.city || 'Not specified'}</p>
+                    {form.expectations && (
+                      <p><strong>Expectations:</strong> {form.expectations}</p>
+                    )}
+                    {form.specialRequirements && (
+                      <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
+                    )}
+                    {form.visitorNotes && (
+                      <p><strong>Notes:</strong> {form.visitorNotes}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
@@ -440,39 +601,39 @@ const Counselor = () => {
         />
       )}
 
-      {showMyForms && (
-        <div className="my-forms-container">
-          <h2>My Form Submissions</h2>
-          <div className="forms-list">
-            {myForms.map(form => (
-              <div key={form.id} className="form-card">
-                <div className="form-header">
-                  <h3>{form.schoolName || 'No School Name'}</h3>
-                  <span className={`status-badge ${form.state?.toLowerCase()}`}>
-                    {form.state}
-                  </span>
-                </div>
-                <div className="form-details">
-                  <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
-                  <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
-                  <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
-                  <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
-                  <p><strong>Leader Role:</strong> {form.groupLeaderRole || 'Not specified'}</p>
-                  <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
-                  <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
-                  <p><strong>City:</strong> {form.city || 'Not specified'}</p>
-                  {form.expectations && (
-                    <p><strong>Expectations:</strong> {form.expectations}</p>
-                  )}
-                  {form.specialRequirements && (
-                    <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
-                  )}
-                  {form.visitorNotes && (
-                    <p><strong>Notes:</strong> {form.visitorNotes}</p>
-                  )}
-                </div>
+      {showFeedbackForm && selectedTour && (
+        <div className="form-overlay">
+          <div className="form-container">
+            <h3>Tour Feedback</h3>
+            <div className="selected-tour-info">
+              <p><strong>{selectedTour.schoolName}</strong></p>
+              <p>Date: {selectedTour.date} at {selectedTour.time}</p>
+            </div>
+            <form onSubmit={handleFeedbackSubmit}>
+              <div className="form-group">
+                <label>Feedback:</label>
+                <textarea
+                  value={feedback.feedback}
+                  onChange={(e) => setFeedback({ ...feedback, feedback: e.target.value })}
+                  required
+                />
               </div>
-            ))}
+              <div className="form-group">
+                <label>Rating:</label>
+                <StarRating 
+                  rating={feedback.rating}
+                  onRatingChange={(rating) => setFeedback({ ...feedback, rating })}
+                />
+              </div>
+              <div className="form-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowFeedbackForm(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="submit-btn">
+                  Submit Feedback
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

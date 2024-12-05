@@ -83,14 +83,11 @@ const FormRequests = () => {
             headers: { Authorization: `Bearer ${token}` }
           });
           
-          if (updateResponse.data.state !== 'APPROVED') {
-            throw new Error('Form status update failed');
-          }
+          console.log('Form status updated:', updateResponse.data);
           
           // After successful form approval, create the tour
           const createTour = async () => {
             try {
-              const decodedToken = JSON.parse(atob(token.split('.')[1]));
               console.log('Creating tour for form:', updateResponse.data);
               
               const response = await axios.post(
@@ -98,7 +95,6 @@ const FormRequests = () => {
                 {
                   formId: formId,
                   requiredGuides: parseInt(requiredGuides),
-                  submittedBy: decodedToken.sub
                 },
                 {
                   headers: { 

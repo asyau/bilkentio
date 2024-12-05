@@ -30,6 +30,7 @@ public class TourController {
     @GetMapping
     public ResponseEntity<List<TourDTO>> getTours(
             @RequestParam(required = false) TourStatus status) {
+
         if (status != null) {
             return ResponseEntity.ok(
                 tourService.getToursByStatus(status).stream()
@@ -37,6 +38,7 @@ public class TourController {
                     .collect(Collectors.toList())
             );
         }
+
         return ResponseEntity.ok(
             tourService.getToursByStatus(TourStatus.GUIDES_PENDING).stream()
                 .map(TourDTO::fromEntity)
@@ -115,8 +117,7 @@ public class TourController {
         try {
             Tour tour = tourService.createTourFromForm(
                 requestDTO.getFormId(), 
-                requestDTO.getRequiredGuides(),
-                requestDTO.getSubmittedBy()
+                requestDTO.getRequiredGuides()
             );
             logger.debug("Tour created successfully: {}", tour);
             return ResponseEntity.ok(TourDTO.fromEntity(tour));

@@ -155,4 +155,26 @@
 
 .tour-history-container h2 {
   font-weight: bold;
+}
+
+.star-rating {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.star-rating .star {
+  cursor: pointer;
+  color: #ccc;
+  font-size: 24px;
+  transition: color 0.2s;
+}
+
+.star-rating .star:hover,
+.star-rating .star.filled {
+  color: #ffd700;
+}
+
+.star-rating .star:hover ~ .star {
+  color: #ccc;
 } 
