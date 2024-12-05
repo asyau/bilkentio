@@ -1,0 +1,126 @@
+.guide-dashboard-container {
+  padding: 20px;
+}
+
+.view-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.view-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.view-btn.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.tours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.tour-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tour-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.tour-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+}
+
+.status-badge.pending {
+  background-color: #ffd700;
+  color: #856404;
+}
+
+.status-badge.in-progress {
+  background-color: #b8daff;
+  color: #004085;
+}
+
+.status-badge.finished {
+  background-color: #c3e6cb;
+  color: #155724;
+}
+
+.status-badge.feedback {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.tour-details {
+  margin-bottom: 15px;
+}
+
+.tour-details p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.tour-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.tour-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.tour-actions button:hover {
+  opacity: 0.9;
+}
+
+.join-btn {
+  background-color: #007bff !important;
+}
+
+.feedback-section {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.cancellation-reason {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #fff3cd;
+  border-radius: 4px;
+  color: #856404;
+} 
