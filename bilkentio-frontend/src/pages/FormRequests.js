@@ -10,6 +10,7 @@ const FormRequests = () => {
   const [selectedStatus, setSelectedStatus] = useState('PENDING');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [expandedFormId, setExpandedFormId] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -166,6 +167,11 @@ const FormRequests = () => {
     }
   };
 
+  const toggleFormDetails = (formId, e) => {
+    e.stopPropagation();
+    setExpandedFormId(expandedFormId === formId ? null : formId);
+  };
+
   return (
     <div className="admin-layout">
       <AdminSidebar />
@@ -207,53 +213,74 @@ const FormRequests = () => {
               <div className="loading">Loading...</div>
             ) : forms.length > 0 ? (
               <div className="forms-list">
-                {forms.map(form => (
-                  <div key={form.id} className="form-card">
-                    <div className="form-header">
-                      <h3>{form.schoolName || 'No School Name'}</h3>
-                      <span className="status-badge" style={{ backgroundColor: getStatusColor(form.state) }}>
-                        {form.state}
-                      </span>
-                    </div>
-                    <div className="form-details">
-                      <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
-                      <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
-                      <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
-                      <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
-                      <p><strong>Leader:</strong> {form.groupLeaderRole || 'Not specified'}</p>
-                      <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
-                      <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
-                      <p><strong>City:</strong> {form.city || 'Not specified'}</p>
-                      {form.expectations && (
-                        <p><strong>Expectations:</strong> {form.expectations}</p>
-                      )}
-                      {form.specialRequirements && (
-                        <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
-                      )}
-                      {form.visitorNotes && (
-                        <p><strong>Notes:</strong> {form.visitorNotes}</p>
-                      )}
-                    </div>
-                    {form.state === 'PENDING' && (
-                      <div className="form-actions">
-                        <button 
-                          className="approve-btn"
-                          onClick={() => handleFormAction(form.id, 'APPROVED')}
-                        >
-                          <span className="material-icons">check_circle</span>
-                          Approve
-                        </button>
-                        <button 
-                          className="deny-btn"
-                          onClick={() => handleFormAction(form.id, 'DENIED')}
-                        >
-                          <span className="material-icons">cancel</span>
-                          Deny
-                        </button>
+                {forms.map(form => {
+                  const isExpanded = expandedFormId === form.id;
+                  return (
+                    <div 
+                      key={form.id} 
+                      className={`form-card ${isExpanded ? 'expanded' : ''}`}
+                      onClick={(e) => toggleFormDetails(form.id, e)}
+                    >
+                      <div className="form-header">
+                        <h3>{form.schoolName || 'No School Name'}</h3>
+                        <span className="status-badge" style={{ backgroundColor: getStatusColor(form.state) }}>
+                          {form.state}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      
+                      <div className="form-content">
+                        <div className="form-basic-info">
+                          <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
+                          <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
+                          <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
+                        </div>
+
+                        <div className={`form-details ${isExpanded ? 'show' : ''}`}>
+                          <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
+                          <p><strong>Submission Date:</strong> {form.submissionDate || 'Not specified'}</p>
+                          <p><strong>Leader:</strong> {form.groupLeaderRole || 'Not specified'}</p>
+                          <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
+                          <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
+                          <p><strong>City:</strong> {form.city || 'Not specified'}</p>
+                          {form.expectations && (
+                            <p><strong>Expectations:</strong> {form.expectations}</p>
+                          )}
+                          {form.specialRequirements && (
+                            <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
+                          )}
+                          {form.visitorNotes && (
+                            <p><strong>Notes:</strong> {form.visitorNotes}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {form.state === 'PENDING' && (
+                        <div className="form-actions">
+                          <button 
+                            className="approve-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFormAction(form.id, 'APPROVED');
+                            }}
+                          >
+                            <span className="material-icons">check_circle</span>
+                            Approve
+                          </button>
+                          <button 
+                            className="deny-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFormAction(form.id, 'DENIED');
+                            }}
+                          >
+                            <span className="material-icons">cancel</span>
+                            Deny
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="no-forms-message">
