@@ -1,0 +1,17 @@
+.guide-dashboard {
+  display: flex;
+  min-height: 100vh;
+}
+
+.guide-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-width: 250px;
+  background-color: white;
+  border-right: 1px solid #e2e8f0;
+}
+
+.guide-content {
+  flex: 1;
+  padding: 2rem;
+} 

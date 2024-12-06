@@ -18,6 +18,8 @@ import TourDetails from './pages/TourDetails';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
 
+import DaySelection from './pages/advisor/DaySelection';
+
 
 import PresidentDashboard from './pages/president/Dashboard';
 import CoordinatorDashboard from './pages/coordinator/Dashboard';
@@ -50,6 +52,7 @@ function App() {
         <Route path="/guide/*" element={<GuideDashboard />} />
         <Route path="/counselor/*" element={<Counselor />} />
         <Route path="/individual/*" element={<Individual />} />
+        <Route path="/advisor/day-selection" element={<DaySelection />} />
 
         {/* Legacy Routes - Keep if still needed */}
         <Route path="/crud" element={<CRUD />} />

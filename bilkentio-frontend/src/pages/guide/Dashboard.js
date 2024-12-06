@@ -1,13 +1,14 @@
 import React from 'react';
 import GuideSidebar from '../../components/GuideSidebar';
+import '../../styles/GuideDashboard.css';
 
 const GuideDashboard = () => {
   return (
-    <div className="admin-layout">
+    <div className="guide-dashboard">
       <GuideSidebar />
-      <div className="admin-content">
+      <div className="guide-content">
         <h1>Guide Dashboard</h1>
-        {/* Add your guide-specific content here */}
+        {/* Your existing dashboard content */}
       </div>
     </div>
   );

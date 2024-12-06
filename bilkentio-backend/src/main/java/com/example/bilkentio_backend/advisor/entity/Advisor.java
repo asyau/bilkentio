@@ -8,5 +8,15 @@ import jakarta.persistence.*;
 @Table(name = "advisors")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Advisor extends User {
-    
+    @Column(name = "responsible_day")
+    private String responsibleDay;
+
+    // Getter and Setter
+    public String getResponsibleDay() {
+        return responsibleDay;
+    }
+
+    public void setResponsibleDay(String responsibleDay) {
+        this.responsibleDay = responsibleDay;
+    }
 }
