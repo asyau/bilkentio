@@ -12,7 +12,9 @@ import com.example.bilkentio_backend.user.entity.User;
 import com.example.bilkentio_backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.bilkentio_backend.common.EmailService;
 import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +33,9 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private GuideRepository guideRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     public User saveUser(User newUser) {
         User user = new User();
@@ -113,15 +118,33 @@ public class UserService {
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         };
 
+        String rawPassword = newUser.getPassword(); // Store the raw password before encoding
+        
         // Set common properties
         user.setUsername(newUser.getUsername());
-        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        user.setPassword(passwordEncoder.encode(rawPassword));
         user.setNameSurname(newUser.getNameSurname());
+        user.setEmail(newUser.getEmail());
+        user.setPhoneNumber(newUser.getPhoneNumber());
 
         // Set role
         String roleWithPrefix = "ROLE_" + role.toUpperCase();
         user.setRoles(Collections.singleton(roleWithPrefix));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Send email with credentials
+        emailService.sendEmail(
+            user.getEmail(),
+            "Bilkent IO - Your Account Credentials",
+            emailService.createCredentialsEmailBody(
+                user.getNameSurname(),
+                user.getUsername(),
+                rawPassword,
+                role
+            )
+        );
+
+        return savedUser;
     }
 }
