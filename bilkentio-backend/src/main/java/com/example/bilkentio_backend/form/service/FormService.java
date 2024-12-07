@@ -9,11 +9,15 @@ import com.example.bilkentio_backend.form.repository.FormRepository;
 import com.example.bilkentio_backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+
+import com.example.bilkentio_backend.common.EmailService;
 
 @Service
 public class FormService {
@@ -26,6 +30,9 @@ public class FormService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public Form submitForm(Form form) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -36,7 +43,12 @@ public class FormService {
         TimeSlot slot = form.getLinkedSlot();
         slot.setStatus(SlotStatus.FORM_REQUESTED);
         slotRepository.save(slot);
-        return formRepository.save(form);
+        Form savedForm = formRepository.save(form);
+        
+        // Send email asynchronously
+        sendFormSubmissionEmail(savedForm);
+        
+        return savedForm;
     }
 
     @Transactional
@@ -59,8 +71,65 @@ public class FormService {
 
         slotRepository.save(slot);
         Form savedForm = formRepository.save(form);
-        System.out.println("Form saved with state: " + savedForm.getState());
+        
+        // Send status update email asynchronously
+        sendFormStatusUpdateEmail(savedForm);
+        
         return savedForm;
+    }
+
+    @Async
+    protected void sendFormSubmissionEmail(Form form) {
+        try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
+            String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
+            String time = form.getLinkedSlot().getTime().toString();
+            
+            emailService.sendEmail(
+                form.getGroupLeaderEmail(),
+                "Bilkent IO - Form Submission Confirmation",
+                emailService.createFormSubmissionEmailBody(
+                    form.getSubmittedBy().getNameSurname(),
+                    date,
+                    time,
+                    form.getGroupSize(),
+                    form.getSchoolName(),
+                    form.getContactPhone(),
+                    form.getExpectations(),
+                    form.getSpecialRequirements(),
+                    form.getGroupLeaderRole(),
+                    form.getGroupLeaderPhone(),
+                    form.getGroupLeaderEmail(),
+                    form.getVisitorNotes(),
+                    form.getCity()
+                )
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send form submission email: " + e.getMessage());
+        }
+    }
+
+    @Async
+    protected void sendFormStatusUpdateEmail(Form form) {
+        try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
+            
+            String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
+            String time = form.getLinkedSlot().getTime().toString();
+            
+            emailService.sendEmail(
+                form.getGroupLeaderEmail(),
+                "Bilkent IO - Form Status Update",
+                emailService.createFormStatusUpdateEmailBody(
+                    form.getSubmittedBy().getNameSurname(),
+                    date,
+                    time,
+                    form.getState().toString()
+                )
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send form status update email: " + e.getMessage());
+        }
     }
 
     public List<Form> getPendingForms() {

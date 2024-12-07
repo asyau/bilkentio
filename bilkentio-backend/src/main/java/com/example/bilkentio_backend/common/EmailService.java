@@ -82,4 +82,79 @@ public class EmailService {
             </div>
             """, content);
     }
+
+    public String createFormSubmissionEmailBody(String name, String date, String time, 
+            Integer groupSize, String schoolName, String contactPhone, String expectations,
+            String specialRequirements, String groupLeaderRole, String groupLeaderPhone,
+            String groupLeaderEmail, String visitorNotes, String city) {
+        
+        return String.format("""
+            <h2 style="color: #041E42; margin-bottom: 20px;">Form Submission Confirmation</h2>
+            
+            <p style="color: #333333; font-size: 16px; line-height: 1.5;">Dear %s,</p>
+            
+            <p style="color: #333333; font-size: 16px; line-height: 1.5;">Your form has been successfully submitted. Here are the details:</p>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 5px 0;"><strong>Date:</strong> %s</p>
+                <p style="margin: 5px 0;"><strong>Time:</strong> %s</p>
+                <p style="margin: 5px 0;"><strong>Group Size:</strong> %d</p>
+                <p style="margin: 5px 0;"><strong>School Name:</strong> %s</p>
+                <p style="margin: 5px 0;"><strong>Contact Phone:</strong> %s</p>
+                <p style="margin: 5px 0;"><strong>City:</strong> %s</p>
+                
+                <div style="margin-top: 15px;">
+                    <p style="margin: 5px 0;"><strong>Group Leader Information:</strong></p>
+                    <p style="margin: 5px 0; padding-left: 15px;">Role: %s</p>
+                    <p style="margin: 5px 0; padding-left: 15px;">Phone: %s</p>
+                    <p style="margin: 5px 0; padding-left: 15px;">Email: %s</p>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <p style="margin: 5px 0;"><strong>Additional Information:</strong></p>
+                    <p style="margin: 5px 0;"><strong>Expectations:</strong> %s</p>
+                    <p style="margin: 5px 0;"><strong>Special Requirements:</strong> %s</p>
+                    <p style="margin: 5px 0;"><strong>Visitor Notes:</strong> %s</p>
+                </div>
+            </div>
+            
+            <p style="color: #333333; font-size: 16px; line-height: 1.5;">
+                We will review your form and notify you once a decision has been made.
+            </p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eeeeee;">
+                <p style="color: #666666; font-size: 14px;">Best regards,</p>
+                <p style="color: #666666; font-size: 14px;">Bilkent IO Team</p>
+            </div>
+            """, name, date, time, groupSize, schoolName, contactPhone, city,
+                groupLeaderRole, groupLeaderPhone, groupLeaderEmail,
+                expectations, specialRequirements, visitorNotes);
+    }
+
+    public String createFormStatusUpdateEmailBody(String name, String date, String time, String status) {
+        String statusColor = status.equals("APPROVED") ? "#28a745" : "#dc3545";
+        String statusMessage = status.equals("APPROVED") ? 
+            "You can proceed with your planned activity." : 
+            "Unfortunately, your form has been denied.";
+        
+        return String.format("""
+            <h2 style="color: #041E42; margin-bottom: 20px;">Form Status Update</h2>
+            
+            <p style="color: #333333; font-size: 16px; line-height: 1.5;">Dear %s,</p>
+            
+            <p style="color: #333333; font-size: 16px; line-height: 1.5;">
+                Your form has been <span style="color: %s; font-weight: bold;">%s</span>. %s
+            </p>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <p style="margin: 5px 0;"><strong>Date:</strong> %s</p>
+                <p style="margin: 5px 0;"><strong>Time:</strong> %s</p>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eeeeee;">
+                <p style="color: #666666; font-size: 14px;">Best regards,</p>
+                <p style="color: #666666; font-size: 14px;">Bilkent IO Team</p>
+            </div>
+            """, name, statusColor, status, statusMessage, date, time);
+    }
 }

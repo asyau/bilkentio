@@ -8,6 +8,8 @@ import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.guide.repository.GuideRepository;
 import com.example.bilkentio_backend.individual.entity.Individual;
 import com.example.bilkentio_backend.individual.repository.IndividualRepository;
+import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
+import com.example.bilkentio_backend.guidanceCounselor.repository.GuidanceCounselorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +37,9 @@ public class DatabaseInitializer implements CommandLineRunner {
     private GuideRepository guideRepository;
 
     @Autowired
+    private GuidanceCounselorRepository guidanceCounselorRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -44,6 +49,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         initializeDays();
         initializeIndividual();
         initializeGuide();
+        initializeCounselor();
     }
 
     private void initializeAdmin() {
@@ -68,10 +74,10 @@ public class DatabaseInitializer implements CommandLineRunner {
                 Day day = new Day();
                 day.setDate(current);
                 day.initializeSlots();
-                
+
                 // Set the day reference for each slot
                 day.getSlots().forEach(slot -> slot.setDay(day));
-                
+
                 dayRepository.save(day);
             }
             current = current.plusDays(1);
@@ -108,4 +114,18 @@ public class DatabaseInitializer implements CommandLineRunner {
             guideRepository.save(guide);
         }
     }
-} 
+
+    private void initializeCounselor() {
+        // Check if counselor account exists
+        if (!guidanceCounselorRepository.findByUsername("eray").isPresent()) {
+            GuidanceCounselor counselor = new GuidanceCounselor();
+            counselor.setUsername("eray");
+            counselor.setPassword(passwordEncoder.encode("123"));
+            counselor.setNameSurname("Eray Counselor");
+            counselor.setEmail("barsyayc@gmail.com");
+            counselor.setPhoneNumber("+90 555 123 4567");
+            counselor.setRoles(new HashSet<>(Collections.singletonList("ROLE_COUNSELOR")));
+            guidanceCounselorRepository.save(counselor);
+        }
+    }
+}

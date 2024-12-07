@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.bilkentio_backend.common.EmailService;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.Collections;
 import java.util.List;
@@ -133,18 +134,29 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        // Send email with credentials
-        emailService.sendEmail(
-            user.getEmail(),
-            "Bilkent IO - Your Account Credentials",
-            emailService.createCredentialsEmailBody(
-                user.getNameSurname(),
-                user.getUsername(),
-                rawPassword,
-                role
-            )
-        );
+        // Send email asynchronously
+        sendCredentialsEmail(savedUser, rawPassword, role);
 
         return savedUser;
     }
+
+    @Async
+    protected void sendCredentialsEmail(User user, String rawPassword, String role) {
+        try {
+            emailService.sendEmail(
+                user.getEmail(),
+                "Bilkent IO - Your Account Credentials",
+                emailService.createCredentialsEmailBody(
+                    user.getNameSurname(),
+                    user.getUsername(),
+                    rawPassword,
+                    role
+                )
+            );
+        } catch (Exception e) {
+            // Log error but don't throw it since this is async
+            logger.error("Failed to send credentials email: " + e.getMessage());
+        }
+    }
+    
 }
