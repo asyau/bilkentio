@@ -12,7 +12,6 @@ const PuantajScores = () => {
   const [guideDetails, setGuideDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedSection, setExpandedSection] = useState(null);
 
   useEffect(() => {
     const initializeComponent = async () => {
@@ -98,7 +97,7 @@ const PuantajScores = () => {
             {filteredGuides.map(guide => (
               <div 
                 key={guide.id}
-                className={`guide-card ${selectedGuide?.id === guide.id ? 'expanded' : ''}`}
+                className="guide-card"
                 onClick={() => handleGuideSelect(guide)}
               >
                 <div className="guide-header">
@@ -121,94 +120,140 @@ const PuantajScores = () => {
                     </div>
                   </div>
                 </div>
-
-                {selectedGuide?.id === guide.id && guideDetails && (
-                  <div className="modal-overlay">
-                    <div className="modal-content">
-                      <div className="modal-header">
-                        <div className="guide-profile">
-                          <h2>{selectedGuide.nameSurname}</h2>
-                          <span className="username">@{selectedGuide.username}</span>
-                        </div>
-                        <div className="guide-metrics">
-                          <div className="metric">
-                            <span className="label">Level</span>
-                            <span className="value">{selectedGuide.level}</span>
-                          </div>
-                          <div className="metric">
-                            <span className="label">Score</span>
-                            <span className="value">{selectedGuide.score}</span>
-                          </div>
-                          <div className="metric">
-                            <span className="label">Rating</span>
-                            <span className="value">{selectedGuide.averageRating?.toFixed(1) || '-'} ★</span>
-                          </div>
-                        </div>
-                        <button className="close-btn" onClick={() => setSelectedGuide(null)}>
-                          <span className="material-icons">close</span>
-                        </button>
-                      </div>
-
-                      <div className="modal-body">
-                        <div className="info-section">
-                          <div className="section-header">
-                            <span className="material-icons">event</span>
-                            <h3>Upcoming Tours</h3>
-                          </div>
-                          <div className="tours-list">
-                            {[...guideDetails.tours.upcomingIndividualTours || [], 
-                              ...guideDetails.tours.upcomingGroupTours || []
-                            ].map((tour, index) => (
-                              <div key={index} className="tour-card">
-                                <div className="tour-date">
-                                  <span className="material-icons">calendar_today</span>
-                                  {new Date(tour.date).toLocaleDateString()}
-                                </div>
-                                <div className="tour-badge">
-                                  {tour.schoolName ? 'Group Tour' : 'Individual Tour'}
-                                </div>
-                                <div className="tour-info">
-                                  <p><span className="material-icons">location_on</span> {tour.city}</p>
-                                  {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
-                                  {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="info-section">
-                          <div className="section-header">
-                            <span className="material-icons">star_rate</span>
-                            <h3>Recent Reviews</h3>
-                          </div>
-                          <div className="reviews-list">
-                            {guideDetails.reviews.map((review, index) => (
-                              <div key={index} className="review-card">
-                                <div className="review-header">
-                                  <div className="rating">
-                                    {[...Array(5)].map((_, i) => (
-                                      <span key={i} className={`star ${i < review.rating ? 'filled' : ''}`}>★</span>
-                                    ))}
-                                  </div>
-                                  <span className="review-date">{new Date(review.date).toLocaleDateString()}</span>
-                                </div>
-                                <p className="review-text">"{review.feedback}"</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
+
+          {selectedGuide && guideDetails && (
+            <div className="modal-overlay" onClick={() => setSelectedGuide(null)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <div className="guide-profile">
+                    <h2>{selectedGuide.nameSurname}</h2>
+                    <span className="username">@{selectedGuide.username}</span>
+                  </div>
+                  <div className="guide-metrics">
+                    <div className="metric">
+                      <span className="material-icons">military_tech</span>
+                      <div className="metric-details">
+                        <span className="label">Level</span>
+                        <span className="value">{selectedGuide.level}</span>
+                      </div>
+                    </div>
+                    <div className="metric">
+                      <span className="material-icons">stars</span>
+                      <div className="metric-details">
+                        <span className="label">Total Score</span>
+                        <span className="value">{selectedGuide.score}</span>
+                      </div>
+                    </div>
+                    <div className="metric">
+                      <span className="material-icons">grade</span>
+                      <div className="metric-details">
+                        <span className="label">Rating</span>
+                        <span className="value">{selectedGuide.averageRating?.toFixed(1) || '-'} ★</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button className="close-btn" onClick={() => setSelectedGuide(null)}>
+                    <span className="material-icons">close</span>
+                  </button>
+                </div>
+
+                <div className="modal-body">
+                  <div className="tours-section">
+                    <div className="section-header">
+                      <span className="material-icons">event</span>
+                      <h3>Upcoming Tours</h3>
+                    </div>
+                    <div className="tours-list">
+                      {[...guideDetails.tours.upcomingIndividualTours || [], 
+                        ...guideDetails.tours.upcomingGroupTours || []
+                      ].map((tour, index) => (
+                        <div key={index} className="tour-card">
+                          <div className="tour-date">
+                            <span className="material-icons">calendar_today</span>
+                            {new Date(tour.date).toLocaleDateString()}
+                          </div>
+                          <div className="tour-badge">
+                            {tour.schoolName ? 'Group Tour' : 'Individual Tour'}
+                          </div>
+                          <div className="tour-info">
+                            <p><span className="material-icons">location_on</span> {tour.city}</p>
+                            {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
+                            {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
+                            {tour.interests && <p><span className="material-icons">interests</span> {tour.interests}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="completed-tours-section">
+                    <div className="section-header">
+                      <span className="material-icons">task_alt</span>
+                      <h3>Completed Tours</h3>
+                    </div>
+                    <div className="tours-list">
+                      {[...guideDetails.tours.completedIndividualTours || [], 
+                        ...guideDetails.tours.completedGroupTours || []
+                      ].map((tour, index) => (
+                        <div key={index} className="tour-card completed">
+                          <div className="tour-date">
+                            <span className="material-icons">event_available</span>
+                            {new Date(tour.date).toLocaleDateString()}
+                          </div>
+                          <div className="tour-badge">
+                            {tour.schoolName ? 'Group Tour' : 'Individual Tour'}
+                          </div>
+                          <div className="tour-info">
+                            <p><span className="material-icons">location_on</span> {tour.city}</p>
+                            {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
+                            {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
+                          </div>
+                          {tour.rating && (
+                            <div className="tour-feedback">
+                              <div className="rating">
+                                {[...Array(5)].map((_, i) => (
+                                  <span key={i} className={`star ${i < tour.rating ? 'filled' : ''}`}>★</span>
+                                ))}
+                              </div>
+                              {tour.feedback && <p className="feedback-text">"{tour.feedback}"</p>}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="reviews-section">
+                <div className="section-header">
+                  <span className="material-icons">reviews</span>
+                      <h3>Recent Reviews</h3>
+                    </div>
+                    <div className="reviews-list">
+                      {guideDetails.reviews.map((review, index) => (
+                        <div key={index} className="review-card">
+                          <div className="review-header">
+                            <div className="rating">
+                              {[...Array(5)].map((_, i) => (
+                                <span key={i} className={`star ${i < review.rating ? 'filled' : ''}`}>★</span>
+                              ))}
+                            </div>
+                            <span className="review-date">{new Date(review.date).toLocaleDateString()}</span>
+                          </div>
+                          <p className="review-text">"{review.feedback}"</p>
+                        </div>
+                      ))}
+                    </div>
+                </div>
+              </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default PuantajScores; 
+export default PuantajScores;
