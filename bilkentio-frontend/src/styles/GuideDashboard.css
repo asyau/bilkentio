@@ -123,4 +123,43 @@
   background-color: #fff3cd;
   border-radius: 4px;
   color: #856404;
+}
+
+.tour-card.individual {
+  border-left: 4px solid #9c27b0;  /* Purple accent for individual tours */
+  background-color: #faf5ff;
+}
+
+.tour-card.individual .tour-header h3 {
+  color: #9c27b0;
+}
+
+.tour-card .tour-details p {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.tour-card .tour-details strong {
+  color: #555;
+  margin-right: 8px;
+}
+
+.view-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.view-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background: #f0f0f0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.view-btn.active {
+  background: #2196f3;
+  color: white;
 } 

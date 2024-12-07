@@ -1,32 +1,27 @@
 package com.example.bilkentio_backend.tour.entity;
 
-import com.example.bilkentio_backend.form.entity.Form;
 import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
-import com.example.bilkentio_backend.user.entity.User;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "tours")
-@Data
-public class Tour {
+@Table(name = "individual_tours")
+@Getter
+@Setter
+public class IndividualTour {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "form_id")
-    private Form form;
-
-    @ManyToOne
-    @JoinColumn(name = "counselor_id")
-    private User counselor;
+    @Column(nullable = false)
+    private String username;  // to track who submitted the request
 
     @Column(nullable = false)
     private LocalDate date;
@@ -35,16 +30,13 @@ public class Tour {
     private String time;
 
     @Column(nullable = false)
-    private Integer groupSize;
+    private String interests;
 
     @Column(nullable = false)
-    private Integer requiredGuides;
+    private String contactNumber;
 
     @Column(nullable = false)
-    private String schoolName;
-
-    @Column
-    private String expectations;
+    private String email;
 
     @Column
     private String specialRequirements;
@@ -52,14 +44,11 @@ public class Tour {
     @Column
     private String visitorNotes;
 
-    @Column(nullable = false)
-    private String city;
-
-    @JsonManagedReference
+    @JsonManagedReference("individual-tour-guides")
     @ManyToMany
     @JoinTable(
-        name = "tour_guides",
-        joinColumns = @JoinColumn(name = "tour_id"),
+        name = "individual_tour_guides",
+        joinColumns = @JoinColumn(name = "individual_tour_id"),
         inverseJoinColumns = @JoinColumn(name = "guide_id")
     )
     private Set<Guide> assignedGuides = new HashSet<>();
@@ -76,4 +65,31 @@ public class Tour {
 
     @Column
     private String cancellationReason;
+
+    @Column
+    private String city;
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 } 

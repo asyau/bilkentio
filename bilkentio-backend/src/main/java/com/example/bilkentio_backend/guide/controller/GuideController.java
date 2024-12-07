@@ -2,11 +2,19 @@ package com.example.bilkentio_backend.guide.controller;
 
 import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.guide.service.GuideService;
+import com.example.bilkentio_backend.guide.repository.GuideRepository;
+import com.example.bilkentio_backend.tour.enums.TourStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/guides")
@@ -14,6 +22,9 @@ public class GuideController {
 
     @Autowired
     private GuideService guideService;
+
+    @Autowired
+    private GuideRepository guideRepository;
 
     @GetMapping
     public List<Guide> getAllGuides() {
@@ -44,5 +55,50 @@ public class GuideController {
         return guideService.deleteGuide(id) 
                 ? ResponseEntity.ok().build() 
                 : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{guideId}/stats")
+    public ResponseEntity<?> getGuideStats(@PathVariable Long guideId) {
+        try {
+            return ResponseEntity.ok(guideService.getGuideStats(guideId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{guideId}/reviews")
+    public ResponseEntity<?> getGuideReviews(@PathVariable Long guideId) {
+        Optional<Guide> guideOpt = guideRepository.findById(guideId);
+        if (guideOpt.isPresent()) {
+            return ResponseEntity.ok(guideOpt.get().getAllReviews());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{guideId}/tours")
+    public ResponseEntity<?> getGuideTours(@PathVariable Long guideId) {
+        try {
+            return ResponseEntity.ok(guideService.getGuideTours(guideId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{guideId}/tours/upcoming")
+    public ResponseEntity<?> getGuideUpcomingTours(@PathVariable Long guideId) {
+        try {
+            return ResponseEntity.ok(guideService.getGuideUpcomingTours(guideId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{guideId}/tours/completed")
+    public ResponseEntity<?> getGuideCompletedTours(@PathVariable Long guideId) {
+        try {
+            return ResponseEntity.ok(guideService.getGuideCompletedTours(guideId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 } 
