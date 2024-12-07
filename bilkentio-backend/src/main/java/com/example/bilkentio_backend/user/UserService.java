@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.bilkentio_backend.common.EmailService;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.context.ApplicationEventPublisher;
+import com.example.bilkentio_backend.common.event.EmailEvent;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +39,9 @@ public class UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     public User saveUser(User newUser) {
         User user = new User();
@@ -142,21 +147,18 @@ public class UserService {
 
     @Async
     protected void sendCredentialsEmail(User user, String rawPassword, String role) {
-        try {
-            emailService.sendEmail(
-                user.getEmail(),
-                "Bilkent IO - Your Account Credentials",
-                emailService.createCredentialsEmailBody(
-                    user.getNameSurname(),
-                    user.getUsername(),
-                    rawPassword,
-                    role
-                )
-            );
-        } catch (Exception e) {
-            // Log error but don't throw it since this is async
-            logger.error("Failed to send credentials email: " + e.getMessage());
-        }
+        String emailContent = emailService.createCredentialsEmailBody(
+            user.getNameSurname(),
+            user.getUsername(),
+            rawPassword,
+            role
+        );
+
+        eventPublisher.publishEvent(new EmailEvent(
+            user.getEmail(),
+            "Bilkent IO - Your Account Credentials",
+            emailContent
+        ));
     }
     
 }

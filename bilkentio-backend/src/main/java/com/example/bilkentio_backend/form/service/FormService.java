@@ -8,6 +8,7 @@ import com.example.bilkentio_backend.form.enums.FormState;
 import com.example.bilkentio_backend.form.repository.FormRepository;
 import com.example.bilkentio_backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.bilkentio_backend.common.EmailService;
+import com.example.bilkentio_backend.common.event.EmailEvent;
 
 @Service
 public class FormService {
@@ -32,6 +34,9 @@ public class FormService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Form submitForm(Form form) {
@@ -80,56 +85,51 @@ public class FormService {
 
     @Async
     protected void sendFormSubmissionEmail(Form form) {
-        try {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
-            String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
-            String time = form.getLinkedSlot().getTime().toString();
-            
-            emailService.sendEmail(
-                form.getGroupLeaderEmail(),
-                "Bilkent IO - Form Submission Confirmation",
-                emailService.createFormSubmissionEmailBody(
-                    form.getSubmittedBy().getNameSurname(),
-                    date,
-                    time,
-                    form.getGroupSize(),
-                    form.getSchoolName(),
-                    form.getContactPhone(),
-                    form.getExpectations(),
-                    form.getSpecialRequirements(),
-                    form.getGroupLeaderRole(),
-                    form.getGroupLeaderPhone(),
-                    form.getGroupLeaderEmail(),
-                    form.getVisitorNotes(),
-                    form.getCity()
-                )
-            );
-        } catch (Exception e) {
-            System.err.println("Failed to send form submission email: " + e.getMessage());
-        }
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
+        String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
+        String time = form.getLinkedSlot().getTime().toString();
+        
+        String emailContent = emailService.createFormSubmissionEmailBody(
+            form.getSubmittedBy().getNameSurname(),
+            date,
+            time,
+            form.getGroupSize(),
+            form.getSchoolName(),
+            form.getContactPhone(),
+            form.getExpectations(),
+            form.getSpecialRequirements(),
+            form.getGroupLeaderRole(),
+            form.getGroupLeaderPhone(),
+            form.getGroupLeaderEmail(),
+            form.getVisitorNotes(),
+            form.getCity()
+        );
+
+        eventPublisher.publishEvent(new EmailEvent(
+            form.getGroupLeaderEmail(),
+            "Bilkent IO - Form Submission Confirmation",
+            emailContent
+        ));
     }
 
     @Async
     protected void sendFormStatusUpdateEmail(Form form) {
-        try {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
-            
-            String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
-            String time = form.getLinkedSlot().getTime().toString();
-            
-            emailService.sendEmail(
-                form.getGroupLeaderEmail(),
-                "Bilkent IO - Form Status Update",
-                emailService.createFormStatusUpdateEmailBody(
-                    form.getSubmittedBy().getNameSurname(),
-                    date,
-                    time,
-                    form.getState().toString()
-                )
-            );
-        } catch (Exception e) {
-            System.err.println("Failed to send form status update email: " + e.getMessage());
-        }
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
+        String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
+        String time = form.getLinkedSlot().getTime().toString();
+        
+        String emailContent = emailService.createFormStatusUpdateEmailBody(
+            form.getSubmittedBy().getNameSurname(),
+            date,
+            time,
+            form.getState().toString()
+        );
+
+        eventPublisher.publishEvent(new EmailEvent(
+            form.getGroupLeaderEmail(),
+            "Bilkent IO - Form Status Update",
+            emailContent
+        ));
     }
 
     public List<Form> getPendingForms() {
