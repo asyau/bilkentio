@@ -8,18 +8,17 @@ import { checkAdminRole } from '../utils/roleCheck';
 const PuantajScores = () => {
   const navigate = useNavigate();
   const [guides, setGuides] = useState([]);
+  const [selectedGuide, setSelectedGuide] = useState(null);
+  const [guideDetails, setGuideDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedSection, setExpandedSection] = useState(null);
 
   useEffect(() => {
     const initializeComponent = async () => {
       const { isAuthorized, error } = await checkAdminRole();
-      
       if (!isAuthorized) {
-        if (error === 'No token found') {
-          navigate('/login');
-        } else {
-          navigate('/unauthorized');
-        }
+        navigate(error === 'No token found' ? '/login' : '/unauthorized');
         return;
       }
 
@@ -38,39 +37,171 @@ const PuantajScores = () => {
     initializeComponent();
   }, [navigate]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const fetchGuideDetails = async (guideId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const [stats, reviews, tours] = await Promise.all([
+        axios.get(`http://localhost:8080/api/guides/${guideId}/stats`, { headers }),
+        axios.get(`http://localhost:8080/api/guides/${guideId}/reviews`, { headers }),
+        axios.get(`http://localhost:8080/api/guides/${guideId}/tours`, { headers })
+      ]);
+
+      setGuideDetails({
+        stats: stats.data,
+        reviews: reviews.data || [],
+        tours: tours.data || {}
+      });
+    } catch (error) {
+      console.error('Error fetching guide details:', error);
+      setGuideDetails(null);
+    }
+  };
+
+  const handleGuideSelect = (guide) => {
+    if (selectedGuide?.id === guide.id) {
+      setSelectedGuide(null);
+      setGuideDetails(null);
+    } else {
+      setSelectedGuide(guide);
+      fetchGuideDetails(guide.id);
+    }
+  };
+
+  const filteredGuides = guides.filter(guide => 
+    guide.nameSurname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    guide.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (isLoading) return <div className="loading">Loading...</div>;
 
   return (
     <div className="admin-layout">
       <AdminSidebar />
       <div className="admin-content">
         <div className="puantaj-container">
-          <h1>Guide List</h1>
-          <div className="scores-grid">
-            {guides.map(guide => (
-              <div key={guide.id} className="score-card">
-                <div className="guide-info">
-                  <h3>{guide.nameSurname}</h3>
-                  <p className="username">@{guide.username}</p>
-                </div>
-                <div className="score-details">
-                  <div className="score-item">
-                    <span className="material-icons">star</span>
-                    <div className="score-text">
-                      <p>Points</p>
-                      <h4>{guide.score}</h4>
+          <div className="dashboard-header">
+            <h1>Guide Performance Dashboard</h1>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Search guides..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <span className="material-icons">search</span>
+            </div>
+          </div>
+
+          <div className="guides-section">
+            {filteredGuides.map(guide => (
+              <div 
+                key={guide.id}
+                className={`guide-card ${selectedGuide?.id === guide.id ? 'expanded' : ''}`}
+                onClick={() => handleGuideSelect(guide)}
+              >
+                <div className="guide-header">
+                  <div className="guide-info">
+                    <h3>{guide.nameSurname}</h3>
+                    <span className="username">@{guide.username}</span>
+                  </div>
+                  <div className="guide-stats">
+                    <div className="stat">
+                      <span className="material-icons">military_tech</span>
+                      <span>Level {guide.level}</span>
+                    </div>
+                    <div className="stat">
+                      <span className="material-icons">stars</span>
+                      <span>{guide.score} pts</span>
+                    </div>
+                    <div className="stat">
+                      <span className="material-icons">grade</span>
+                      <span>{guide.averageRating?.toFixed(1) || '-'}</span>
                     </div>
                   </div>
-                  <div className="score-item">
-                    <span className="material-icons">military_tech</span>
-                    <div className="score-text">
-                      <p>Level</p>
-                      <h4>{guide.level}</h4>
+                </div>
+
+                {selectedGuide?.id === guide.id && guideDetails && (
+                  <div className="modal-overlay">
+                    <div className="modal-content">
+                      <div className="modal-header">
+                        <div className="guide-profile">
+                          <h2>{selectedGuide.nameSurname}</h2>
+                          <span className="username">@{selectedGuide.username}</span>
+                        </div>
+                        <div className="guide-metrics">
+                          <div className="metric">
+                            <span className="label">Level</span>
+                            <span className="value">{selectedGuide.level}</span>
+                          </div>
+                          <div className="metric">
+                            <span className="label">Score</span>
+                            <span className="value">{selectedGuide.score}</span>
+                          </div>
+                          <div className="metric">
+                            <span className="label">Rating</span>
+                            <span className="value">{selectedGuide.averageRating?.toFixed(1) || '-'} ★</span>
+                          </div>
+                        </div>
+                        <button className="close-btn" onClick={() => setSelectedGuide(null)}>
+                          <span className="material-icons">close</span>
+                        </button>
+                      </div>
+
+                      <div className="modal-body">
+                        <div className="info-section">
+                          <div className="section-header">
+                            <span className="material-icons">event</span>
+                            <h3>Upcoming Tours</h3>
+                          </div>
+                          <div className="tours-list">
+                            {[...guideDetails.tours.upcomingIndividualTours || [], 
+                              ...guideDetails.tours.upcomingGroupTours || []
+                            ].map((tour, index) => (
+                              <div key={index} className="tour-card">
+                                <div className="tour-date">
+                                  <span className="material-icons">calendar_today</span>
+                                  {new Date(tour.date).toLocaleDateString()}
+                                </div>
+                                <div className="tour-badge">
+                                  {tour.schoolName ? 'Group Tour' : 'Individual Tour'}
+                                </div>
+                                <div className="tour-info">
+                                  <p><span className="material-icons">location_on</span> {tour.city}</p>
+                                  {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
+                                  {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="info-section">
+                          <div className="section-header">
+                            <span className="material-icons">star_rate</span>
+                            <h3>Recent Reviews</h3>
+                          </div>
+                          <div className="reviews-list">
+                            {guideDetails.reviews.map((review, index) => (
+                              <div key={index} className="review-card">
+                                <div className="review-header">
+                                  <div className="rating">
+                                    {[...Array(5)].map((_, i) => (
+                                      <span key={i} className={`star ${i < review.rating ? 'filled' : ''}`}>★</span>
+                                    ))}
+                                  </div>
+                                  <span className="review-date">{new Date(review.date).toLocaleDateString()}</span>
+                                </div>
+                                <p className="review-text">"{review.feedback}"</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

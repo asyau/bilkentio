@@ -5,6 +5,9 @@ import com.example.bilkentio_backend.guide.repository.GuideRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
+import com.example.bilkentio_backend.tour.dto.TourResponse;
+import com.example.bilkentio_backend.tour.entity.Tour;
+import com.example.bilkentio_backend.tour.dto.IndividualTourResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -94,25 +97,34 @@ public class GuideService {
             
         Map<String, Object> tours = new HashMap<>();
         
-        tours.put("groupTours", guide.getJoinedTours());
-        tours.put("individualTours", guide.getIndividualTours());
+        tours.put("groupTours", guide.getJoinedTours().stream()
+            .map(TourResponse::fromTour)
+            .collect(Collectors.toList()));
+            
+        tours.put("individualTours", guide.getIndividualTours().stream()
+            .map(IndividualTourResponse::fromTour)
+            .collect(Collectors.toList()));
         
         tours.put("completedGroupTours", guide.getJoinedTours().stream()
             .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
                           tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
+            .map(TourResponse::fromTour)
             .collect(Collectors.toList()));
             
         tours.put("completedIndividualTours", guide.getIndividualTours().stream()
             .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
                           tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
+            .map(IndividualTourResponse::fromTour)
             .collect(Collectors.toList()));
-        
+            
         tours.put("upcomingGroupTours", guide.getJoinedTours().stream()
             .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
+            .map(TourResponse::fromTour)
             .collect(Collectors.toList()));
             
         tours.put("upcomingIndividualTours", guide.getIndividualTours().stream()
             .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
+            .map(IndividualTourResponse::fromTour)
             .collect(Collectors.toList()));
 
         return tours;
