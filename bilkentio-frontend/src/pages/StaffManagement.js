@@ -11,6 +11,8 @@ const StaffForm = ({ staff, onClose, fetchStaffMembers, roles }) => {
     username: staff?.username || '',
     password: staff ? null : '',
     nameSurname: staff?.nameSurname || '',
+    email: staff?.email || '',
+    phoneNumber: staff?.phoneNumber || '',
     role: staff?.roles?.[0]?.replace('ROLE_', '').toLowerCase() || 'guide'
   });
 
@@ -22,6 +24,8 @@ const StaffForm = ({ staff, onClose, fetchStaffMembers, roles }) => {
           {
             username: formData.username,
             nameSurname: formData.nameSurname,
+            email: formData.email,
+            phoneNumber: formData.phoneNumber,
             roles: [`ROLE_${formData.role.toUpperCase()}`],
             ...(formData.password && { password: formData.password })
           },
@@ -34,7 +38,9 @@ const StaffForm = ({ staff, onClose, fetchStaffMembers, roles }) => {
           {
             username: formData.username,
             password: formData.password,
-            nameSurname: formData.nameSurname
+            nameSurname: formData.nameSurname,
+            email: formData.email,
+            phoneNumber: formData.phoneNumber
           },
           {
             params: { role: formData.role },
@@ -82,6 +88,25 @@ const StaffForm = ({ staff, onClose, fetchStaffMembers, roles }) => {
               required
               value={formData.nameSurname}
               onChange={(e) => setFormData({...formData, nameSurname: e.target.value})}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Email *</label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Phone Number</label>
+            <input
+              type="tel"
+              value={formData.phoneNumber}
+              onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
             />
           </div>
 
