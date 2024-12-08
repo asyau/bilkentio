@@ -4,6 +4,9 @@ import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.guide.service.GuideService;
 import com.example.bilkentio_backend.guide.repository.GuideRepository;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
+import com.example.bilkentio_backend.tour.dto.CompletedTourDTO;
+import com.example.bilkentio_backend.tour.entity.Tour;
+import com.example.bilkentio_backend.guide.dto.GuideProfileDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -67,10 +70,13 @@ public class GuideController {
     }
 
     @GetMapping("/{guideId}/reviews")
-    public ResponseEntity<?> getGuideReviews(@PathVariable Long guideId) {
+    public ResponseEntity<List<CompletedTourDTO>> getGuideReviews(@PathVariable Long guideId) {
         Optional<Guide> guideOpt = guideRepository.findById(guideId);
         if (guideOpt.isPresent()) {
-            return ResponseEntity.ok(guideOpt.get().getAllReviews());
+            List<CompletedTourDTO> reviews = guideOpt.get().getAllReviews().stream()
+                .map(CompletedTourDTO::fromEntity)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(reviews);
         }
         return ResponseEntity.notFound().build();
     }
@@ -94,11 +100,22 @@ public class GuideController {
     }
 
     @GetMapping("/{guideId}/tours/completed")
-    public ResponseEntity<?> getGuideCompletedTours(@PathVariable Long guideId) {
+    public ResponseEntity<List<CompletedTourDTO>> getGuideCompletedTours(@PathVariable Long guideId) {
         try {
-            return ResponseEntity.ok(guideService.getGuideCompletedTours(guideId));
+            List<Tour> completedTours = guideService.getGuideCompletedTours(guideId);
+            List<CompletedTourDTO> dtos = completedTours.stream()
+                .map(CompletedTourDTO::fromEntity)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{guideId}/profile")
+    public ResponseEntity<GuideProfileDTO> getGuideProfile(@PathVariable Long guideId) {
+        return guideService.getGuideById(guideId)
+            .map(guide -> ResponseEntity.ok(GuideProfileDTO.fromEntity(guide)))
+            .orElse(ResponseEntity.notFound().build());
     }
 } 

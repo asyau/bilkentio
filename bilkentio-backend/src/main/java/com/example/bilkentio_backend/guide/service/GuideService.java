@@ -147,22 +147,13 @@ public class GuideService {
         return upcomingTours;
     }
 
-    public Map<String, List<?>> getGuideCompletedTours(Long guideId) {
+    public List<Tour> getGuideCompletedTours(Long guideId) {
         Guide guide = guideRepository.findById(guideId)
             .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
-            
-        Map<String, List<?>> completedTours = new HashMap<>();
-        
-        completedTours.put("groupTours", guide.getJoinedTours().stream()
+ 
+        return guide.getJoinedTours().stream()
             .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
-                          tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
-            .collect(Collectors.toList()));
-            
-        completedTours.put("individualTours", guide.getIndividualTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
-                          tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
-            .collect(Collectors.toList()));
-
-        return completedTours;
+                           tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
+            .collect(Collectors.toList());
     }
 } 
