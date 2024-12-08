@@ -67,24 +67,30 @@ public class FormService {
 
         if (newState == FormState.APPROVED) {
             slot.setStatus(SlotStatus.UNAVAILABLE);
-        } else if (newState == FormState.DENIED) {
-            if (slot.getLinkedForms().stream()
-                    .noneMatch(f -> f.getState() == FormState.APPROVED)) {
-                slot.setStatus(SlotStatus.AVAILABLE);
+            
+            // Get all other pending forms for the same time slot
+            List<Form> otherForms = formRepository.findByLinkedSlot_IdAndStateAndIdNot(
+                slot.getId(),
+                FormState.PENDING,
+                formId
+            );
+            
+            // Automatically deny other forms
+            for (Form otherForm : otherForms) {
+                otherForm.setState(FormState.DENIED);
+                formRepository.save(otherForm);                
+                sendFormStatusUpdateEmail(otherForm);
             }
         }
-
         slotRepository.save(slot);
         Form savedForm = formRepository.save(form);
         
-        // Send status update email asynchronously
         sendFormStatusUpdateEmail(savedForm);
         
         return savedForm;
     }
 
-    @Async
-    protected void sendFormSubmissionEmail(Form form) {
+    private void sendFormSubmissionEmail(Form form) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
         String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
         String time = form.getLinkedSlot().getTime().toString();
