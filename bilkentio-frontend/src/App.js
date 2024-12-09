@@ -25,6 +25,11 @@ import AdvisorDashboard from './pages/advisor/Dashboard';
 import GuideDashboard from './pages/guide/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 
+// Guide pages
+import MyTours from './pages/guide/MyTours';
+import TourHistory from './pages/guide/TourHistory';
+import GuideProfile from './pages/guide/Profile';
+
 function App() {
   return (
     <Router>
@@ -35,7 +40,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-          <Route path="/admin">
+        {/* Admin Routes */}
+        <Route path="/admin">
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="scores" element={<PuantajScores />} />
@@ -43,11 +49,18 @@ function App() {
           <Route path="tours/:tourId" element={<TourDetails />} />
         </Route>
 
-        {/* Role-specific Routes */}
+        {/* Guide Routes */}
+        <Route path="/guide">
+          <Route path="dashboard" element={<GuideDashboard />} />
+          <Route path="my-tours" element={<MyTours />} />
+          <Route path="history" element={<TourHistory />} />
+          <Route path="profile" element={<GuideProfile />} />
+        </Route>
+
+        {/* Other Role-specific Routes */}
         <Route path="/president/*" element={<PresidentDashboard />} />
         <Route path="/coordinator/*" element={<CoordinatorDashboard />} />
         <Route path="/advisor/*" element={<AdvisorDashboard />} />
-        <Route path="/guide/*" element={<GuideDashboard />} />
         <Route path="/counselor/*" element={<Counselor />} />
         <Route path="/individual/*" element={<Individual />} />
 
