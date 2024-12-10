@@ -113,13 +113,15 @@ public class UserService {
 
     public User createUserWithRole(User newUser, String role) {
         // Create the appropriate entity based on role
+        System.out.println(role.toLowerCase());
+
         User user = switch (role.toLowerCase()) {
             case "admin" -> new Admin();
             case "advisor" -> new Advisor();
             case "guide" -> new Guide();
             case "president" -> new President();
             case "coordinator" -> new Coordinator();
-            case "individual" -> new Individual();
+            case "ındıvıdual" -> new Individual();
             case "counselor" -> new GuidanceCounselor();
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         };

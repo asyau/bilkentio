@@ -108,7 +108,7 @@ public class DatabaseInitializer implements CommandLineRunner {
     private void initializeSchools() {
         if (schoolService.getAllSchools().isEmpty()) {
             try {
-                schoolService.importSchoolsFromCsv("bilkentio-backend/src/main/resources/processed_schools.csv");
+                schoolService.importSchoolsFromCsv("src/main/resources/processed_schools.csv");
             } catch (Exception e) {
                 logger.error("Failed to initialize schools", e);
             }
