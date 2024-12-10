@@ -37,6 +37,8 @@ import CoordinatorTourManagement from './pages/coordinator/CoordinatorTourManage
 import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScores';
 
 import SchoolManagement from './pages/admin/SchoolManagement';
+import InviteToFairForm from './pages/admin/InviteToFairForm';
+import ViewFairApplications from './pages/admin/ViewFairApplications';
 
 function App() {
   return (
@@ -56,6 +58,8 @@ function App() {
           <Route path="tours" element={<TourManagement />} />
           <Route path="tours/:tourId" element={<TourDetails />} />
           <Route path="schools" element={<SchoolManagement />} />
+          <Route path="fairs/invite" element={<InviteToFairForm />} />
+          <Route path="fairs/applications" element={<ViewFairApplications />} />
         </Route>
 
         {/* Guide Routes */}
