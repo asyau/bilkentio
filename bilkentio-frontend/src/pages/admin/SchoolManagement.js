@@ -32,6 +32,7 @@ const SchoolManagement = () => {
       });
       setSchools(response.data);
       setFilteredSchools(response.data);
+      console.log('Schools Data:', schools);
     } catch (error) {
       console.error('Error fetching schools:', error);
     }
@@ -42,7 +43,9 @@ const SchoolManagement = () => {
 
     // Filter by city
     if (selectedCity !== 'all') {
-      filtered = filtered.filter(school => school.city === selectedCity);
+      filtered = filtered.filter(school => 
+        school.city.trim().toLowerCase() === selectedCity.trim().toLowerCase()
+      );
     }
 
     // Filter by ranking
@@ -110,9 +113,9 @@ const SchoolManagement = () => {
               className="filter-select"
             >
               <option value="all">All Rankings</option>
-              <option value="high">High Priority (8-10)</option>
+              <option value="high">High Priority (1-4)</option>
               <option value="medium">Medium Priority (5-7)</option>
-              <option value="low">Low Priority (1-4)</option>
+              <option value="low">Low Priority (8-15)</option>
             </select>
           </div>
 
@@ -127,15 +130,9 @@ const SchoolManagement = () => {
                 </div>
                 <div className="school-info">
                   <p><span className="material-icons">location_on</span> {school.city}</p>
-                  <p><span className="material-icons">phone</span> {school.phone}</p>
+                  {/* <p><span className="material-icons">phone</span> {school.phone}</p>
                   <p><span className="material-icons">email</span> {school.email}</p>
-                  <p><span className="material-icons">person</span> {school.contactPerson}</p>
-                </div>
-                <div className="school-stats">
-                  <div className="stat">
-                    <span className="label">Total Students</span>
-                    <span className="value">{school.totalStudents}</span>
-                  </div>
+                  <p><span className="material-icons">person</span> {school.contactPerson}</p> */}
                 </div>
               </div>
             ))}
