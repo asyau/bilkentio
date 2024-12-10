@@ -8,8 +8,11 @@ import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.guide.repository.GuideRepository;
 import com.example.bilkentio_backend.individual.entity.Individual;
 import com.example.bilkentio_backend.individual.repository.IndividualRepository;
+import com.example.bilkentio_backend.school.service.SchoolService;
 import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
 import com.example.bilkentio_backend.guidanceCounselor.repository.GuidanceCounselorRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +26,8 @@ import java.util.HashSet;
 
 @Component
 public class DatabaseInitializer implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
 
     @Autowired
     private AdminRepository adminRepository;
@@ -42,14 +47,17 @@ public class DatabaseInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private SchoolService schoolService;
+
     @Override
     @Transactional
     public void run(String... args) {
         initializeAdmin();
         initializeDays();
         initializeIndividual();
-        initializeGuide();
         initializeCounselor();
+        initializeSchools();
     }
 
     private void initializeAdmin() {
@@ -98,23 +106,6 @@ public class DatabaseInitializer implements CommandLineRunner {
         }
     }
 
-    private void initializeGuide() {
-        // Check if guide account exists
-        if (!guideRepository.findByUsername("asya").isPresent()) {
-            Guide guide = new Guide();
-            guide.setUsername("asya");
-            guide.setPassword(passwordEncoder.encode("123"));
-            guide.setNameSurname("Asya Guide");
-            guide.setEmail("asya@example.com");
-            guide.setPhoneNumber("+90 555 987 6543");
-            guide.setYearsOfExperience(2);
-            guide.setScore(0);
-            guide.setLevel("Level 0");
-            guide.setRoles(new HashSet<>(Collections.singletonList("ROLE_GUIDE")));
-            guideRepository.save(guide);
-        }
-    }
-
     private void initializeCounselor() {
         // Check if counselor account exists
         if (!guidanceCounselorRepository.findByUsername("eray").isPresent()) {
@@ -126,6 +117,17 @@ public class DatabaseInitializer implements CommandLineRunner {
             counselor.setPhoneNumber("+90 555 123 4567");
             counselor.setRoles(new HashSet<>(Collections.singletonList("ROLE_COUNSELOR")));
             guidanceCounselorRepository.save(counselor);
+        }
+    }
+
+
+    private void initializeSchools() {
+        if (schoolService.getAllSchools().isEmpty()) {
+            try {
+                schoolService.importSchoolsFromCsv("bilkentio-backend/src/main/resources/processed_schools.csv");
+            } catch (Exception e) {
+                logger.error("Failed to initialize schools", e);
+            }
         }
     }
 }
