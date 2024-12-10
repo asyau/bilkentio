@@ -50,6 +50,9 @@ function Login() {
                     case 'ROLE_GUİDE':
                         navigate('/guide/dashboard');
                         break;
+                    case 'ROLE_GUIDE':
+                        navigate('/guide/dashboard');
+                        break;
                     case 'ROLE_COUNSELOR':
                         navigate('/counselor');
                         break;

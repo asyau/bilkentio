@@ -1,7 +1,12 @@
-import React from 'react';
-import BaseSidebar from './BaseSidebar';
+import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import AdvisorInfoContainer from './AdvisorInfoContainer';
+import '../styles/Sidebar.css';
+import '../styles/GuideMode.css';
 
 const GuideSidebar = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const menuItems = [
     {
       title: 'Dashboard',
@@ -29,7 +34,37 @@ const GuideSidebar = () => {
     }
   ];
 
-  return <BaseSidebar logo="BilkentIO" menuItems={menuItems} />;
+  return (
+    
+    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className="logo-section">
+        {!isCollapsed && <h2>BilkentIO</h2>}
+      </div>
+      
+      <button 
+        className={`collapse-btn ${!isCollapsed ? 'is-active' : ''}`}
+        onClick={() => setIsCollapsed(!isCollapsed)}
+      >
+      
+        <div className="hamburger-icon">
+          <span className="line"></span>
+          <span className="line"></span>
+          <span className="line"></span>
+        </div>
+      </button>
+      {!isCollapsed && <AdvisorInfoContainer />} 
+      <nav className="sidebar-nav">
+        {menuItems.map((item, index) => (
+          <NavLink key={index} to={item.path} className="nav-item" title={item.title}>
+            <span className="material-icons">{item.icon}</span>
+            {!isCollapsed && <span>{item.title}</span>}
+          </NavLink>
+        ))}
+      </nav>
+
+     
+    </div>
+  );
 };
 
 export default GuideSidebar; 

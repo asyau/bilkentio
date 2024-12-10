@@ -2,6 +2,7 @@ package com.example.bilkentio_backend.user;
 
 import com.example.bilkentio_backend.admin.entity.Admin;
 import com.example.bilkentio_backend.advisor.entity.Advisor;
+import com.example.bilkentio_backend.advisor.repository.AdvisorRepository;
 import com.example.bilkentio_backend.coordinator.entity.Coordinator;
 import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
 import com.example.bilkentio_backend.guide.entity.Guide;
@@ -36,6 +37,9 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private GuideRepository guideRepository;
+
+     @Autowired
+    private AdvisorRepository advisorRepository; // Add this
 
     @Autowired
     private EmailService emailService;
@@ -122,6 +126,7 @@ public class UserService {
             case "president" -> new President();
             case "coordinator" -> new Coordinator();
             case "ındıvıdual" -> new Individual();
+            case "individual" -> new Individual();
             case "counselor" -> new GuidanceCounselor();
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         };

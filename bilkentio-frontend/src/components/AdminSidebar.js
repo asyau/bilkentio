@@ -53,6 +53,7 @@ const AdminSidebar = () => {
             <span className="material-icons">map</span>
             {!isCollapsed && <span>Tour Management</span>}
           </NavLink>
+         
         </nav>
       </div>
       <div className={`sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />

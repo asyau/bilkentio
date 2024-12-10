@@ -1,10 +1,10 @@
 .sidebar {
   width: 250px;
-  height: 100vh;
+  height: 50vh;
   background-color: white;
   border-right: 1px solid #eee;
   padding: 1.5rem 1rem;
-  position: fixed;
+  position: sticky;
   left: 0;
   top: 0;
   z-index: 1000;
