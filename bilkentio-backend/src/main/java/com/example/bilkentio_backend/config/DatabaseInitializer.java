@@ -56,7 +56,6 @@ public class DatabaseInitializer implements CommandLineRunner {
         initializeAdmin();
         initializeDays();
         initializeIndividual();
-        initializeCounselor();
         initializeSchools();
     }
 
@@ -105,21 +104,6 @@ public class DatabaseInitializer implements CommandLineRunner {
             individualRepository.save(individual);
         }
     }
-
-    private void initializeCounselor() {
-        // Check if counselor account exists
-        if (!guidanceCounselorRepository.findByUsername("eray").isPresent()) {
-            GuidanceCounselor counselor = new GuidanceCounselor();
-            counselor.setUsername("eray");
-            counselor.setPassword(passwordEncoder.encode("123"));
-            counselor.setNameSurname("Eray Counselor");
-            counselor.setEmail("barsyayc@gmail.com");
-            counselor.setPhoneNumber("+90 555 123 4567");
-            counselor.setRoles(new HashSet<>(Collections.singletonList("ROLE_COUNSELOR")));
-            guidanceCounselorRepository.save(counselor);
-        }
-    }
-
 
     private void initializeSchools() {
         if (schoolService.getAllSchools().isEmpty()) {

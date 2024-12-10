@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function Register() {
@@ -7,13 +7,43 @@ function Register() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [userType, setUserType] = useState('');
+    const [userType, setUserType] = useState('individual');
     const [school, setSchool] = useState('');
     const [studyLevel, setStudyLevel] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [schools, setSchools] = useState([]);
+    const [cities, setCities] = useState([]);
+    const [selectedCity, setSelectedCity] = useState('');
+    const [email, setEmail] = useState('');
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/api/schools/cities');
+                setCities(response.data);
+            } catch (error) {
+                console.error('Error fetching cities:', error);
+            }
+        };
+        fetchCities();
+    }, []);
+
+    useEffect(() => {
+        const fetchSchools = async () => {
+            if (selectedCity) {
+                try {
+                    const response = await axios.get(`http://localhost:8080/api/schools/city/${selectedCity}`);
+                    setSchools(response.data);
+                } catch (error) {
+                    console.error('Error fetching schools:', error);
+                }
+            }
+        };
+        fetchSchools();
+    }, [selectedCity]);
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -28,17 +58,25 @@ function Register() {
             return;
         }
 
+        const userData = {
+            username,
+            password,
+            nameSurname: `${firstName} ${lastName}`,
+            phoneNumber,
+            email,
+            roles: []
+        };
+
+        if (userType === 'counselor') {
+            userData.school = { id: school };
+        }
         try {
-            const response = await axios.post('http://localhost:8080/auth/register', {
-                username,
-                password,
-                userType,
-                school,
-                studyLevel: userType === 'individual' ? studyLevel : null,
-                phoneNumber,
-                firstName,
-                lastName,
-            });
+            console.log('Sending counselor data:', userData);
+            const endpoint = userType === 'counselor' 
+                ? 'http://localhost:8080/auth/register/counselor'
+                : 'http://localhost:8080/auth/register/individual';
+
+            const response = await axios.post(endpoint, userData);
 
             if (response && response.status === 200) {
                 setSuccessMessage(response.data);
@@ -49,7 +87,9 @@ function Register() {
                 setError('Unexpected response from the server.');
             }
         } catch (err) {
+            console.log('Full error:', err);
             if (err.response) {
+                console.log('Error response:', err.response);
                 setError(err.response.data || 'Registration failed. Try again.');
             } else {
                 setError('Network error or server is unreachable.');
@@ -104,29 +144,35 @@ function Register() {
                         required
                     />
                     
-                    <select 
-                        value={school} 
-                        onChange={(e) => setSchool(e.target.value)}
-                        required
-                    >
-                        <option value="">Select School</option>
-                        <option value="school1">School 1</option>
-                        <option value="school2">School 2</option>
-                        <option value="school3">School 3</option>
-                    </select>
+                    {userType === 'counselor' && (
+                        <>
+                            <select 
+                                value={selectedCity} 
+                                onChange={(e) => setSelectedCity(e.target.value)}
+                                required
+                            >
+                                <option value="">Select City</option>
+                                {cities.map((city, index) => (
+                                    <option key={index} value={city}>
+                                        {city}
+                                    </option>
+                                ))}
+                            </select>
 
-                    {userType === 'individual' && (
-                        <select 
-                            value={studyLevel} 
-                            onChange={(e) => setStudyLevel(e.target.value)}
-                            required
-                        >
-                            <option value="">Select Study Level</option>
-                            <option value="high_school_1">High School 1</option>
-                            <option value="high_school_2">High School 2</option>
-                            <option value="high_school_3">High School 3</option>
-                            <option value="high_school_4">High School 4</option>
-                        </select>
+                            <select 
+                                value={school} 
+                                onChange={(e) => setSchool(e.target.value)}
+                                required
+                                disabled={!selectedCity}
+                            >
+                                <option value="">Select School</option>
+                                {schools.map((school) => (
+                                    <option key={school.id} value={school.id}>
+                                        {school.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </>
                     )}
 
                     <input
@@ -142,6 +188,13 @@ function Register() {
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                     />
                     <input
