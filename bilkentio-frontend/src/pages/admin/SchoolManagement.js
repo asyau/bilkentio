@@ -27,11 +27,12 @@ const SchoolManagement = () => {
 
   const fetchSchools = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/schools', {
+      const response = await axios.get('http://localhost:8080/api/schools', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setSchools(response.data);
       setFilteredSchools(response.data);
+      console.log('Schools Data:', schools);
     } catch (error) {
       console.error('Error fetching schools:', error);
     }
@@ -42,20 +43,22 @@ const SchoolManagement = () => {
 
     // Filter by city
     if (selectedCity !== 'all') {
-      filtered = filtered.filter(school => school.city === selectedCity);
+      filtered = filtered.filter(school => 
+        school.city.trim().toLowerCase() === selectedCity.trim().toLowerCase()
+      );
     }
 
     // Filter by ranking
     if (rankingFilter !== 'all') {
       switch (rankingFilter) {
-        case 'high':
-          filtered = filtered.filter(school => school.ranking >= 8);
+        case 'low':
+          filtered = filtered.filter(school => school.priorityRank >= 8);
           break;
         case 'medium':
-          filtered = filtered.filter(school => school.ranking >= 5 && school.ranking < 8);
+          filtered = filtered.filter(school => school.priorityRank >= 5 && school.priorityRank < 8);
           break;
-        case 'low':
-          filtered = filtered.filter(school => school.ranking < 5);
+        case 'high':
+          filtered = filtered.filter(school => school.priorityRank < 5);
           break;
       }
     }
@@ -110,9 +113,9 @@ const SchoolManagement = () => {
               className="filter-select"
             >
               <option value="all">All Rankings</option>
-              <option value="high">High Priority (8-10)</option>
+              <option value="high">High Priority (1-4)</option>
               <option value="medium">Medium Priority (5-7)</option>
-              <option value="low">Low Priority (1-4)</option>
+              <option value="low">Low Priority (8-15)</option>
             </select>
           </div>
 
@@ -121,25 +124,15 @@ const SchoolManagement = () => {
               <div key={school.id} className="school-card">
                 <div className="school-header">
                   <h3>{school.name}</h3>
-                  <span className={`ranking-badge rank-${Math.floor(school.ranking)}`}>
-                    Rank: {school.ranking.toFixed(1)}
+                  <span className={`ranking-badge rank-${Math.floor(school.priorityRank)}`}>
+                    Priority Rank: {school.priorityRank}
                   </span>
                 </div>
                 <div className="school-info">
                   <p><span className="material-icons">location_on</span> {school.city}</p>
-                  <p><span className="material-icons">phone</span> {school.phone}</p>
+                  {/* <p><span className="material-icons">phone</span> {school.phone}</p>
                   <p><span className="material-icons">email</span> {school.email}</p>
-                  <p><span className="material-icons">person</span> {school.contactPerson}</p>
-                </div>
-                <div className="school-stats">
-                  <div className="stat">
-                    <span className="label">Success Rate</span>
-                    <span className="value">{school.successRate}%</span>
-                  </div>
-                  <div className="stat">
-                    <span className="label">Total Students</span>
-                    <span className="value">{school.totalStudents}</span>
-                  </div>
+                  <p><span className="material-icons">person</span> {school.contactPerson}</p> */}
                 </div>
               </div>
             ))}
