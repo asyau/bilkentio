@@ -3,25 +3,32 @@ import BaseSidebar from './BaseSidebar';
 
 const CoordinatorSidebar = () => {
   const menuItems = [
+    
+    
     {
-      title: 'Dashboard',
-      path: '/coordinator/dashboard',
-      icon: 'dashboard'
-    },
-    {
-      title: 'Guide Management',
-      path: '/coordinator/guides',
-      icon: 'people'
-    },
-    {
-      title: 'Tour Schedule',
-      path: '/coordinator/schedule',
-      icon: 'event'
+      title: 'Analytics',
+      path: '/coordinator/analytics',
+      icon: 'analytics'
     },
     {
       title: 'Form Requests',
-      path: '/coordinator/forms',
+      path: '/coordinator/form-requests',
       icon: 'description'
+    },
+    {
+      title: 'Staff Management',
+      path: '/coordinator/staff',
+      icon: 'groups'
+    },
+    {
+      title: 'Tour Management',
+      path: '/coordinator/tours',
+      icon: 'map'
+    },
+    {
+      title: 'View Puantaj Scores',
+      path: '/coordinator/scores',
+      icon: 'grade'
     }
   ];
 

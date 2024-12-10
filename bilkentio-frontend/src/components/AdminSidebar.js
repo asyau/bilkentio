@@ -24,8 +24,6 @@ const AdminSidebar = () => {
         </button>
         
         <nav className="sidebar-nav">
-          
-          
           <NavLink to="/admin/analytics" className="nav-item" title="Analytics">
             <span className="material-icons">analytics</span>
             {!isCollapsed && <span>Analytics</span>}
@@ -34,6 +32,11 @@ const AdminSidebar = () => {
           <NavLink to="/admin/staff" className="nav-item" title="Staff Management">
             <span className="material-icons">groups</span>
             {!isCollapsed && <span>Staff Management</span>}
+          </NavLink>
+          
+          <NavLink to="/admin/schools" className="nav-item" title="School Management">
+            <span className="material-icons">school</span>
+            {!isCollapsed && <span>School Management</span>}
           </NavLink>
           
           <NavLink to="/form-request" className="nav-item" title="Accept/Reject Forms">

@@ -30,6 +30,14 @@ import MyTours from './pages/guide/MyTours';
 import TourHistory from './pages/guide/TourHistory';
 import GuideProfile from './pages/guide/Profile';
 
+import CoordinatorAnalytics from './pages/coordinator/CoordinatorAnalytics';
+import CoordinatorFormRequests from './pages/coordinator/CoordinatorFormRequests';
+import CoordinatorStaffManagement from './pages/coordinator/CoordinatorStaffManagement';
+import CoordinatorTourManagement from './pages/coordinator/CoordinatorTourManagement';
+import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScores';
+
+import SchoolManagement from './pages/admin/SchoolManagement';
+
 function App() {
   return (
     <Router>
@@ -47,6 +55,7 @@ function App() {
           <Route path="scores" element={<PuantajScores />} />
           <Route path="tours" element={<TourManagement />} />
           <Route path="tours/:tourId" element={<TourDetails />} />
+          <Route path="schools" element={<SchoolManagement />} />
         </Route>
 
         {/* Guide Routes */}
@@ -67,6 +76,17 @@ function App() {
         {/* Legacy Routes - Keep if still needed */}
         <Route path="/crud" element={<CRUD />} />
         <Route path="/form-request" element={<FormRequests />} />
+
+
+        {/* Coordinator Routes */}
+        <Route path="/coordinator">
+          <Route path="dashboard" element={<CoordinatorDashboard />} />
+          <Route path="analytics" element={<CoordinatorAnalytics />} />
+          <Route path="form-requests" element={<CoordinatorFormRequests />} />
+          <Route path="staff" element={<CoordinatorStaffManagement />} />
+          <Route path="tours" element={<CoordinatorTourManagement />} />
+          <Route path="scores" element={<CoordinatorPuantajScores />} />
+        </Route>
       </Routes>
     </Router>
   );

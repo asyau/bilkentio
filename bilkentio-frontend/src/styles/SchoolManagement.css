@@ -1,0 +1,107 @@
+.school-management-container {
+  padding: 24px;
+}
+
+.filters-section {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.filter-select {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+  min-width: 200px;
+}
+
+.schools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.school-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.school-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.school-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ranking-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.rank-8, .rank-9, .rank-10 {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.rank-5, .rank-6, .rank-7 {
+  background-color: #FFC107;
+  color: black;
+}
+
+.rank-1, .rank-2, .rank-3, .rank-4 {
+  background-color: #FF5722;
+  color: white;
+}
+
+.school-info {
+  margin-bottom: 16px;
+}
+
+.school-info p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  color: #666;
+}
+
+.school-info .material-icons {
+  font-size: 18px;
+  color: #1a73e8;
+}
+
+.school-stats {
+  display: flex;
+  gap: 16px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.stat {
+  flex: 1;
+  text-align: center;
+}
+
+.stat .label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.stat .value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a73e8;
+} 
