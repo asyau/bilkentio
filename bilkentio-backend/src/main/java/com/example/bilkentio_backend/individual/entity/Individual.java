@@ -1,6 +1,5 @@
 package com.example.bilkentio_backend.individual.entity;
 
-
 import com.example.bilkentio_backend.user.entity.User;
 import jakarta.persistence.*;
 
@@ -8,5 +7,8 @@ import jakarta.persistence.*;
 @Table(name = "individuals")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Individual extends User {
-    
+    // Since it extends User, it already has:
+    // - username
+    // - password
+    // No additional fields needed
 }

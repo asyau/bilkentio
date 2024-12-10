@@ -37,7 +37,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR")
                 .requestMatchers(HttpMethod.GET, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE", "COUNSELOR")
                 .requestMatchers(HttpMethod.POST, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
                 .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR")
                 .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
+                .requestMatchers("/api/schools/**").permitAll()  
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

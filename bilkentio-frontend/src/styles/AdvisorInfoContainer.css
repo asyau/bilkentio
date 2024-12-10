@@ -2,8 +2,10 @@
   background-color: #f8f9fa;
   border-radius: 8px;
   padding: 1rem;
-  margin: 1rem;
+  margin: 1rem 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .advisor-info-title {
@@ -18,6 +20,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .advisor-item {

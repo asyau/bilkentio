@@ -13,7 +13,12 @@ import com.example.bilkentio_backend.user.entity.User;
 import com.example.bilkentio_backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.bilkentio_backend.common.EmailService;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.context.ApplicationEventPublisher;
+import com.example.bilkentio_backend.common.event.EmailEvent;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +41,11 @@ public class UserService {
      @Autowired
     private AdvisorRepository advisorRepository; // Add this
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     public User saveUser(User newUser) {
         User user = new User();
@@ -107,26 +117,55 @@ public class UserService {
 
     public User createUserWithRole(User newUser, String role) {
         // Create the appropriate entity based on role
+        System.out.println(role.toLowerCase());
+
         User user = switch (role.toLowerCase()) {
             case "admin" -> new Admin();
             case "advisor" -> new Advisor();
             case "guide" -> new Guide();
             case "president" -> new President();
             case "coordinator" -> new Coordinator();
+            case "ındıvıdual" -> new Individual();
             case "individual" -> new Individual();
             case "counselor" -> new GuidanceCounselor();
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         };
 
+        String rawPassword = newUser.getPassword(); // Store the raw password before encoding
+        
         // Set common properties
         user.setUsername(newUser.getUsername());
-        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        user.setPassword(passwordEncoder.encode(rawPassword));
         user.setNameSurname(newUser.getNameSurname());
+        user.setEmail(newUser.getEmail());
+        user.setPhoneNumber(newUser.getPhoneNumber());
 
         // Set role
         String roleWithPrefix = "ROLE_" + role.toUpperCase();
         user.setRoles(Collections.singleton(roleWithPrefix));
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Send email asynchronously
+        sendCredentialsEmail(savedUser, rawPassword, role);
+
+        return savedUser;
     }
+
+    @Async
+    protected void sendCredentialsEmail(User user, String rawPassword, String role) {
+        String emailContent = emailService.createCredentialsEmailBody(
+            user.getNameSurname(),
+            user.getUsername(),
+            rawPassword,
+            role
+        );
+
+        eventPublisher.publishEvent(new EmailEvent(
+            user.getEmail(),
+            "Bilkent IO - Your Account Credentials",
+            emailContent
+        ));
+    }
+    
 }

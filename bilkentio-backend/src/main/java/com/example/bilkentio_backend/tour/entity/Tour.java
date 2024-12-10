@@ -4,6 +4,7 @@ import com.example.bilkentio_backend.form.entity.Form;
 import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -54,6 +55,7 @@ public class Tour {
     @Column(nullable = false)
     private String city;
 
+    @JsonManagedReference
     @ManyToMany
     @JoinTable(
         name = "tour_guides",
