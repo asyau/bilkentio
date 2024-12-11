@@ -16,13 +16,13 @@
   padding: 1.5rem 0.5rem;
 }
 
-.sidebar-placeholder {
+.admin-sidebar-placeholder {
   width: 250px;
   flex-shrink: 0;
   transition: width 0.3s ease-in-out;
 }
 
-.sidebar-placeholder.collapsed {
+.admin-sidebar-placeholder.collapsed {
   width: 70px;
 }
 

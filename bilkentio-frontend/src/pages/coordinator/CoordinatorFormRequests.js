@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import AdminSidebar from '../../components/CoordinatorSidebar';
+import CoordinatorSidebar from '../../components/CoordinatorSidebar';
 import '../../styles/FormRequests.css';
 
 const FormRequests = () => {
@@ -170,7 +170,7 @@ const FormRequests = () => {
 
   return (
     <div className="admin-layout">
-      <AdminSidebar />
+      <CoordinatorSidebar />
       <div className="admin-content">
         <div className="form-requests-container">
           <div className="form-header">
