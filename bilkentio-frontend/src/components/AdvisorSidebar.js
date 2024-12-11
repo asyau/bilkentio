@@ -24,20 +24,12 @@ const AdvisorSidebar = () => {
         </button>
         
         <nav className="sidebar-nav">
-          <NavLink to="/advisor/dashboard" className="nav-item" title="Dashboard">
-            <span className="material-icons">dashboard</span>
-            {!isCollapsed && <span>Dashboard</span>}
-          </NavLink>
           
-          <NavLink to="/advisor/forms" className="nav-item" title="Form Requests">
+          <NavLink to="/advisor/AdvisorFormRequests" className="nav-item" title="Form Requests">
             <span className="material-icons">description</span>
             {!isCollapsed && <span>Form Requests</span>}
           </NavLink>
-          
-          <NavLink to="/advisor/students" className="nav-item" title="Student Records">
-            <span className="material-icons">school</span>
-            {!isCollapsed && <span>Student Records</span>}
-          </NavLink>
+        
 
           <NavLink to="/advisor/day-selection" className="nav-item" title="Choose Day">
             <span className="material-icons">event</span>
