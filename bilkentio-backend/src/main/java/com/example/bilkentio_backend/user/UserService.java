@@ -120,13 +120,12 @@ public class UserService {
         System.out.println(role.toLowerCase());
 
         User user = switch (role.toLowerCase()) {
-            case "admin" -> new Admin();
-            case "advisor" -> new Advisor();
-            case "guide" -> new Guide();
-            case "president" -> new President();
-            case "coordinator" -> new Coordinator();
-            case "ındıvıdual" -> new Individual();
-            case "individual" -> new Individual();
+            case "admin", "admın" -> new Admin();
+            case "advisor", "advısor" -> new Advisor();
+            case "guide", "guıde" -> new Guide();
+            case "president", "presıdent" -> new President();
+            case "coordinator", "coordınator" -> new Coordinator();
+            case "ındıvıdual", "individual" -> new Individual();
             case "counselor" -> new GuidanceCounselor();
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         };

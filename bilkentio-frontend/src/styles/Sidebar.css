@@ -17,13 +17,13 @@
 }
 
 .sidebar-placeholder {
-  width: 250px;
+  width: 0px;
   flex-shrink: 0;
   transition: width 0.3s ease-in-out;
 }
 
 .sidebar-placeholder.collapsed {
-  width: 70px;
+  width: 0px;
 }
 
 .logo-section {

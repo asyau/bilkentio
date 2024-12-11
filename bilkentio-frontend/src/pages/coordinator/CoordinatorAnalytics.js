@@ -11,7 +11,7 @@ import {
   Filler,
   Legend,
 } from 'chart.js';
-import '../../styles/AdminAnalytics.css';
+import '../../styles/CoordinatorAnalytics.css';
 import CoordinatorSidebar from '../../components/CoordinatorSidebar';
 
 ChartJS.register(

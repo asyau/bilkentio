@@ -61,7 +61,7 @@ const AdminSidebar = () => {
           {!isCollapsed && <span>Log Out</span>}
         </button>
       </div>
-      <div className={`sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />
+      <div className={`admin-sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />
     </>
   );
 };
