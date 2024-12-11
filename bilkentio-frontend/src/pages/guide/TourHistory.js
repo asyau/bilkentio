@@ -22,21 +22,27 @@ const TourHistory = () => {
       }
 
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      
+      const response = await axios.get(
+        `http://localhost:8080/api/guides/${decodedToken.userId}/tours`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      const [groupResponse, individualResponse] = await Promise.all([
-        axios.get(`http://localhost:8080/api/guides/${decodedToken.userId}/tours/completed`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`http://localhost:8080/api/guides/${decodedToken.userId}/reviews`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+      const groupTours = response.data.completedGroupTours.map(tour => ({
+        ...tour,
+        tourType: 'group',
+        uniqueId: `group-${tour.id}`
+      }));
+
+      const individualTours = response.data.completedIndividualTours.map(tour => ({
+        ...tour,
+        tourType: 'individual',
+        uniqueId: `individual-${tour.id}`
+      }));
 
       // Combine and sort tours
-      const allCompletedTours = [
-        ...groupResponse.data.map(tour => ({ ...tour, isIndividual: false })),
-        ...individualResponse.data.map(tour => ({ ...tour, isIndividual: true }))
-      ].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const allCompletedTours = [...groupTours, ...individualTours]
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
 
       setCompletedTours(allCompletedTours);
     } catch (error) {
@@ -81,14 +87,21 @@ const TourHistory = () => {
 
         <div className="tours-grid">
           {completedTours.map((tour) => (
-            <div key={tour.id} className="tour-card">
+            <div key={tour.uniqueId} className="tour-card">
               <div className="tour-header">
-                <h3>{tour.isIndividual ? 'Individual Tour' : tour.schoolName}</h3>
-                <span className="date">{tour.date}</span>
+                <h3>{tour.tourType === 'individual' ? 'Individual Tour' : tour.schoolName}</h3>
+                <span className="badge">{tour.tourType === 'individual' ? 'Individual Tour' : 'Group Tour'}</span>
               </div>
-              
+              <div className="tour-details">
+                <p><i className="material-icons">event</i> {tour.date}</p>
+                <p><i className="material-icons">schedule</i> {tour.time}</p>
+                {tour.tourType === 'group' && tour.groupSize && (
+                  <p><i className="material-icons">group</i> Group Size: {tour.groupSize}</p>
+                )}
+              </div>
               {tour.feedback && (
                 <div className="feedback-section">
+                  <h4>{tour.tourType === 'individual' ? 'Visitor Feedback' : 'Counselor Feedback'}</h4>
                   <div className="rating">
                     {'⭐'.repeat(tour.rating)}
                     <span className="rating-number">({tour.rating}/5)</span>
@@ -96,13 +109,6 @@ const TourHistory = () => {
                   <p className="feedback-text">{tour.feedback}</p>
                 </div>
               )}
-
-              <div className="tour-content">
-                <p><i className="material-icons">schedule</i> {tour.time}</p>
-                <p><i className="material-icons">
-                  {tour.isIndividual ? 'person' : 'group'}
-                </i> {tour.isIndividual ? 'Individual' : `Group of ${tour.groupSize}`}</p>
-              </div>
             </div>
           ))}
         </div>

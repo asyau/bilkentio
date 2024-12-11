@@ -107,3 +107,123 @@
 .tour-actions button:hover {
   opacity: 0.9;
 } 
+
+.tour-management-container {
+  padding: 20px;
+}
+
+.controls-container {
+  margin-bottom: 30px;
+}
+
+.tour-type-selector {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.selector-button, .filter-button {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  background: #f8f9fa;
+  color: #495057;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.selector-button:hover, .filter-button:hover {
+  background: #e9ecef;
+}
+
+.selector-button.active, .filter-button.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.status-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tours-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.tour-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.tour-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.detail-label {
+  font-weight: bold;
+  color: #666;
+}
+
+.tour-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-button.start {
+  background: #28a745;
+  color: white;
+}
+
+.action-button.cancel {
+  background: #dc3545;
+  color: white;
+}
+
+.action-button.complete {
+  background: #17a2b8;
+  color: white;
+}
+
+.cancellation-reason {
+  color: #dc3545;
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+
+.loading, .no-tours {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}

@@ -76,9 +76,15 @@ public class TourController {
     public ResponseEntity<TourDTO> addFeedback(
             @PathVariable Long id,
             @RequestBody TourFeedbackDTO feedbackDTO) {
-        return ResponseEntity.ok(TourDTO.fromEntity(
-            tourService.addFeedback(id, feedbackDTO.getFeedback(), feedbackDTO.getRating())
-        ));
+        try {
+            return ResponseEntity.ok(TourDTO.fromEntity(
+                tourService.addFeedback(id, feedbackDTO.getFeedback(), feedbackDTO.getRating())
+            ));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/guide/{guideId}")

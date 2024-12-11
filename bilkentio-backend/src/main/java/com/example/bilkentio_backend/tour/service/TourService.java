@@ -5,6 +5,7 @@ import com.example.bilkentio_backend.form.enums.FormState;
 import com.example.bilkentio_backend.form.repository.FormRepository;
 import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.guide.repository.GuideRepository;
+import com.example.bilkentio_backend.tour.entity.IndividualTour;
 import com.example.bilkentio_backend.tour.entity.Tour;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.tour.repository.TourRepository;
@@ -98,7 +99,11 @@ public class TourService {
     public Tour addFeedback(Long tourId, String feedback, Integer rating) {
         Tour tour = tourRepository.findById(tourId)
             .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
-            
+        
+        if (tour.getCounselor() == null) {
+            throw new IllegalStateException("Cannot add counselor feedback to non-group tour");
+        }
+        
         tour.setFeedback(feedback);
         tour.setRating(rating);
         tour.setStatus(TourStatus.GIVEN_FEEDBACK);
@@ -111,7 +116,14 @@ public class TourService {
     }
 
     public List<Tour> getToursByCounselor(Long counselorId) {
-        return tourRepository.findByCounselorId(counselorId);
+        logger.info("Fetching tours for counselor: {}", counselorId);
+        
+        List<Tour> tours = tourRepository.findByCounselorId(counselorId);
+        
+        // Add logging
+        logger.info("Found {} tours for counselor {}", tours.size(), counselorId);
+        
+        return tours;
     }
 
     @Transactional

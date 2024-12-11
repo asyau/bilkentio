@@ -57,6 +57,21 @@ const MyTours = () => {
     }
   };
 
+  const handleCompleteIndividualTour = async (tourId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `http://localhost:8080/api/individual-tours/${tourId}/complete`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchMyTours();
+    } catch (error) {
+      console.error("Error completing individual tour:", error);
+      alert("Failed to complete individual tour");
+    }
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -110,7 +125,7 @@ const MyTours = () => {
                 {tour.status === "WAITING_TO_FINISH" && (
                   <button
                     className="join-button"
-                    onClick={() => handleUpdateTourStatus(tour.id, "FINISHED")}
+                    onClick={() => handleCompleteIndividualTour(tour.id)}
                   >
                     Mark as Finished
                   </button>

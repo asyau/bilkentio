@@ -120,4 +120,8 @@ public class IndividualTourService {
         }
         throw new IllegalArgumentException("Guide not found");
     }
+
+    public List<IndividualTour> getToursByStatus(TourStatus status) {
+        return individualTourRepository.findByStatus(status);
+    }
 } 
