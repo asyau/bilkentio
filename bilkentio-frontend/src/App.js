@@ -20,6 +20,7 @@ import Individual from './pages/individual';
 
 import DaySelection from './pages/advisor/DaySelection';
 
+import AdvisorFormRequests from './pages/advisor/AdvisorFormRequests';
 
 import PresidentDashboard from './pages/president/Dashboard';
 import CoordinatorDashboard from './pages/coordinator/Dashboard';
@@ -71,7 +72,8 @@ function App() {
         {/* Other Role-specific Routes */}
         <Route path="/president/*" element={<PresidentDashboard />} />
         <Route path="/coordinator/*" element={<CoordinatorDashboard />} />
-        <Route path="/advisor/*" element={<AdvisorDashboard />} />
+        <Route path="/advisor/*" element={<AdvisorFormRequests />} />
+        <Route path="/advisor/AdvisorFormRequests" element={<AdvisorFormRequests />} />
         <Route path="/counselor/*" element={<Counselor />} />
         <Route path="/individual/*" element={<Individual />} />
         <Route path="/advisor/day-selection" element={<DaySelection />} />
