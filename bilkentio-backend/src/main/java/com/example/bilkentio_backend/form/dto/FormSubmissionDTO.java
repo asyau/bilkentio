@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class FormSubmissionDTO {
     private Integer groupSize;
-    private String schoolName;
     private String contactPhone;
     private String expectations;
     private String specialRequirements;
@@ -13,7 +12,6 @@ public class FormSubmissionDTO {
     private String groupLeaderPhone;
     private String groupLeaderEmail;
     private String visitorNotes;
-    private String city;
     private Boolean agreeToTerms;
     private Long slotId;
 } 

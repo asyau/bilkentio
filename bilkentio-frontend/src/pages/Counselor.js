@@ -151,7 +151,6 @@ const Counselor = () => {
   const TourRequestForm = ({ onClose, slot }) => {
     const [formData, setFormData] = useState({
       groupSize: '',
-      schoolName: '',
       contactPhone: '',
       expectations: '',
       specialRequirements: '',
@@ -159,7 +158,6 @@ const Counselor = () => {
       groupLeaderPhone: '',
       groupLeaderEmail: '',
       visitorNotes: '',
-      city: '',
       agreeToTerms: false
     });
 
@@ -205,19 +203,6 @@ const Counselor = () => {
           <p className="selected-slot">Selected Time: {slot.time} on {slot.date}</p>
           
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>School</label>
-              <select
-                value={formData.schoolName}
-                onChange={(e) => setFormData({...formData, schoolName: e.target.value})}
-              >
-                <option value="">Select a school</option>
-                {schools.map((school, index) => (
-                  <option key={index} value={school}>{school}</option>
-                ))}
-              </select>
-            </div>
-
             <div className="form-group">
               <label>Number of Participants *</label>
               <input
@@ -268,20 +253,6 @@ const Counselor = () => {
                 value={formData.groupLeaderEmail}
                 onChange={(e) => setFormData({ ...formData, groupLeaderEmail: e.target.value })}
               />
-            </div>
-
-            <div className="form-group">
-              <label>City *</label>
-              <select
-                required
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              >
-                <option value="">Select a city</option>
-                {cities.map((city, index) => (
-                  <option key={index} value={city}>{city}</option>
-                ))}
-              </select>
             </div>
 
             <div className="form-group">
