@@ -10,7 +10,6 @@ import com.example.bilkentio_backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,17 +39,15 @@ public class FormService {
 
     @Transactional
     public Form submitForm(Form form) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        form.setSubmittedBy(userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found")));
-
         TimeSlot slot = form.getLinkedSlot();
+        if (slot == null) {
+            throw new IllegalArgumentException("Form must have a linked time slot");
+        }
+
         slot.setStatus(SlotStatus.FORM_REQUESTED);
         slotRepository.save(slot);
+
         Form savedForm = formRepository.save(form);
-        
-        // Send email asynchronously
         sendFormSubmissionEmail(savedForm);
         
         return savedForm;
@@ -100,7 +97,7 @@ public class FormService {
             date,
             time,
             form.getGroupSize(),
-            form.getSchoolName(),
+            form.getSchool().getName(),
             form.getContactPhone(),
             form.getExpectations(),
             form.getSpecialRequirements(),
@@ -108,7 +105,7 @@ public class FormService {
             form.getGroupLeaderPhone(),
             form.getGroupLeaderEmail(),
             form.getVisitorNotes(),
-            form.getCity()
+            form.getSchool().getCity()
         );
 
         eventPublisher.publishEvent(new EmailEvent(
@@ -118,7 +115,6 @@ public class FormService {
         ));
     }
 
-    @Async
     protected void sendFormStatusUpdateEmail(Form form) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
         String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
@@ -161,5 +157,13 @@ public class FormService {
 
     public Optional<Form> getFormById(Long id) {
         return formRepository.findById(id);
+    }
+
+    public List<Form> getFormsBySchool(Long schoolId) {
+        return formRepository.findBySchool_Id(schoolId);
+    }
+
+    public List<Form> getFormsBySchoolAndState(Long schoolId, FormState state) {
+        return formRepository.findBySchool_IdAndState(schoolId, state);
     }
 }

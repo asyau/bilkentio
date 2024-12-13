@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class FormDTO {
     private Integer groupSize;
-    private String schoolName;
+    private Long schoolId;
     private String contactPhone;
     private String expectations;
     private String specialRequirements;
@@ -14,8 +14,10 @@ public class FormDTO {
     private String groupLeaderPhone;
     private String groupLeaderEmail;
     private String visitorNotes;
-    private String city;
     private Boolean agreeToTerms;
     private LocalDate date;
     private String time;
+    
+    private String schoolName;
+    private String city;
 } 

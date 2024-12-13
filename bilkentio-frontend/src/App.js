@@ -40,6 +40,7 @@ import CoordinatorTourManagement from './pages/coordinator/CoordinatorTourManage
 import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScores';
 
 import SchoolManagement from './pages/admin/SchoolManagement';
+import Analytics from './pages/Analytics';
 
 function App() {
   return (
@@ -81,6 +82,7 @@ function App() {
         {/* Legacy Routes - Keep if still needed */}
         <Route path="/crud" element={<CRUD />} />
         <Route path="/form-request" element={<FormRequests />} />
+        <Route path="/analytics" element={<Analytics />} />
 
 
         {/* Coordinator Routes */}

@@ -12,8 +12,12 @@ import java.util.List;
 public interface FormRepository extends JpaRepository<Form, Long> {
     List<Form> findByState(FormState state);
     List<Form> findBySubmittedBy_Id(Long userId);
-    List<Form> findByStateOrderByLinkedSlot_Day_DateAsc(FormState state);
     List<Form> findBySubmittedBy_Username(String username);
-    List<Form> findByLinkedSlot_Day_DateAndStateAndIdNot(LocalDate date, FormState state, Long formId);
+    List<Form> findByStateOrderByLinkedSlot_Day_DateAsc(FormState state);
     List<Form> findByLinkedSlot_IdAndStateAndIdNot(Long slotId, FormState state, Long formId);
+    
+    // New methods for school-related queries
+    List<Form> findBySchool_Id(Long schoolId);
+    List<Form> findBySchool_IdAndState(Long schoolId, FormState state);
+    List<Form> findBySchool_IdOrderByLinkedSlot_Day_DateAsc(Long schoolId);
 }

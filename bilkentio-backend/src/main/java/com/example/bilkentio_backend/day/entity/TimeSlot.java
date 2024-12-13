@@ -26,7 +26,7 @@ public class TimeSlot {
     private SlotStatus status = SlotStatus.AVAILABLE;
 
     @OneToMany(mappedBy = "linkedSlot")
-    @JsonManagedReference
+    @JsonManagedReference("slot-form")
     private List<Form> linkedForms = new ArrayList<>();
 
     @ManyToOne
