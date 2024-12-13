@@ -7,7 +7,30 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend,
     ResponsiveContainer, Cell, Area, AreaChart
 } from 'recharts';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip as ChartTooltip,
+    Legend as ChartLegend,
+    Filler,
+} from 'chart.js';
+import { Line as ChartJSLine } from 'react-chartjs-2';
 import '../styles/Analytics.css';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    ChartTooltip,
+    ChartLegend,
+    Filler
+);
 
 const Analytics = () => {
     const navigate = useNavigate();
@@ -15,6 +38,7 @@ const Analytics = () => {
     const [analytics, setAnalytics] = useState({});
     const [loading, setLoading] = useState(true);
     const [cities, setCities] = useState([]);
+    const [selectedMonth, setSelectedMonth] = useState('October');
     const [dateRange, setDateRange] = useState({
         startDate: new Date().toISOString().split('T')[0],
         endDate: new Date().toISOString().split('T')[0]
@@ -22,6 +46,10 @@ const Analytics = () => {
     const [comparisonCities, setComparisonCities] = useState({
         city1: '',
         city2: ''
+    });
+    const [staffCounts, setStaffCounts] = useState({
+        guides: 0,
+        counselors: 0
     });
 
     const COLORS = ['#4299E1', '#48BB78', '#F6AD55', '#F56565', '#9F7AEA', '#ED64A6'];
@@ -32,6 +60,65 @@ const Analytics = () => {
         secondaryLight: 'rgba(72, 187, 120, 0.1)'
     };
 
+    const chartData = {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        datasets: [
+            {
+                fill: true,
+                label: 'Student Visits',
+                data: [analytics.totalStudentsVisited * 0.2, 
+                       analytics.totalStudentsVisited * 0.4, 
+                       analytics.totalStudentsVisited * 0.7, 
+                       analytics.totalStudentsVisited],
+                borderColor: 'rgb(65, 105, 225)',
+                backgroundColor: 'rgba(65, 105, 225, 0.1)',
+                tension: 0.4
+            }
+        ]
+    };
+
+    const chartOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'white',
+                titleColor: '#2d3748',
+                bodyColor: '#2d3748',
+                borderColor: '#e2e8f0',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: false,
+                callbacks: {
+                    label: function(context) {
+                        return `${context.parsed.y} students`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: '#f0f0f0'
+                },
+                ticks: {
+                    color: '#718096'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: '#718096'
+                }
+            }
+        }
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -40,6 +127,7 @@ const Analytics = () => {
         }
         fetchAnalytics();
         fetchCities();
+        fetchStaffCounts();
     }, [navigate]);
 
     const fetchCities = async () => {
@@ -51,6 +139,29 @@ const Analytics = () => {
             setCities(response.data);
         } catch (error) {
             console.error('Error fetching cities:', error);
+        }
+    };
+
+    const fetchStaffCounts = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/admin/users', {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            
+            const guides = response.data.filter(user => 
+                user.roles.includes('ROLE_GUIDE')
+            ).length;
+
+            const counselors = response.data.filter(user => 
+                user.roles.includes('ROLE_COUNSELOR')
+            ).length;
+
+            setStaffCounts({
+                guides,
+                counselors
+            });
+        } catch (error) {
+            console.error('Error fetching staff counts:', error);
         }
     };
 
@@ -121,20 +232,20 @@ const Analytics = () => {
             </div>
             <div className="stat-card">
                 <div className="stat-content">
-                    <h3>Average Rating</h3>
-                    <div className="stat-number">{(analytics.averageTourRating || 0).toFixed(1)}</div>
+                    <h3>Total Counselors</h3>
+                    <div className="stat-number">{staffCounts.counselors}</div>
                 </div>
-                <div className="stat-icon rating">
-                    <span className="material-icons">star</span>
+                <div className="stat-icon counselors">
+                    <span className="material-icons">supervisor_account</span>
                 </div>
             </div>
             <div className="stat-card">
                 <div className="stat-content">
-                    <h3>Average Group Size</h3>
-                    <div className="stat-number">{(analytics.averageGroupSize || 0).toFixed(1)}</div>
+                    <h3>Total Guides</h3>
+                    <div className="stat-number">{staffCounts.guides}</div>
                 </div>
-                <div className="stat-icon group">
-                    <span className="material-icons">people</span>
+                <div className="stat-icon guides">
+                    <span className="material-icons">tour</span>
                 </div>
             </div>
         </div>
@@ -152,37 +263,46 @@ const Analytics = () => {
         return (
             <div className="analytics-section">
                 <h3>Top 10 School Performance</h3>
-                <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={schoolData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                        <XAxis 
-                            dataKey="name" 
-                            angle={-45}
-                            textAnchor="end"
-                            height={60}
-                            interval={0}
-                            stroke="#666"
-                        />
-                        <YAxis stroke="#666" />
-                        <Tooltip 
-                            contentStyle={{ 
-                                backgroundColor: '#fff',
-                                border: '1px solid #ccc',
-                                borderRadius: '4px'
-                            }} 
-                        />
-                        <Legend />
-                        <Bar 
-                            dataKey="visits" 
-                            fill={CHART_COLORS.primary}
-                            radius={[4, 4, 0, 0]}
+                <div style={{ height: '600px', marginBottom: '40px', marginLeft: '60px', marginRight: '60px' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart 
+                            data={schoolData} 
+                            margin={{ top: 20, right: 30, left: 40, bottom: 100 }}
                         >
-                            {schoolData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                            <XAxis 
+                                dataKey="name" 
+                                angle={-45}
+                                textAnchor="end"
+                                height={100}
+                                interval={0}
+                                stroke="#666"
+                                tick={{ fontSize: 12 }}
+                            />
+                            <YAxis 
+                                stroke="#666"
+                                tick={{ fontSize: 12 }}
+                            />
+                            <Tooltip 
+                                contentStyle={{ 
+                                    backgroundColor: '#fff',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    padding: '10px'
+                                }} 
+                            />
+                            <Bar 
+                                dataKey="visits" 
+                                fill={CHART_COLORS.primary}
+                                radius={[4, 4, 0, 0]}
+                            >
+                                {schoolData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
         );
     };
@@ -199,8 +319,8 @@ const Analytics = () => {
             <div className="analytics-section">
                 <h3>City Distribution</h3>
                 <div className="city-analytics-container">
-                    <div className="city-chart">
-                        <ResponsiveContainer width="100%" height={400}>
+                    <div className="city-chart" style={{ height: '400px', marginBottom: '40px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={cityData}
@@ -230,7 +350,7 @@ const Analytics = () => {
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="city-stats">
+                    <div className="city-stats-grid">
                         {cityData.map((city, index) => (
                             <div key={city.name} className="city-stat-item">
                                 <div className="city-color-indicator" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
@@ -312,22 +432,6 @@ const Analytics = () => {
                     />
                 </BarChart>
             </ResponsiveContainer>
-        </div>
-    );
-
-    const renderGuideAnalytics = () => (
-        <div className="analytics-section">
-            <h3>Guide Performance</h3>
-            <div className="guide-stats">
-                {Object.entries(analytics.guideTourCounts || {}).map(([guide, count]) => (
-                    <div key={guide} className="guide-card">
-                        <h4>{guide}</h4>
-                        <p>Tours: {count}</p>
-                        <p>Rating: {((analytics.guideAverageRatings || {})[guide] || 0).toFixed(1)}</p>
-                        <p>Students: {(analytics.guideStudentCounts || {})[guide] || 0}</p>
-                    </div>
-                ))}
-            </div>
         </div>
     );
 
@@ -526,12 +630,6 @@ const Analytics = () => {
                             Feedback
                         </button>
                         <button
-                            className={activeTab === 'guides' ? 'active' : ''}
-                            onClick={() => setActiveTab('guides')}
-                        >
-                            Guides
-                        </button>
-                        <button
                             className={activeTab === 'date-range' ? 'active' : ''}
                             onClick={() => setActiveTab('date-range')}
                         >
@@ -555,7 +653,6 @@ const Analytics = () => {
                         {activeTab === 'cities' && renderCityAnalytics()}
                         {activeTab === 'time' && renderTimeAnalytics()}
                         {activeTab === 'feedback' && renderFeedbackAnalytics()}
-                        {activeTab === 'guides' && renderGuideAnalytics()}
                         {activeTab === 'date-range' && renderDateRangeAnalytics()}
                         {activeTab === 'comparison' && renderCityComparison()}
                     </div>

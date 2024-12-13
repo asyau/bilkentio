@@ -54,7 +54,7 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin">
-          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="scores" element={<PuantajScores />} />
           <Route path="tours" element={<TourManagement />} />
