@@ -283,7 +283,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             List<Guide> guides = guideRepository.findAll();
             List<GuidanceCounselor> counselors = guidanceCounselorRepository.findAll();
             List<Day> availableDays = dayRepository.findAllWithSlots();
-            
+
             if (availableDays.isEmpty()) {
                 logger.error("No available days found in the database. Please ensure days are initialized first.");
                 return;
@@ -318,18 +318,18 @@ public class DatabaseInitializer implements CommandLineRunner {
                     List<TimeSlot> daySlots = randomDay.getSlots().stream()
                             .filter(slot -> slot.getStatus() == SlotStatus.AVAILABLE)
                             .collect(Collectors.toList());
-                    
+
                     if (!daySlots.isEmpty()) {
                         TimeSlot randomSlot = daySlots.get(random.nextInt(daySlots.size()));
                         form.setLinkedSlot(randomSlot);
-                        
+
                         // Update slot status based on form state
                         if (form.getState() == FormState.PENDING) {
                             randomSlot.setStatus(SlotStatus.FORM_REQUESTED);
                         } else if (form.getState() == FormState.APPROVED) {
                             randomSlot.setStatus(SlotStatus.UNAVAILABLE);
                         }
-                        
+
                         slotsToUpdate.add(randomSlot);
                         forms.add(form);
 
@@ -346,26 +346,30 @@ public class DatabaseInitializer implements CommandLineRunner {
                         tour.setSpecialRequirements(form.getSpecialRequirements());
                         tour.setVisitorNotes(form.getVisitorNotes());
 
-                        // Assign guides
-                        Set<Guide> assignedGuides = new HashSet<>();
-                        int numGuides = 1 + random.nextInt(tour.getRequiredGuides());
-                        for (int j = 0; j < numGuides; j++) {
-                            assignedGuides.add(guides.get(random.nextInt(guides.size())));
-                        }
-                        tour.setAssignedGuides(assignedGuides);
-
                         // Set status with weighted distribution
                         double statusRandom = random.nextDouble();
                         if (statusRandom < 0.2) {
                             tour.setStatus(TourStatus.GUIDES_PENDING);
-                        } else if (statusRandom < 0.4) {
-                            tour.setStatus(TourStatus.WAITING_TO_FINISH);
-                        } else if (statusRandom < 0.7) {
-                            tour.setStatus(TourStatus.FINISHED);
+                            // Don't assign guides for GUIDES_PENDING status
+                            tour.setAssignedGuides(new HashSet<>());
                         } else {
-                            tour.setStatus(TourStatus.GIVEN_FEEDBACK);
-                            tour.setFeedback("Sample feedback for tour " + (i + 1));
-                            tour.setRating(3 + random.nextInt(3));
+                            // Assign guides for other statuses
+                            Set<Guide> assignedGuides = new HashSet<>();
+                            int numGuides = 1 + random.nextInt(tour.getRequiredGuides());
+                            for (int j = 0; j < numGuides; j++) {
+                                assignedGuides.add(guides.get(random.nextInt(guides.size())));
+                            }
+                            tour.setAssignedGuides(assignedGuides);
+
+                            if (statusRandom < 0.4) {
+                                tour.setStatus(TourStatus.WAITING_TO_FINISH);
+                            } else if (statusRandom < 0.7) {
+                                tour.setStatus(TourStatus.FINISHED);
+                            } else {
+                                tour.setStatus(TourStatus.GIVEN_FEEDBACK);
+                                tour.setFeedback("Sample feedback for tour " + (i + 1));
+                                tour.setRating(3 + random.nextInt(3));
+                            }
                         }
                         tours.add(tour);
 
