@@ -18,6 +18,7 @@ import com.example.bilkentio_backend.form.repository.FormRepository;
 import com.example.bilkentio_backend.form.enums.FormState;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.day.entity.TimeSlot;
+import com.example.bilkentio_backend.day.repository.SlotRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.bilkentio_backend.school.entity.School;
+import com.example.bilkentio_backend.day.enums.SlotStatus;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class DatabaseInitializer implements CommandLineRunner {
@@ -55,6 +58,9 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     @Autowired
     private FormRepository formRepository;
+
+    @Autowired
+    private SlotRepository slotRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -283,12 +289,11 @@ public class DatabaseInitializer implements CommandLineRunner {
                 return;
             }
 
-            String[] times = { "09:00", "10:00", "11:00", "13:00", "14:00", "15:00" };
-
             // Create more tours and forms (200 for better analytics)
-            int numberOfTours = 200;
+            int numberOfTours = 100;
             List<Form> forms = new ArrayList<>();
             List<Tour> tours = new ArrayList<>();
+            List<TimeSlot> slotsToUpdate = new ArrayList<>();
 
             for (int i = 0; i < numberOfTours; i++) {
                 try {
@@ -310,11 +315,22 @@ public class DatabaseInitializer implements CommandLineRunner {
 
                     // Get a random existing day and its slots
                     Day randomDay = availableDays.get(random.nextInt(availableDays.size()));
-                    List<TimeSlot> daySlots = randomDay.getSlots();
+                    List<TimeSlot> daySlots = randomDay.getSlots().stream()
+                            .filter(slot -> slot.getStatus() == SlotStatus.AVAILABLE)
+                            .collect(Collectors.toList());
                     
-                    if (daySlots != null && !daySlots.isEmpty()) {
+                    if (!daySlots.isEmpty()) {
                         TimeSlot randomSlot = daySlots.get(random.nextInt(daySlots.size()));
                         form.setLinkedSlot(randomSlot);
+                        
+                        // Update slot status based on form state
+                        if (form.getState() == FormState.PENDING) {
+                            randomSlot.setStatus(SlotStatus.FORM_REQUESTED);
+                        } else if (form.getState() == FormState.APPROVED) {
+                            randomSlot.setStatus(SlotStatus.UNAVAILABLE);
+                        }
+                        
+                        slotsToUpdate.add(randomSlot);
                         forms.add(form);
 
                         // Create corresponding tour
@@ -355,10 +371,12 @@ public class DatabaseInitializer implements CommandLineRunner {
 
                         if ((i + 1) % 50 == 0) {
                             // Save in batches to prevent memory issues
+                            slotRepository.saveAll(slotsToUpdate);
                             formRepository.saveAll(forms);
                             tourRepository.saveAll(tours);
                             forms.clear();
                             tours.clear();
+                            slotsToUpdate.clear();
                         }
                     } else {
                         logger.warn("Day {} has no available slots, skipping tour creation", randomDay.getDate());
@@ -370,6 +388,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // Save any remaining forms and tours
             if (!forms.isEmpty()) {
+                slotRepository.saveAll(slotsToUpdate);
                 formRepository.saveAll(forms);
                 tourRepository.saveAll(tours);
             }
