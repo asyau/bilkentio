@@ -20,4 +20,5 @@ public interface FormRepository extends JpaRepository<Form, Long> {
     List<Form> findBySchool_Id(Long schoolId);
     List<Form> findBySchool_IdAndState(Long schoolId, FormState state);
     List<Form> findBySchool_IdOrderByLinkedSlot_Day_DateAsc(Long schoolId);
+    boolean existsBySchool_IdAndLinkedSlot_Id(Long schoolId, Long slotId);
 }

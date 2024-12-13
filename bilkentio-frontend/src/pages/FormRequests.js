@@ -50,6 +50,12 @@ const FormRequests = () => {
       const response = await axios.get(`http://localhost:8080${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log(response.data);
+      const formIds = response.data.map(form => form.id);
+      const duplicateIds = formIds.filter((id, index) => formIds.indexOf(id) !== index);
+      if (duplicateIds.length > 0) {
+        console.warn('Warning: Duplicate form IDs found:', duplicateIds);
+      }
       setForms(response.data);
     } catch (error) {
       console.error('Error fetching forms:', error);
@@ -209,11 +215,11 @@ const FormRequests = () => {
               <div className="loading">Loading...</div>
             ) : forms.length > 0 ? (
               <div className="forms-list">
-                {forms.map(form => {
+                {forms.map((form, index) => {
                   const isExpanded = expandedFormId === form.id;
                   return (
                     <div 
-                      key={form.id} 
+                      key={`form-${form.id || index}`}
                       className={`form-card ${isExpanded ? 'expanded' : ''}`}
                       onClick={(e) => toggleFormDetails(form.id, e)}
                     >

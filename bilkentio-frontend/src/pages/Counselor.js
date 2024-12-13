@@ -190,6 +190,8 @@ const Counselor = () => {
         console.error('Error submitting form:', error);
         if (error.response?.status === 401) {
           navigate('/login');
+        } else if (error.response?.status === 409) {
+          alert('You already have a submitted form for this time slot.');
         } else {
           alert('Failed to submit form. Please try again.');
         }
@@ -387,6 +389,34 @@ const Counselor = () => {
     }
   };
 
+  const handleCancelForm = async (formId) => {
+    if (!window.confirm('Are you sure you want to cancel this form? The form will be automatically denied.')) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `http://localhost:8080/api/forms/${formId}/status`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { newState: 'DENIED' }
+        }
+      );
+      
+      // Refresh the forms list
+      fetchMyForms();
+    } catch (error) {
+      console.error('Error cancelling form:', error);
+      if (error.response?.status === 403) {
+        alert('You do not have permission to cancel this form.');
+      } else {
+        alert('Failed to cancel form. Please try again.');
+      }
+    }
+  };
+
   return (
     <div className="guide-mode-container">
       <div className="sidebar">
@@ -456,15 +486,15 @@ const Counselor = () => {
               {loading ? (
                 <div className="loading-spinner">Loading...</div>
               ) : days.length > 0 ? (
-                days.map((day) => (
-                  <div key={day.id} className="day-column">
+                days.map((day, index) => (
+                  <div key={`${day.date}-${index}`} className="day-column">
                     <div className="day-header">
                       <div>{format(new Date(day.date), 'dd MMM')}</div>
                       <div>{format(new Date(day.date), 'EEEE')}</div>
                     </div>
-                    {day.slots && day.slots.map((slot) => (
+                    {day.slots && day.slots.map((slot, slotIndex) => (
                       <div 
-                        key={slot.id} 
+                        key={`${slot.id}-${slotIndex}`}
                         className={getSlotClass(slot)}
                         onClick={() => handleSlotClick(slot, day)}
                       >
@@ -531,31 +561,45 @@ const Counselor = () => {
           <div className="my-forms-container">
             <h2>My Form Submissions</h2>
             <div className="forms-list">
-              {myForms.map(form => (
-                <div key={form.id} className="form-card">
+              {myForms.map((form, index) => (
+                <div 
+                  key={`form-${form.form?.id || index}`}
+                  className="form-card"
+                >
                   <div className="form-header">
-                    <h3>{form.schoolName || 'No School Name'}</h3>
-                    <span className={`status-badge ${form.state?.toLowerCase()}`}>
-                      {form.state}
-                    </span>
+                    <h3>{form.form?.schoolName || 'No School Name'}</h3>
+                    <div className="form-header-actions">
+                      <span className={`status-badge ${form.form?.state?.toLowerCase()}`}>
+                        {form.form?.state || 'PENDING'}
+                      </span>
+                      {form.form?.state === 'PENDING' && (
+                        <button
+                          className="deny-form-btn"
+                          onClick={() => handleCancelForm(form.form.id)}
+                        >
+                          <span className="material-icons">cancel</span>
+                          Cancel Form
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="form-details">
-                    <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
-                    <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
-                    <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
-                    <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
-                    <p><strong>Leader Role:</strong> {form.groupLeaderRole || 'Not specified'}</p>
-                    <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
-                    <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
-                    <p><strong>City:</strong> {form.city || 'Not specified'}</p>
-                    {form.expectations && (
-                      <p><strong>Expectations:</strong> {form.expectations}</p>
+                    <p><strong>Date:</strong> {form.form?.slotDate || 'Not specified'}</p>
+                    <p><strong>Time:</strong> {form.form?.slotTime || 'Not specified'}</p>
+                    <p><strong>Group Size:</strong> {form.form?.groupSize || 'Not specified'}</p>
+                    <p><strong>Contact:</strong> {form.form?.contactPhone || 'Not specified'}</p>
+                    <p><strong>Leader Role:</strong> {form.form?.groupLeaderRole || 'Not specified'}</p>
+                    <p><strong>Leader Phone:</strong> {form.form?.groupLeaderPhone || 'Not specified'}</p>
+                    <p><strong>Leader Email:</strong> {form.form?.groupLeaderEmail || 'Not specified'}</p>
+                    <p><strong>City:</strong> {form.form?.city || 'Not specified'}</p>
+                    {form.form?.expectations && (
+                      <p><strong>Expectations:</strong> {form.form.expectations}</p>
                     )}
-                    {form.specialRequirements && (
-                      <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
+                    {form.form?.specialRequirements && (
+                      <p><strong>Special Requirements:</strong> {form.form.specialRequirements}</p>
                     )}
-                    {form.visitorNotes && (
-                      <p><strong>Notes:</strong> {form.visitorNotes}</p>
+                    {form.form?.visitorNotes && (
+                      <p><strong>Notes:</strong> {form.form.visitorNotes}</p>
                     )}
                   </div>
                 </div>
