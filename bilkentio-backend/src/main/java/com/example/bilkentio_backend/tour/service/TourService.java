@@ -38,9 +38,6 @@ public class TourService {
     private FormRepository formRepository;
 
     @Autowired
-    private EmailService emailService;
-
-    @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -70,6 +67,9 @@ public class TourService {
         tour.setExpectations(form.getExpectations());
         tour.setSpecialRequirements(form.getSpecialRequirements());
         tour.setVisitorNotes(form.getVisitorNotes());
+        tour.setGroupLeaderRole(form.getGroupLeaderRole());
+        tour.setGroupLeaderPhone(form.getGroupLeaderPhone());
+        tour.setGroupLeaderEmail(form.getGroupLeaderEmail());
 
         return tourRepository.save(tour);
     }
@@ -123,7 +123,7 @@ public class TourService {
     private void notifyStatusChange(Tour tour, TourStatus oldStatus, TourStatus newStatus) {
         String subject = "Tour Status Update";
         
-        if (tour.getCounselor() != null && tour.getCounselor().getEmail() != null) {
+        if (tour.getGroupLeaderEmail() != null && !tour.getGroupLeaderEmail().isEmpty()) {
             String message = String.format(
                 "Your tour for %s on %s has been updated from %s to %s.",
                 tour.getSchoolName(),
@@ -132,14 +132,14 @@ public class TourService {
                 newStatus
             );
             eventPublisher.publishEvent(new EmailEvent(
-                tour.getCounselor().getEmail(),
+                tour.getGroupLeaderEmail(),
                 subject,
                 message
             ));
         }
 
         for (Guide guide : tour.getAssignedGuides()) {
-            if (guide.getEmail() != null) {
+            if (guide.getEmail() != null && !guide.getEmail().isEmpty()) {
                 String message = String.format(
                     "The tour for %s on %s has been updated from %s to %s.",
                     tour.getSchoolName(),
@@ -216,7 +216,7 @@ public class TourService {
     private void notifyCancellation(Tour tour, TourStatus oldStatus, String reason) {
         String subject = "Tour Cancelled";
         
-        if (tour.getCounselor() != null && tour.getCounselor().getEmail() != null) {
+        if (tour.getGroupLeaderEmail() != null && !tour.getGroupLeaderEmail().isEmpty()) {
             String message = String.format(
                 "Your tour for %s on %s has been cancelled.\nReason: %s",
                 tour.getSchoolName(),
@@ -224,14 +224,14 @@ public class TourService {
                 reason
             );
             eventPublisher.publishEvent(new EmailEvent(
-                tour.getCounselor().getEmail(),
+                tour.getGroupLeaderEmail(),
                 subject,
                 message
             ));
         }
 
         for (Guide guide : tour.getAssignedGuides()) {
-            if (guide.getEmail() != null) {
+            if (guide.getEmail() != null && !guide.getEmail().isEmpty()) {
                 String message = String.format(
                     "The tour for %s on %s has been cancelled.\nReason: %s",
                     tour.getSchoolName(),

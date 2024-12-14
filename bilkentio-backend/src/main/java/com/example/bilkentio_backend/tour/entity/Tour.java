@@ -78,6 +78,15 @@ public class Tour {
     @Column
     private String cancellationReason;
 
+    @Column
+    private String groupLeaderRole;
+
+    @Column
+    private String groupLeaderPhone;
+
+    @Column
+    private String groupLeaderEmail;
+
     // Convenience methods to get school information
     public String getSchoolName() {
         return school != null ? school.getName() : null;

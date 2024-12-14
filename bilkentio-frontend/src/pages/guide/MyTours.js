@@ -279,6 +279,13 @@ const MyTours = () => {
                       <p><i className="material-icons">event</i> {tour.date}</p>
                       <p><i className="material-icons">schedule</i> {tour.time}</p>
                       <p><i className="material-icons">group</i> Group Size: {tour.groupSize}</p>
+                      
+                      <div className="group-leader-info">
+                        <h4>Group Leader Information</h4>
+                        <p><i className="material-icons">person</i> Role: {tour.groupLeaderRole}</p>
+                        <p><i className="material-icons">phone</i> Phone: {tour.groupLeaderPhone}</p>
+                        <p><i className="material-icons">email</i> Email: {tour.groupLeaderEmail}</p>
+                      </div>
                     </div>
                     {tour.status === "WAITING_TO_FINISH" && (
                       <button
