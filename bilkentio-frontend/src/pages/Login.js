@@ -41,7 +41,10 @@ function Login() {
                     case 'ROLE_PRESIDENT':
                         navigate('/president');
                         break;
-                    case 'ROLE_COORDINATOR', 'ROLE_COORDİNATOR':
+                    case 'ROLE_COORDINATOR':
+                        navigate('/coordinator/analytics');
+                        break;
+                    case 'ROLE_COORDİNATOR':
                         navigate('/coordinator/analytics');
                         break;
                     case 'ROLE_ADVISOR':
