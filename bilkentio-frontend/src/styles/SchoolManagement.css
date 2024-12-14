@@ -105,4 +105,126 @@
   font-size: 18px;
   font-weight: 600;
   color: #1a73e8;
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.popup-header h2 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.5rem;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #718096;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover {
+    color: #2d3748;
+}
+
+.popup-body {
+    padding: 16px 0;
+}
+
+.counselors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.counselor-card {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.counselor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.counselor-info h3 {
+    margin: 0 0 12px 0;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.counselor-info p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    color: #4a5568;
+}
+
+.counselor-info .material-icons {
+    font-size: 18px;
+    color: #718096;
+}
+
+.loading, .no-counselors {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+    font-size: 1.1rem;
+}
+
+.school-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.school-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 640px) {
+    .popup-content {
+        width: 95%;
+        margin: 10px;
+        padding: 16px;
+    }
+
+    .counselors-grid {
+        grid-template-columns: 1fr;
+    }
 } 

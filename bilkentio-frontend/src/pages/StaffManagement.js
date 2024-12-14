@@ -155,8 +155,19 @@ const StaffManagement = () => {
       const response = await axios.get('http://localhost:8080/api/admin/users', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setStaffMembers(response.data);
-      setFilteredStaff(response.data);
+      console.log("get all users")
+      console.log(response.data)
+      // Filter out users who have counselor or individual roles
+      const filteredData = response.data.filter(user => 
+        !user.roles.some(role => 
+          ['ROLE_COUNSELOR', 'ROLE_INDIVIDUAL', 'ROLE_İNDİVİDUAL']
+            .includes(role.toUpperCase())
+        )
+      );
+      console.log(filteredData)
+
+      setStaffMembers(filteredData);
+      setFilteredStaff(filteredData);
     } catch (error) {
       console.error('Error fetching staff:', error);
     }

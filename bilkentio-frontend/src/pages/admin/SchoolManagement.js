@@ -3,16 +3,59 @@ import AdminSidebar from '../../components/AdminSidebar';
 import axios from 'axios';
 import '../../styles/SchoolManagement.css';
 
-const cities = [
-  'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya', 'Ardahan', 'Artvin', 
-  'Aydın', 'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 
-  'Bursa', 'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 
-  'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkâri', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul', 
-  'İzmir', 'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kırıkkale', 'Kırklareli', 'Kırşehir', 
-  'Kilis', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 
-  'Niğde', 'Ordu', 'Osmaniye', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Şanlıurfa', 'Şırnak', 
-  'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak'
-];
+const CounselorPopup = ({ school, onClose }) => {
+  const [counselors, setCounselors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCounselors = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/schools/${school.id}/counselors`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        setCounselors(response.data);
+      } catch (error) {
+        console.error('Error fetching counselors:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCounselors();
+  }, [school.id]);
+
+  return (
+    <div className="popup-overlay">
+      <div className="popup-content">
+        <div className="popup-header">
+          <h2>{school.name} - Counselors</h2>
+          <button className="close-button" onClick={onClose}>
+            <span className="material-icons">close</span>
+          </button>
+        </div>
+        <div className="popup-body">
+          {loading ? (
+            <div className="loading">Loading counselors...</div>
+          ) : counselors.length === 0 ? (
+            <div className="no-counselors">No counselors assigned to this school</div>
+          ) : (
+            <div className="counselors-grid">
+              {counselors.map(counselor => (
+                <div key={counselor.id} className="counselor-card">
+                  <div className="counselor-info">
+                    <h3>{counselor.nameSurname}</h3>
+                    <p><span className="material-icons">email</span> {counselor.email}</p>
+                    <p><span className="material-icons">phone</span> {counselor.phoneNumber}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SchoolManagement = () => {
   const [schools, setSchools] = useState([]);
@@ -20,10 +63,24 @@ const SchoolManagement = () => {
   const [selectedCity, setSelectedCity] = useState('all');
   const [rankingFilter, setRankingFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [cities, setCities] = useState([]);
 
   useEffect(() => {
     fetchSchools();
+    fetchCities();
   }, []);
+
+  const fetchCities = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/schools/cities', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setCities(response.data);
+    } catch (error) {
+      console.error('Error fetching cities:', error);
+    }
+  };
 
   const fetchSchools = async () => {
     try {
@@ -121,7 +178,11 @@ const SchoolManagement = () => {
 
           <div className="schools-grid">
             {filteredSchools.map(school => (
-              <div key={school.id} className="school-card">
+              <div 
+                key={school.id} 
+                className="school-card"
+                onClick={() => setSelectedSchool(school)}
+              >
                 <div className="school-header">
                   <h3>{school.name}</h3>
                   <span className={`ranking-badge rank-${Math.floor(school.priorityRank)}`}>
@@ -130,13 +191,17 @@ const SchoolManagement = () => {
                 </div>
                 <div className="school-info">
                   <p><span className="material-icons">location_on</span> {school.city}</p>
-                  {/* <p><span className="material-icons">phone</span> {school.phone}</p>
-                  <p><span className="material-icons">email</span> {school.email}</p>
-                  <p><span className="material-icons">person</span> {school.contactPerson}</p> */}
                 </div>
               </div>
             ))}
           </div>
+
+          {selectedSchool && (
+            <CounselorPopup 
+              school={selectedSchool} 
+              onClose={() => setSelectedSchool(null)} 
+            />
+          )}
         </div>
       </div>
     </div>

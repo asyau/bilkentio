@@ -4,7 +4,9 @@ import com.example.bilkentio_backend.form.entity.Form;
 import com.example.bilkentio_backend.guide.entity.Guide;
 import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.user.entity.User;
+import com.example.bilkentio_backend.school.entity.School;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -40,8 +42,10 @@ public class Tour {
     @Column(nullable = false)
     private Integer requiredGuides;
 
-    @Column(nullable = false)
-    private String schoolName;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "school_id", nullable = false)
+    @JsonBackReference
+    private School school;
 
     @Column
     private String expectations;
@@ -51,9 +55,6 @@ public class Tour {
 
     @Column
     private String visitorNotes;
-
-    @Column(nullable = false)
-    private String city;
 
     @JsonManagedReference
     @ManyToMany
@@ -76,4 +77,22 @@ public class Tour {
 
     @Column
     private String cancellationReason;
+
+    @Column
+    private String groupLeaderRole;
+
+    @Column
+    private String groupLeaderPhone;
+
+    @Column
+    private String groupLeaderEmail;
+
+    // Convenience methods to get school information
+    public String getSchoolName() {
+        return school != null ? school.getName() : null;
+    }
+
+    public String getCity() {
+        return school != null ? school.getCity() : null;
+    }
 } 

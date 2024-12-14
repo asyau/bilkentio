@@ -3,6 +3,7 @@ package com.example.bilkentio_backend.form.entity;
 import com.example.bilkentio_backend.day.entity.TimeSlot;
 import com.example.bilkentio_backend.form.enums.FormState;
 import com.example.bilkentio_backend.user.entity.User;
+import com.example.bilkentio_backend.school.entity.School;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
@@ -22,7 +23,6 @@ public class Form {
     private Long id;
 
     private Integer groupSize;
-    private String schoolName;
     private String contactPhone;
     private String expectations;
     private String specialRequirements;
@@ -30,8 +30,12 @@ public class Form {
     private String groupLeaderPhone;
     private String groupLeaderEmail;
     private String visitorNotes;
-    private String city;
     private Boolean agreeToTerms;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "school_id", nullable = false)
+    @JsonBackReference
+    private School school;
 
     @ManyToOne
     @JoinColumn(name = "submitted_by")
@@ -42,9 +46,9 @@ public class Form {
 
     @ManyToOne
     @JoinColumn(name = "linked_slot_id")
+    @JsonBackReference("slot-form")
     private TimeSlot linkedSlot;
 
-    // Getter for submissionDate
     @Getter
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -58,6 +62,7 @@ public class Form {
     public String getSlotTime() {
         return linkedSlot != null ? linkedSlot.getTime() : null;
     }
+
     @Override
     public String toString() {
         return "Form{" +
@@ -68,5 +73,13 @@ public class Form {
     public String getFormattedSubmissionDate() {
         return submissionDate != null ? submissionDate.toString() : null;
     }
-    
-  }
+
+    // Convenience methods to get school information
+    public String getSchoolName() {
+        return school != null ? school.getName() : null;
+    }
+
+    public String getCity() {
+        return school != null ? school.getCity() : null;
+    }
+}

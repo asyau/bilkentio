@@ -1,5 +1,5 @@
 // src/App.js
-import React from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './styles/styles.css';
 
@@ -42,6 +42,9 @@ import CoordinatorTourManagement from './pages/coordinator/CoordinatorTourManage
 import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScores';
 
 import SchoolManagement from './pages/admin/SchoolManagement';
+import InviteToFairForm from './pages/admin/InviteToFairForm';
+import ViewFairApplications from './pages/admin/ViewFairApplications';
+import Analytics from './pages/Analytics';
 
 function App() {
   return (
@@ -55,12 +58,14 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin">
-          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="scores" element={<PuantajScores />} />
           <Route path="tours" element={<TourManagement />} />
           <Route path="tours/:tourId" element={<TourDetails />} />
           <Route path="schools" element={<SchoolManagement />} />
+          <Route path="fairs/invite" element={<InviteToFairForm />} />
+          <Route path="fairs/applications" element={<ViewFairApplications />} />
         </Route>
 
         {/* Guide Routes */}
@@ -90,6 +95,7 @@ function App() {
         {/* Legacy Routes - Keep if still needed */}
         <Route path="/crud" element={<CRUD />} />
         <Route path="/form-request" element={<FormRequests />} />
+        <Route path="/analytics" element={<Analytics />} />
 
 
         {/* Coordinator Routes */}
