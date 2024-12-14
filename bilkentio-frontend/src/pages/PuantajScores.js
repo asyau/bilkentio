@@ -253,7 +253,7 @@ const PuantajScores = () => {
                   <div className="guide-stats">
                     <div className="stat">
                       <span className="material-icons">military_tech</span>
-                      <span>Level {guide.level}</span>
+                      <span>{guide.level}</span>
                     </div>
                     <div className="stat">
                       <span className="material-icons">stars</span>
