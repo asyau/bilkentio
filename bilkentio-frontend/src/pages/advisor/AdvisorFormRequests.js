@@ -1,0 +1,293 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import AdvisorSidebar from '../../components/AdvisorSidebar';
+import '../../styles/FormRequests.css';
+
+const FormRequests = () => {
+  const navigate = useNavigate();
+  const [forms, setForms] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState('PENDING');
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [expandedFormId, setExpandedFormId] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      // Decode JWT token to get user info
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      setUser(decodedToken);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    fetchForms();
+  }, [selectedStatus]);
+
+  const fetchForms = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      let endpoint = '/api/forms/all';
+      if (selectedStatus !== 'ALL') {
+        endpoint = `/api/forms/state/${selectedStatus}`;
+      }
+      
+      const response = await axios.get(`http://localhost:8080${endpoint}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setForms(response.data);
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFormAction = async (formId, action) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      if (action === 'APPROVED') {
+        // Prompt for required guides
+        const requiredGuides = prompt('Enter the number of required guides for this tour:');
+        if (!requiredGuides || isNaN(requiredGuides) || requiredGuides < 1) {
+          alert('Please enter a valid number of guides (minimum 1)');
+          return;
+        }
+        
+        try {
+          // First update form status
+          const updateResponse = await axios.put(`http://localhost:8080/api/forms/${formId}/status`, null, {
+            params: { newState: action },
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          console.log('Form status updated:', updateResponse.data);
+          
+          // After successful form approval, create the tour
+          const createTour = async () => {
+            try {
+              console.log('Creating tour for form:', updateResponse.data);
+              
+              const response = await axios.post(
+                'http://localhost:8080/api/tours',
+                {
+                  formId: formId,
+                  requiredGuides: parseInt(requiredGuides),
+                },
+                {
+                  headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                }
+              );
+              
+              console.log('Tour created successfully:', response.data);
+              alert('Form approved and tour created successfully!');
+            } catch (error) {
+              console.error('Error creating tour:', error);
+              alert(`Failed to create tour: ${error.response?.data || error.message}`);
+              
+              // Revert form status if tour creation fails
+              await axios.put(`http://localhost:8080/api/forms/${formId}/status`, null, {
+                params: { newState: 'PENDING' },
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              
+              // Refresh form data
+              await fetchForms();
+            }
+          };
+          
+          // Call createTour after form approval
+          await createTour();
+          
+        } catch (error) {
+          console.error('Error approving form:', error);
+          alert(`Failed to approve form: ${error.response?.data || error.message}`);
+          return;
+        }
+      } else {
+        // Just update form status for denial
+        await axios.put(`http://localhost:8080/api/forms/${formId}/status`, null, {
+          params: { newState: action },
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+
+      fetchForms();
+    } catch (error) {
+      console.error('Error updating form status:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        alert(`Failed to update form status: ${error.response?.data?.message || error.message}`);
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'APPROVED': return 'green';
+      case 'DENIED': return 'red';
+      case 'PENDING': return 'orange';
+      default: return 'gray';
+    }
+  };
+
+  const toggleFormDetails = (formId, e) => {
+    e.stopPropagation();
+    setExpandedFormId(expandedFormId === formId ? null : formId);
+  };
+
+  return (
+    <div className="admin-layout">
+      <AdvisorSidebar />
+      <div className="admin-content">
+        <div className="form-requests-container">
+          <div className="form-header">
+            <div className="filter-section">
+              <div className="status-filters">
+                <button 
+                  className={`filter-btn ${selectedStatus === 'ALL' ? 'active' : ''}`}
+                  onClick={() => setSelectedStatus('ALL')}
+                >
+                  All Forms
+                </button>
+                <button 
+                  className={`filter-btn ${selectedStatus === 'PENDING' ? 'active' : ''}`}
+                  onClick={() => setSelectedStatus('PENDING')}
+                >
+                  Pending
+                </button>
+                <button 
+                  className={`filter-btn ${selectedStatus === 'APPROVED' ? 'active' : ''}`}
+                  onClick={() => setSelectedStatus('APPROVED')}
+                >
+                  Approved
+                </button>
+                <button 
+                  className={`filter-btn ${selectedStatus === 'DENIED' ? 'active' : ''}`}
+                  onClick={() => setSelectedStatus('DENIED')}
+                >
+                  Denied
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="forms-content">
+            {loading ? (
+              <div className="loading">Loading...</div>
+            ) : forms.length > 0 ? (
+              <div className="forms-list">
+                {forms.map(form => {
+                  const isExpanded = expandedFormId === form.id;
+                  return (
+                    <div 
+                      key={form.id} 
+                      className={`form-card ${isExpanded ? 'expanded' : ''}`}
+                      onClick={(e) => toggleFormDetails(form.id, e)}
+                    >
+                      <div className="form-header">
+                        <h3>{form.schoolName || 'No School Name'}</h3>
+                        <span className="status-badge" style={{ backgroundColor: getStatusColor(form.state) }}>
+                          {form.state}
+                        </span>
+                      </div>
+                      
+                      <div className="form-content">
+                        <div className="form-basic-info">
+                          <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
+                          <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
+                          <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
+                        </div>
+
+                        <div className={`form-details ${isExpanded ? 'show' : ''}`}>
+                          <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
+                          <p><strong>Submission Date:</strong> {form.submissionDate || 'Not specified'}</p>
+                          <p><strong>Leader:</strong> {form.groupLeaderRole || 'Not specified'}</p>
+                          <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
+                          <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
+                          <p><strong>City:</strong> {form.city || 'Not specified'}</p>
+                          {form.expectations && (
+                            <p><strong>Expectations:</strong> {form.expectations}</p>
+                          )}
+                          {form.specialRequirements && (
+                            <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
+                          )}
+                          {form.visitorNotes && (
+                            <p><strong>Notes:</strong> {form.visitorNotes}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {form.state === 'PENDING' && (
+                        <div className="form-actions">
+                          <button 
+                            className="approve-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFormAction(form.id, 'APPROVED');
+                            }}
+                          >
+                            <span className="material-icons">check_circle</span>
+                            Approve
+                          </button>
+                          <button 
+                            className="deny-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFormAction(form.id, 'DENIED');
+                            }}
+                          >
+                            <span className="material-icons">cancel</span>
+                            Deny
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="no-forms-message">
+                No {selectedStatus.toLowerCase()} forms found
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FormRequests; 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import AdminSidebar from '../components/AdminSidebar';
 import '../styles/PuantajScores.css';
 import { checkAdminRole } from '../utils/roleCheck';
@@ -12,6 +13,7 @@ const PuantajScores = () => {
   const [guideDetails, setGuideDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming', 'completed', or 'reviews'
 
   useEffect(() => {
     const initializeComponent = async () => {
@@ -36,21 +38,75 @@ const PuantajScores = () => {
     initializeComponent();
   }, [navigate]);
 
+  const processMonthlyStats = (tours) => {
+    const monthlyData = {};
+    const currentDate = new Date();
+    const lastYear = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1));
+
+    tours.forEach(tour => {
+      const tourDate = new Date(tour.date);
+      if (tourDate >= lastYear) {
+        const monthKey = tourDate.toLocaleString('default', { month: 'short', year: 'numeric' });
+        monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
+      }
+    });
+
+    return Object.entries(monthlyData)
+      .map(([month, tours]) => ({ month, tours }))
+      .sort((a, b) => new Date(a.month) - new Date(b.month));
+  };
+
+  const getLastMonthTours = (tours) => {
+    const currentDate = new Date();
+    const lastMonth = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+    return tours.filter(tour => {
+      const tourDate = new Date(tour.date);
+      return tourDate.getMonth() === lastMonth.getMonth() && 
+             tourDate.getFullYear() === lastMonth.getFullYear();
+    }).length;
+  };
+
   const fetchGuideDetails = async (guideId) => {
     try {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [stats, reviews, tours] = await Promise.all([
+      const [stats, reviews, completedGroupTours, completedIndividualTours, upcomingTours] = await Promise.all([
         axios.get(`http://localhost:8080/api/guides/${guideId}/stats`, { headers }),
         axios.get(`http://localhost:8080/api/guides/${guideId}/reviews`, { headers }),
-        axios.get(`http://localhost:8080/api/guides/${guideId}/tours`, { headers })
+        axios.get(`http://localhost:8080/api/guides/${guideId}/tours/completed`, { headers }),
+        axios.get(`http://localhost:8080/api/individual-tours/guide/${guideId}`, { headers }),
+        axios.get(`http://localhost:8080/api/guides/${guideId}/tours/upcoming`, { headers })
       ]);
 
+      // Filter completed individual tours
+      const completedIndividuals = completedIndividualTours.data.filter(
+        tour => tour.status === 'FINISHED' || tour.status === 'GIVEN_FEEDBACK'
+      );
+
+      // Filter upcoming individual tours
+      const upcomingIndividuals = completedIndividualTours.data.filter(
+        tour => tour.status === 'WAITING_TO_FINISH'
+      );
+
+      // Combine all completed tours
+      const allCompletedTours = [...completedGroupTours.data, ...completedIndividuals];
+
       setGuideDetails({
-        stats: stats.data,
+        stats: {
+          ...stats.data,
+          lastMonthTours: getLastMonthTours(allCompletedTours),
+          totalTours: allCompletedTours.length
+        },
         reviews: reviews.data || [],
-        tours: tours.data || {}
+        tours: {
+          completed: allCompletedTours,
+          upcoming: {
+            groupTours: upcomingTours.data.groupTours || [],
+            individualTours: upcomingIndividuals || []
+          }
+        },
+        monthlyStats: processMonthlyStats(allCompletedTours)
       });
     } catch (error) {
       console.error('Error fetching guide details:', error);
@@ -72,6 +128,95 @@ const PuantajScores = () => {
     guide.nameSurname.toLowerCase().includes(searchTerm.toLowerCase()) ||
     guide.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const renderTourCard = (tour, type = 'upcoming') => (
+    <div key={tour.id} className={`tour-card ${type}`}>
+      <div className="tour-date">
+        <span className="material-icons">
+          {type === 'upcoming' ? 'event' : 'event_available'}
+        </span>
+        {new Date(tour.date).toLocaleDateString()}
+      </div>
+      <div className="tour-badge">
+        {tour.schoolName ? 'Group Tour' : 'Individual Tour'}
+      </div>
+      <div className="tour-info">
+        <p><span className="material-icons">location_on</span> {tour.city}</p>
+        {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
+        {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
+        {tour.interests && <p><span className="material-icons">interests</span> {tour.interests}</p>}
+      </div>
+      {type === 'completed' && tour.rating && (
+        <div className="tour-feedback">
+          <div className="rating">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className={`star ${i < tour.rating ? 'filled' : ''}`}>★</span>
+            ))}
+          </div>
+          {tour.feedback && <p className="feedback-text">"{tour.feedback}"</p>}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderContent = () => {
+    if (!guideDetails) return null;
+
+    switch (activeTab) {
+      case 'upcoming':
+        return (
+          <div className="tours-grid">
+            {[
+              ...(guideDetails.tours.upcoming.groupTours || []),
+              ...(guideDetails.tours.upcoming.individualTours || [])
+            ].map(tour => renderTourCard(tour, 'upcoming'))}
+          </div>
+        );
+      case 'completed':
+        return (
+          <div className="tours-grid">
+            {guideDetails.tours.completed.map(tour => renderTourCard(tour, 'completed'))}
+          </div>
+        );
+      case 'reviews':
+        return (
+          <div className="reviews-grid">
+            {guideDetails.reviews.map((review, index) => (
+              <div key={index} className="review-card">
+                <div className="review-header">
+                  <div className="review-info">
+                    <div className="rating">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className={`star ${i < review.rating ? 'filled' : ''}`}>★</span>
+                      ))}
+                    </div>
+                    <span className="review-date">
+                      {new Date(review.date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {review.tourType && (
+                    <div className="review-tour-type">
+                      {review.tourType}
+                    </div>
+                  )}
+                </div>
+                <div className="review-content">
+                  <p className="review-text">"{review.feedback}"</p>
+                  {review.schoolName && (
+                    <div className="review-school">
+                      <span className="material-icons">school</span>
+                      {review.schoolName}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   if (isLoading) return <div className="loading">Loading...</div>;
 
@@ -161,94 +306,73 @@ const PuantajScores = () => {
                 </div>
 
                 <div className="modal-body">
-                  <div className="tours-section">
+                  <div className="tour-stats-section">
                     <div className="section-header">
-                      <span className="material-icons">event</span>
-                      <h3>Upcoming Tours</h3>
+                      <span className="material-icons">analytics</span>
+                      <h3>Tour Statistics</h3>
                     </div>
-                    <div className="tours-list">
-                      {[...guideDetails.tours.upcomingIndividualTours || [], 
-                        ...guideDetails.tours.upcomingGroupTours || []
-                      ].map((tour, index) => (
-                        <div key={index} className="tour-card">
-                          <div className="tour-date">
-                            <span className="material-icons">calendar_today</span>
-                            {new Date(tour.date).toLocaleDateString()}
-                          </div>
-                          <div className="tour-badge">
-                            {tour.schoolName ? 'Group Tour' : 'Individual Tour'}
-                          </div>
-                          <div className="tour-info">
-                            <p><span className="material-icons">location_on</span> {tour.city}</p>
-                            {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
-                            {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
-                            {tour.interests && <p><span className="material-icons">interests</span> {tour.interests}</p>}
-                          </div>
+                    <div className="stats-grid">
+                      <div className="stat-card">
+                        <span className="material-icons">calendar_month</span>
+                        <div className="stat-info">
+                          <h4>Last Month Tours</h4>
+                          <p>{guideDetails.stats.lastMonthTours || 0}</p>
                         </div>
-                      ))}
+                      </div>
+                      <div className="stat-card">
+                        <span className="material-icons">history</span>
+                        <div className="stat-info">
+                          <h4>Total Tours</h4>
+                          <p>{guideDetails.stats.totalTours || 0}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="monthly-chart">
+                      <h4>Monthly Tour Activity</h4>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={guideDetails.monthlyStats}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line type="monotone" dataKey="tours" stroke="#6c63ff" name="Tours" />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
                   </div>
 
-                  <div className="completed-tours-section">
-                    <div className="section-header">
+                  <div className="content-tabs">
+                    <button
+                      className={`tab-button ${activeTab === 'upcoming' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('upcoming')}
+                    >
+                      <span className="material-icons">event</span>
+                      Upcoming Tours
+                    </button>
+                    <button
+                      className={`tab-button ${activeTab === 'completed' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('completed')}
+                    >
                       <span className="material-icons">task_alt</span>
-                      <h3>Completed Tours</h3>
-                    </div>
-                    <div className="tours-list">
-                      {[...guideDetails.tours.completedIndividualTours || [], 
-                        ...guideDetails.tours.completedGroupTours || []
-                      ].map((tour, index) => (
-                        <div key={index} className="tour-card completed">
-                          <div className="tour-date">
-                            <span className="material-icons">event_available</span>
-                            {new Date(tour.date).toLocaleDateString()}
-                          </div>
-                          <div className="tour-badge">
-                            {tour.schoolName ? 'Group Tour' : 'Individual Tour'}
-                          </div>
-                          <div className="tour-info">
-                            <p><span className="material-icons">location_on</span> {tour.city}</p>
-                            {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
-                            {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
-                          </div>
-                          {tour.rating && (
-                            <div className="tour-feedback">
-                              <div className="rating">
-                                {[...Array(5)].map((_, i) => (
-                                  <span key={i} className={`star ${i < tour.rating ? 'filled' : ''}`}>★</span>
-                                ))}
-                              </div>
-                              {tour.feedback && <p className="feedback-text">"{tour.feedback}"</p>}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                      Completed Tours
+                    </button>
+                    <button
+                      className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('reviews')}
+                    >
+                      <span className="material-icons">reviews</span>
+                      Reviews
+                    </button>
+                  </div>
+
+                  <div className="tab-content">
+                    {renderContent()}
                   </div>
                 </div>
               </div>
-              <div className="reviews-section">
-                <div className="section-header">
-                  <span className="material-icons">reviews</span>
-                      <h3>Recent Reviews</h3>
-                    </div>
-                    <div className="reviews-list">
-                      {guideDetails.reviews.map((review, index) => (
-                        <div key={index} className="review-card">
-                          <div className="review-header">
-                            <div className="rating">
-                              {[...Array(5)].map((_, i) => (
-                                <span key={i} className={`star ${i < review.rating ? 'filled' : ''}`}>★</span>
-                              ))}
-                            </div>
-                            <span className="review-date">{new Date(review.date).toLocaleDateString()}</span>
-                          </div>
-                          <p className="review-text">"{review.feedback}"</p>
-                        </div>
-                      ))}
-                    </div>
-                </div>
-              </div>
+            </div>
           )}
         </div>
       </div>

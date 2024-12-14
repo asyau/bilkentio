@@ -8,7 +8,9 @@ import lombok.Data;
 @Data
 public class CompletedTourDTO {
     private Long id;
+    private Long schoolId;
     private String schoolName;
+    private String city;
     private String date;
     private String time;
     private Integer groupSize;
@@ -20,7 +22,9 @@ public class CompletedTourDTO {
     public static CompletedTourDTO fromEntity(Tour tour) {
         CompletedTourDTO dto = new CompletedTourDTO();
         dto.setId(tour.getId());
-        dto.setSchoolName(tour.getSchoolName());
+        dto.setSchoolId(tour.getSchool().getId());
+        dto.setSchoolName(tour.getSchool().getName());
+        dto.setCity(tour.getSchool().getCity());
         dto.setDate(tour.getDate().toString());
         dto.setTime(tour.getTime());
         dto.setGroupSize(tour.getGroupSize());

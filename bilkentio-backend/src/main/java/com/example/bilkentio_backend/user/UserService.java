@@ -2,6 +2,7 @@ package com.example.bilkentio_backend.user;
 
 import com.example.bilkentio_backend.admin.entity.Admin;
 import com.example.bilkentio_backend.advisor.entity.Advisor;
+import com.example.bilkentio_backend.advisor.repository.AdvisorRepository;
 import com.example.bilkentio_backend.coordinator.entity.Coordinator;
 import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
 import com.example.bilkentio_backend.guide.entity.Guide;
@@ -36,6 +37,9 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private GuideRepository guideRepository;
+
+     @Autowired
+    private AdvisorRepository advisorRepository; // Add this
 
     @Autowired
     private EmailService emailService;
@@ -113,13 +117,15 @@ public class UserService {
 
     public User createUserWithRole(User newUser, String role) {
         // Create the appropriate entity based on role
+        System.out.println(role.toLowerCase());
+
         User user = switch (role.toLowerCase()) {
-            case "admin" -> new Admin();
-            case "advisor" -> new Advisor();
-            case "guide" -> new Guide();
-            case "president" -> new President();
-            case "coordinator" -> new Coordinator();
-            case "individual" -> new Individual();
+            case "admin", "admın" -> new Admin();
+            case "advisor", "advısor" -> new Advisor();
+            case "guide", "guıde" -> new Guide();
+            case "president", "presıdent" -> new President();
+            case "coordinator", "coordınator" -> new Coordinator();
+            case "ındıvıdual", "individual" -> new Individual();
             case "counselor" -> new GuidanceCounselor();
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         };

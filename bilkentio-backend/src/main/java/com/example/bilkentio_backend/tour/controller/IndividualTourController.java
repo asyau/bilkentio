@@ -3,6 +3,7 @@ package com.example.bilkentio_backend.tour.controller;
 import com.example.bilkentio_backend.tour.entity.IndividualTour;
 import com.example.bilkentio_backend.tour.service.IndividualTourService;
 import com.example.bilkentio_backend.tour.dto.IndividualTourRequest;
+import com.example.bilkentio_backend.tour.enums.TourStatus;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -72,5 +73,10 @@ public class IndividualTourController {
     @GetMapping("/guide/{guideId}")
     public ResponseEntity<List<IndividualTour>> getGuideIndividualTours(@PathVariable Long guideId) {
         return ResponseEntity.ok(individualTourService.getToursForGuide(guideId));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<IndividualTour>> getToursByStatus(@PathVariable TourStatus status) {
+        return ResponseEntity.ok(individualTourService.getToursByStatus(status));
     }
 } 

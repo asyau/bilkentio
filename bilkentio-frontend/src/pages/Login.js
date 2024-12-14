@@ -12,14 +12,64 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
+            // First, authenticate user
             const response = await axios.post('http://localhost:8080/auth/login', {
                 username,
                 password,
             });
-            localStorage.setItem('token', response.data.jwt);
-            navigate('/crud');
+            const token = response.data.jwt;
+            localStorage.setItem('token', token);
+
+            // Then, fetch user role
+            const roleResponse = await axios.get('http://localhost:8080/auth/getRole', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // Log the role response to understand its structure
+            console.log('Role Response:', roleResponse.data);
+
+            // Check if roles exist and extract the first role
+            if (roleResponse.data.roles && roleResponse.data.roles.length > 0) {
+                const userRole = roleResponse.data.roles[0].authority; // Access the authority property
+                console.log('User Role:', userRole); // Log the user role
+
+                // Navigate based on role
+                switch (userRole) {
+                    case 'ROLE_ADMIN':
+                        navigate('/admin/analytics');
+                        break;
+                    case 'ROLE_PRESIDENT':
+                        navigate('/president');
+                        break;
+                    case 'ROLE_COORDINATOR', 'ROLE_COORDİNATOR':
+                        navigate('/coordinator/analytics');
+                        break;
+                    case 'ROLE_ADVISOR':
+                        navigate('/advisor');
+                        break;
+                    case 'ROLE_GUİDE':
+                        navigate('/guide/dashboard');
+                        break;
+                    case 'ROLE_GUIDE':
+                        navigate('/guide/dashboard');
+                        break;
+                    case 'ROLE_COUNSELOR':
+                        navigate('/counselor');
+                        break;
+                    case 'ROLE_INDIVIDUAL':
+                        navigate('/individual');
+                        break;
+                    default:
+                        setError('Invalid role');
+                        localStorage.removeItem('token');
+                }
+            } else {
+                setError('No roles found');
+                localStorage.removeItem('token');
+            }
         } catch (error) {
             setError('Incorrect username or password.');
+            localStorage.removeItem('token');
         }
     };
 

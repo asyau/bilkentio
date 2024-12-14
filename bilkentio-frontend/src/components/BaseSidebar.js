@@ -5,6 +5,12 @@ import '../styles/Sidebar.css';
 const BaseSidebar = ({ logo, menuItems }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    console.log("Logging out...");
+    window.location.href = '/login';
+  };
+
   return (
     <>
       <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -35,6 +41,10 @@ const BaseSidebar = ({ logo, menuItems }) => {
               {!isCollapsed && <span>{item.title}</span>}
             </NavLink>
           ))}
+          <button className="logout-btn" onClick={handleLogout}>
+            <span className="material-icons">logout</span>
+            {!isCollapsed && <span>Log Out</span>}
+          </button>
         </nav>
       </div>
       <div className={`sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />

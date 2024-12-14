@@ -63,11 +63,23 @@ const AdminSidebar = () => {
             <span className="material-icons">list_alt</span>
             {!isCollapsed && <span>View Applications</span>}
           </NavLink>
+         
         </nav>
+        
+        <button className="logout-btn" onClick={handleLogout}>
+          <span className="material-icons">logout</span>
+          {!isCollapsed && <span>Log Out</span>}
+        </button>
       </div>
-      <div className={`sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />
+      <div className={`admin-sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />
     </>
   );
+};
+
+const handleLogout = () => {
+  localStorage.removeItem('token');
+  console.log("Logging out...");
+  window.location.href = '/login';
 };
 
 export default AdminSidebar; 

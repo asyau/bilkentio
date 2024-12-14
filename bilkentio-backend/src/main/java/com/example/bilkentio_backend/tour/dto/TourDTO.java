@@ -29,6 +29,9 @@ public class TourDTO {
     private String feedback;
     private Integer rating;
     private String cancellationReason;
+    private String groupLeaderRole;
+    private String groupLeaderPhone;
+    private String groupLeaderEmail;
 
     public static TourDTO fromEntity(Tour tour) {
         TourDTO dto = new TourDTO();
@@ -45,13 +48,20 @@ public class TourDTO {
         dto.setSpecialRequirements(tour.getSpecialRequirements());
         dto.setVisitorNotes(tour.getVisitorNotes());
         dto.setCity(tour.getCity());
-        dto.setAssignedGuides(tour.getAssignedGuides().stream()
-                .map(GuideDTO::fromEntity)
-                .collect(Collectors.toSet()));
         dto.setStatus(tour.getStatus());
         dto.setFeedback(tour.getFeedback());
         dto.setRating(tour.getRating());
         dto.setCancellationReason(tour.getCancellationReason());
+        dto.setGroupLeaderRole(tour.getGroupLeaderRole());
+        dto.setGroupLeaderPhone(tour.getGroupLeaderPhone());
+        dto.setGroupLeaderEmail(tour.getGroupLeaderEmail());
+
+        if (tour.getAssignedGuides() != null) {
+            dto.setAssignedGuides(tour.getAssignedGuides().stream()
+                .map(GuideDTO::fromEntity)
+                .collect(Collectors.toSet()));
+        }
+
         return dto;
     }
 

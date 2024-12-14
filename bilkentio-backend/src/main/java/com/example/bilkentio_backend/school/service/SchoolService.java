@@ -2,6 +2,8 @@ package com.example.bilkentio_backend.school.service;
 
 import com.example.bilkentio_backend.school.entity.School;
 import com.example.bilkentio_backend.school.repository.SchoolRepository;
+import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
+import com.example.bilkentio_backend.guidanceCounselor.repository.GuidanceCounselorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,9 @@ public class SchoolService {
 
     @Autowired
     private SchoolRepository schoolRepository;
+
+    @Autowired
+    private GuidanceCounselorRepository guidanceCounselorRepository;
 
     @Transactional
     public void importSchoolsFromCsv(String filePath) {
@@ -70,3 +75,8 @@ public class SchoolService {
         return schoolRepository.findByName(name);
     }
 }
+
+    public List<GuidanceCounselor> getSchoolCounselors(Long schoolId) {
+        return guidanceCounselorRepository.findBySchoolId(schoolId);
+    }
+} 

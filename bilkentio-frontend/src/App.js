@@ -18,6 +18,9 @@ import TourDetails from './pages/TourDetails';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
 
+import DaySelection from './pages/advisor/DaySelection';
+
+import AdvisorFormRequests from './pages/advisor/AdvisorFormRequests';
 
 import PresidentDashboard from './pages/president/Dashboard';
 import CoordinatorDashboard from './pages/coordinator/Dashboard';
@@ -39,6 +42,7 @@ import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScor
 import SchoolManagement from './pages/admin/SchoolManagement';
 import InviteToFairForm from './pages/admin/InviteToFairForm';
 import ViewFairApplications from './pages/admin/ViewFairApplications';
+import Analytics from './pages/Analytics';
 
 function App() {
   return (
@@ -52,7 +56,7 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin">
-          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="scores" element={<PuantajScores />} />
           <Route path="tours" element={<TourManagement />} />
@@ -73,13 +77,16 @@ function App() {
         {/* Other Role-specific Routes */}
         <Route path="/president/*" element={<PresidentDashboard />} />
         <Route path="/coordinator/*" element={<CoordinatorDashboard />} />
-        <Route path="/advisor/*" element={<AdvisorDashboard />} />
+        <Route path="/advisor/*" element={<AdvisorFormRequests />} />
+        <Route path="/advisor/AdvisorFormRequests" element={<AdvisorFormRequests />} />
         <Route path="/counselor/*" element={<Counselor />} />
         <Route path="/individual/*" element={<Individual />} />
+        <Route path="/advisor/day-selection" element={<DaySelection />} />
 
         {/* Legacy Routes - Keep if still needed */}
         <Route path="/crud" element={<CRUD />} />
         <Route path="/form-request" element={<FormRequests />} />
+        <Route path="/analytics" element={<Analytics />} />
 
 
         {/* Coordinator Routes */}

@@ -1,6 +1,7 @@
 package com.example.bilkentio_backend.school.entity;
 
 import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
+import com.example.bilkentio_backend.form.entity.Form;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -30,4 +31,8 @@ public class School {
     @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<GuidanceCounselor> guidanceCounselors;
+
+    @OneToMany(mappedBy = "school", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Form> forms;
 } 
