@@ -620,3 +620,30 @@ textarea {
   font-weight: 500;
   border-radius: 20px;
 }
+
+.tour-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tour-actions .cancel-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tour-actions .cancel-btn:hover {
+  background-color: #c82333;
+}
+
+.cancellation-reason {
+  color: #dc3545;
+  margin-top: 8px;
+  font-size: 0.9em;
+}

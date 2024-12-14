@@ -39,6 +39,9 @@ const Counselor = () => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [selectedTour, setSelectedTour] = useState(null);
   const [feedback, setFeedback] = useState({ feedback: '', rating: 0 });
+  const [showCancellationForm, setShowCancellationForm] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [tourToCancel, setTourToCancel] = useState(null);
 
   const StarRating = ({ rating, onRatingChange }) => {
     return (
@@ -422,6 +425,43 @@ const Counselor = () => {
     }
   };
 
+  const handleCancelTour = async (tour) => {
+    setTourToCancel(tour);
+    setShowCancellationForm(true);
+  };
+
+  const submitCancellation = async (e) => {
+    e.preventDefault();
+    if (!cancellationReason.trim()) {
+      alert('Please provide a reason for cancellation');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `http://localhost:8080/api/tours/${tourToCancel.id}/cancel`,
+        { reason: cancellationReason },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      // Refresh tours list
+      if (user) {
+        fetchTours(user.userId);
+      }
+      
+      // Reset form
+      setShowCancellationForm(false);
+      setTourToCancel(null);
+      setCancellationReason('');
+    } catch (error) {
+      console.error('Error cancelling tour:', error);
+      alert('Failed to cancel tour: ' + (error.response?.data || error.message));
+    }
+  };
+
   return (
     <div className="guide-mode-container">
       <div className="sidebar">
@@ -542,7 +582,7 @@ const Counselor = () => {
                       </p>
                     )}
                   </div>
-                  <div>
+                  <div className="tour-actions">
                     <span className={getStatusBadgeClass(tour.status)}>
                       {tour.status.replace('_', ' ')}
                     </span>
@@ -555,6 +595,14 @@ const Counselor = () => {
                         }}
                       >
                         Give Feedback
+                      </button>
+                    )}
+                    {(tour.status === 'GUIDES_PENDING' || tour.status === 'WAITING_TO_FINISH') && (
+                      <button 
+                        className="cancel-btn"
+                        onClick={() => handleCancelTour(tour)}
+                      >
+                        Cancel Tour
                       </button>
                     )}
                   </div>
@@ -651,6 +699,45 @@ const Counselor = () => {
                 </button>
                 <button type="submit" className="submit-btn">
                   Submit Feedback
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showCancellationForm && tourToCancel && (
+        <div className="form-overlay">
+          <div className="form-container">
+            <h3>Cancel Tour</h3>
+            <div className="selected-tour-info">
+              <p><strong>{tourToCancel.schoolName}</strong></p>
+              <p>Date: {tourToCancel.date} at {tourToCancel.time}</p>
+            </div>
+            <form onSubmit={submitCancellation}>
+              <div className="form-group">
+                <label>Reason for Cancellation:</label>
+                <textarea
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  required
+                  placeholder="Please provide a reason for cancellation"
+                />
+              </div>
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  className="cancel-btn" 
+                  onClick={() => {
+                    setShowCancellationForm(false);
+                    setTourToCancel(null);
+                    setCancellationReason('');
+                  }}
+                >
+                  Back
+                </button>
+                <button type="submit" className="submit-btn">
+                  Confirm Cancellation
                 </button>
               </div>
             </form>
