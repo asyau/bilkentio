@@ -64,6 +64,15 @@ public class Guide extends User {
 
     public void increaseScore(int increment) {
         this.score += increment;
+        if(this.score >= 5 && this.score < 10){
+            this.level = "Level 1";
+        }
+        if(this.score >= 10 && this.score < 15){
+            this.level = "Level 2";
+        }
+        if(this.score >= 15){
+            this.level = "Level 3";
+        }
     }
 
     public Set<Tour> getJoinedTours() {
