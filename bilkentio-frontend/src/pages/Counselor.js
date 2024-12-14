@@ -321,6 +321,11 @@ const Counselor = () => {
       const response = await axios.get('http://localhost:8080/api/forms/my-forms', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('My Forms Response:', {
+        raw: response.data,
+        firstForm: response.data[0],
+        structure: response.data[0] ? Object.keys(response.data[0]) : []
+      });
       setMyForms(response.data);
     } catch (error) {
       console.error('Error fetching forms:', error);
@@ -563,19 +568,19 @@ const Counselor = () => {
             <div className="forms-list">
               {myForms.map((form, index) => (
                 <div 
-                  key={`form-${form.form?.id || index}`}
+                  key={`form-${form.id || index}`}
                   className="form-card"
                 >
                   <div className="form-header">
-                    <h3>{form.form?.schoolName || 'No School Name'}</h3>
+                    <h3>{form.schoolName || 'No School Name'}</h3>
                     <div className="form-header-actions">
-                      <span className={`status-badge ${form.form?.state?.toLowerCase()}`}>
-                        {form.form?.state || 'PENDING'}
+                      <span className={`status-badge ${form.state?.toLowerCase()}`}>
+                        {form.state || 'PENDING'}
                       </span>
-                      {form.form?.state === 'PENDING' && (
+                      {form.state === 'PENDING' && (
                         <button
                           className="deny-form-btn"
-                          onClick={() => handleCancelForm(form.form.id)}
+                          onClick={() => handleCancelForm(form.id)}
                         >
                           <span className="material-icons">cancel</span>
                           Cancel Form
@@ -584,22 +589,22 @@ const Counselor = () => {
                     </div>
                   </div>
                   <div className="form-details">
-                    <p><strong>Date:</strong> {form.form?.slotDate || 'Not specified'}</p>
-                    <p><strong>Time:</strong> {form.form?.slotTime || 'Not specified'}</p>
-                    <p><strong>Group Size:</strong> {form.form?.groupSize || 'Not specified'}</p>
-                    <p><strong>Contact:</strong> {form.form?.contactPhone || 'Not specified'}</p>
-                    <p><strong>Leader Role:</strong> {form.form?.groupLeaderRole || 'Not specified'}</p>
-                    <p><strong>Leader Phone:</strong> {form.form?.groupLeaderPhone || 'Not specified'}</p>
-                    <p><strong>Leader Email:</strong> {form.form?.groupLeaderEmail || 'Not specified'}</p>
-                    <p><strong>City:</strong> {form.form?.city || 'Not specified'}</p>
-                    {form.form?.expectations && (
-                      <p><strong>Expectations:</strong> {form.form.expectations}</p>
+                    <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
+                    <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
+                    <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
+                    <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
+                    <p><strong>Leader Role:</strong> {form.groupLeaderRole || 'Not specified'}</p>
+                    <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
+                    <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
+                    <p><strong>City:</strong> {form.city || 'Not specified'}</p>
+                    {form.expectations && (
+                      <p><strong>Expectations:</strong> {form.expectations}</p>
                     )}
-                    {form.form?.specialRequirements && (
-                      <p><strong>Special Requirements:</strong> {form.form.specialRequirements}</p>
+                    {form.specialRequirements && (
+                      <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
                     )}
-                    {form.form?.visitorNotes && (
-                      <p><strong>Notes:</strong> {form.form.visitorNotes}</p>
+                    {form.visitorNotes && (
+                      <p><strong>Notes:</strong> {form.visitorNotes}</p>
                     )}
                   </div>
                 </div>

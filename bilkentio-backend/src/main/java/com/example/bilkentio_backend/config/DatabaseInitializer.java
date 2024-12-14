@@ -125,11 +125,10 @@ public class DatabaseInitializer implements CommandLineRunner {
     @Transactional
     private void initializeAdmin() {
         logger.info("Starting Admin initialization...");
-        // Original method unchanged
         if (!adminRepository.findByUsername("admin").isPresent()) {
             Admin admin = new Admin();
             admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("abba"));
+            admin.setPassword(passwordEncoder.encode("123"));
             admin.setNameSurname("System Administrator");
             admin.setRoles(new HashSet<>(Arrays.asList("ROLE_ADMIN", "ROLE_ADVISOR")));
             adminRepository.save(admin);
@@ -223,7 +222,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 GuidanceCounselor counselor = new GuidanceCounselor();
                 counselor.setNameSurname(fullName);
                 counselor.setUsername("counselor" + (i + 1));
-                counselor.setPassword(passwordEncoder.encode("password"));
+                counselor.setPassword(passwordEncoder.encode("123"));
                 counselor.setRoles(new HashSet<>(Collections.singletonList("ROLE_COUNSELOR")));
                 counselor.setSchool(school);
                 counselor.setEmail(firstName.toLowerCase() + "." + lastName.toLowerCase() + "@" +
@@ -265,7 +264,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 Guide guide = new Guide();
                 guide.setNameSurname(guideNames[i]);
                 guide.setUsername("guide" + (i + 1));
-                guide.setPassword(passwordEncoder.encode("password"));
+                guide.setPassword(passwordEncoder.encode("123"));
                 guide.setRoles(new HashSet<>(Collections.singletonList("ROLE_GUIDE")));
                 guides.add(guide);
             }
