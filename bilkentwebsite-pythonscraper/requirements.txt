@@ -1,0 +1,9 @@
+setuptools>=65.5.1
+wheel>=0.38.4
+numpy>=1.21.6,<2.0.0
+torch>=2.0.0
+sentence-transformers>=2.2.2
+chromadb>=0.4.22
+flask>=3.0.0
+beautifulsoup4>=4.12.2
+requests>=2.31.0 

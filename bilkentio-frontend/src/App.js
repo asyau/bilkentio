@@ -42,6 +42,8 @@ import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScor
 import SchoolManagement from './pages/admin/SchoolManagement';
 import Analytics from './pages/Analytics';
 
+import ChatbotPage from './pages/ChatbotPage';
+
 function App() {
   return (
     <Router>
@@ -94,6 +96,8 @@ function App() {
           <Route path="tours" element={<CoordinatorTourManagement />} />
           <Route path="scores" element={<CoordinatorPuantajScores />} />
         </Route>
+
+        <Route path="/chatbot" element={<ChatbotPage />} />
       </Routes>
     </Router>
   );

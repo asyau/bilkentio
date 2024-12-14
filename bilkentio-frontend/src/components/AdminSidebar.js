@@ -53,7 +53,6 @@ const AdminSidebar = () => {
             <span className="material-icons">map</span>
             {!isCollapsed && <span>Tour Management</span>}
           </NavLink>
-         
         </nav>
         
         <button className="logout-btn" onClick={handleLogout}>
