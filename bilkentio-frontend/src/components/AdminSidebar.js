@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import '../styles/AdminSidebar.css';
+import ProfileSettings from './ProfileSettings';
 
 const AdminSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
 
   return (
     <>
@@ -54,6 +61,13 @@ const AdminSidebar = () => {
             {!isCollapsed && <span>Tour Management</span>}
           </NavLink>
 
+          <button 
+            className="nav-item"
+            onClick={() => setIsSettingsOpen(true)}
+          >
+            <span className="material-icons">settings</span>
+            {!isCollapsed && <span>Settings</span>}
+          </button>
           <NavLink to="/admin/fairs/invite" className="nav-item" title="Invite to Fair">
             <span className="material-icons">add_circle</span>
             {!isCollapsed && <span>Invite to Fair</span>}
@@ -65,21 +79,21 @@ const AdminSidebar = () => {
           </NavLink>
          
         </nav>
-        
+
         <button className="logout-btn" onClick={handleLogout}>
           <span className="material-icons">logout</span>
           {!isCollapsed && <span>Log Out</span>}
         </button>
       </div>
+
+      <ProfileSettings 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
+
       <div className={`admin-sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />
     </>
   );
-};
-
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  console.log("Logging out...");
-  window.location.href = '/login';
 };
 
 export default AdminSidebar; 

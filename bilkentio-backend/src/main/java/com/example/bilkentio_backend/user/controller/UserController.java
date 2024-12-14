@@ -8,7 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.example.bilkentio_backend.authentication.*;
+import com.example.bilkentio_backend.user.repository.UserRepository;
+import java.util.Collections;
+import java.util.HashMap;
 
+import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -17,6 +23,11 @@ public class UserController {
     
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private JwtUtil jwtUtil; 
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -75,7 +86,45 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/check-username/{username}")
+    public ResponseEntity<?> checkUsernameAvailability(@PathVariable String username) {
+        boolean isAvailable = userService.isUsernameAvailable(username);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("available", isAvailable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/update-username")
+    public ResponseEntity<?> updateUsername(@RequestBody Map<String, String> request) {
+        String newUsername = request.get("username");
+        
+        if (newUsername == null || newUsername.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Username cannot be empty");
+        }
+
+        // Get current user from security context
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        try {
+            boolean updated = userService.updateUsername(currentUsername, newUsername);
+            if (updated) {
+                // Generate new JWT token
+                User updatedUser = userRepository.findByUsername(newUsername).orElse(null);
+                String newJwt = jwtUtil.generateToken(updatedUser);
+                return ResponseEntity.ok(Collections.singletonMap("token", newJwt));
+            } else {
+                return ResponseEntity.badRequest().body("Username is already taken");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating username: " + e.getMessage());
+        }
+    }
+
+    
 }
+
 
 // Add this class at the end of the file or in a separate file
 class PasswordChangeRequest {

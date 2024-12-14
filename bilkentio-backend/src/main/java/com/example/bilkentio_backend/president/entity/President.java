@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 @Table(name = "presidents")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class President extends User {
-    @Column(nullable = false)
-    private String specialization;
+   
 
 }

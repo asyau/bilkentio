@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import '../styles/Sidebar.css';
+import ProfileSettings from './ProfileSettings';
 
 const BaseSidebar = ({ logo, menuItems }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -41,6 +43,15 @@ const BaseSidebar = ({ logo, menuItems }) => {
               {!isCollapsed && <span>{item.title}</span>}
             </NavLink>
           ))}
+
+          <button 
+            className="nav-item"
+            onClick={() => setIsSettingsOpen(true)}
+          >
+            <span className="material-icons">settings</span>
+            {!isCollapsed && <span>Settings</span>}
+          </button>
+
           <button className="logout-btn" onClick={handleLogout}>
             <span className="material-icons">logout</span>
             {!isCollapsed && <span>Log Out</span>}
@@ -48,6 +59,10 @@ const BaseSidebar = ({ logo, menuItems }) => {
         </nav>
       </div>
       <div className={`sidebar-placeholder ${isCollapsed ? 'collapsed' : ''}`} />
+      <ProfileSettings 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </>
   );
 };

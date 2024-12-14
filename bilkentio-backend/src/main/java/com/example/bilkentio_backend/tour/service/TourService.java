@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import jakarta.persistence.EntityManager;
 
+
 @Service
 public class TourService {
 
@@ -118,9 +119,15 @@ public class TourService {
                 .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
 
         TourStatus oldStatus = tour.getStatus();
-        tour.setStatus(newStatus);
 
-        notifyStatusChange(tour, oldStatus, newStatus);
+        if (newStatus == TourStatus.FINISHED) {
+            Set<Guide> assignedGuides = tour.getAssignedGuides();
+            for (Guide guide : assignedGuides) {
+                guide.increaseScore(1);
+            }
+        }
+
+        tour.setStatus(newStatus);
 
         return tourRepository.save(tour);
     }

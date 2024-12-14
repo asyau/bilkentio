@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './styles/styles.css';
 
+
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -17,6 +18,7 @@ import TourManagement from './pages/TourManagement';
 import TourDetails from './pages/TourDetails';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
+import ProfileSettings from './components/ProfileSettings';
 
 import DaySelection from './pages/advisor/DaySelection';
 
@@ -73,6 +75,13 @@ function App() {
           <Route path="history" element={<TourHistory />} />
           <Route path="profile" element={<GuideProfile />} />
         </Route>
+
+
+        <Route path="/admin/settings" element={<ProfileSettings />} />
+        <Route path="/president/settings" element={<ProfileSettings />} />
+        <Route path="/coordinator/settings" element={<ProfileSettings />} />
+        <Route path="/advisor/settings" element={<ProfileSettings />} />
+        <Route path="/guide/settings" element={<ProfileSettings />} />
 
         {/* Other Role-specific Routes */}
         <Route path="/president/*" element={<PresidentDashboard />} />
