@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.EntityManager;
 
 @Service
 public class TourService {
@@ -32,13 +33,13 @@ public class TourService {
     private TourRepository tourRepository;
 
     @Autowired
-    private GuideRepository guideRepository;
-
-    @Autowired
     private FormRepository formRepository;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Transactional
     public Tour createTourFromForm(Long formId, int requiredGuides) {
@@ -95,16 +96,20 @@ public class TourService {
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
 
-        Guide guide = guideRepository.findById(guideId)
-                .orElseThrow(() -> new EntityNotFoundException("Guide not found"));
+        entityManager.createNativeQuery(
+            "INSERT INTO tour_guides (tour_id, guide_id) VALUES (?, ?)")
+            .setParameter(1, tourId)
+            .setParameter(2, guideId)
+            .executeUpdate();
 
-        tour.getAssignedGuides().add(guide);
+        entityManager.refresh(tour);
 
         if (tour.getAssignedGuides().size() >= tour.getRequiredGuides()) {
             tour.setStatus(TourStatus.WAITING_TO_FINISH);
+            return tourRepository.save(tour);
         }
 
-        return tourRepository.save(tour);
+        return tour;
     }
 
     @Transactional
@@ -114,44 +119,40 @@ public class TourService {
 
         TourStatus oldStatus = tour.getStatus();
         tour.setStatus(newStatus);
-        
+
         notifyStatusChange(tour, oldStatus, newStatus);
-        
+
         return tourRepository.save(tour);
     }
 
     private void notifyStatusChange(Tour tour, TourStatus oldStatus, TourStatus newStatus) {
         String subject = "Tour Status Update";
-        
+
         if (tour.getGroupLeaderEmail() != null && !tour.getGroupLeaderEmail().isEmpty()) {
             String message = String.format(
-                "Your tour for %s on %s has been updated from %s to %s.",
-                tour.getSchoolName(),
-                tour.getDate(),
-                oldStatus,
-                newStatus
-            );
+                    "Your tour for %s on %s has been updated from %s to %s.",
+                    tour.getSchoolName(),
+                    tour.getDate(),
+                    oldStatus,
+                    newStatus);
             eventPublisher.publishEvent(new EmailEvent(
-                tour.getGroupLeaderEmail(),
-                subject,
-                message
-            ));
+                    tour.getGroupLeaderEmail(),
+                    subject,
+                    message));
         }
 
         for (Guide guide : tour.getAssignedGuides()) {
             if (guide.getEmail() != null && !guide.getEmail().isEmpty()) {
                 String message = String.format(
-                    "The tour for %s on %s has been updated from %s to %s.",
-                    tour.getSchoolName(),
-                    tour.getDate(),
-                    oldStatus,
-                    newStatus
-                );
+                        "The tour for %s on %s has been updated from %s to %s.",
+                        tour.getSchoolName(),
+                        tour.getDate(),
+                        oldStatus,
+                        newStatus);
                 eventPublisher.publishEvent(new EmailEvent(
-                    guide.getEmail(),
-                    subject,
-                    message
-                ));
+                        guide.getEmail(),
+                        subject,
+                        message));
             }
         }
     }
@@ -215,34 +216,30 @@ public class TourService {
 
     private void notifyCancellation(Tour tour, TourStatus oldStatus, String reason) {
         String subject = "Tour Cancelled";
-        
+
         if (tour.getGroupLeaderEmail() != null && !tour.getGroupLeaderEmail().isEmpty()) {
             String message = String.format(
-                "Your tour for %s on %s has been cancelled.\nReason: %s",
-                tour.getSchoolName(),
-                tour.getDate(),
-                reason
-            );
+                    "Your tour for %s on %s has been cancelled.\nReason: %s",
+                    tour.getSchoolName(),
+                    tour.getDate(),
+                    reason);
             eventPublisher.publishEvent(new EmailEvent(
-                tour.getGroupLeaderEmail(),
-                subject,
-                message
-            ));
+                    tour.getGroupLeaderEmail(),
+                    subject,
+                    message));
         }
 
         for (Guide guide : tour.getAssignedGuides()) {
             if (guide.getEmail() != null && !guide.getEmail().isEmpty()) {
                 String message = String.format(
-                    "The tour for %s on %s has been cancelled.\nReason: %s",
-                    tour.getSchoolName(),
-                    tour.getDate(),
-                    reason
-                );
+                        "The tour for %s on %s has been cancelled.\nReason: %s",
+                        tour.getSchoolName(),
+                        tour.getDate(),
+                        reason);
                 eventPublisher.publishEvent(new EmailEvent(
-                    guide.getEmail(),
-                    subject,
-                    message
-                ));
+                        guide.getEmail(),
+                        subject,
+                        message));
             }
         }
     }
