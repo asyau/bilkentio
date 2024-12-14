@@ -125,7 +125,6 @@ public class DatabaseInitializer implements CommandLineRunner {
     @Transactional
     private void initializeAdmin() {
         logger.info("Starting Admin initialization...");
-        // Original method unchanged
         if (!adminRepository.findByUsername("admin").isPresent()) {
             Admin admin = new Admin();
             admin.setUsername("admin");
@@ -223,7 +222,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 GuidanceCounselor counselor = new GuidanceCounselor();
                 counselor.setNameSurname(fullName);
                 counselor.setUsername("counselor" + (i + 1));
-                counselor.setPassword(passwordEncoder.encode("password"));
+                counselor.setPassword(passwordEncoder.encode("123"));
                 counselor.setRoles(new HashSet<>(Collections.singletonList("ROLE_COUNSELOR")));
                 counselor.setSchool(school);
                 counselor.setEmail(firstName.toLowerCase() + "." + lastName.toLowerCase() + "@" +
@@ -265,7 +264,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 Guide guide = new Guide();
                 guide.setNameSurname(guideNames[i]);
                 guide.setUsername("guide" + (i + 1));
-                guide.setPassword(passwordEncoder.encode("password"));
+                guide.setPassword(passwordEncoder.encode("123"));
                 guide.setRoles(new HashSet<>(Collections.singletonList("ROLE_GUIDE")));
                 guides.add(guide);
             }
@@ -295,6 +294,16 @@ public class DatabaseInitializer implements CommandLineRunner {
             List<Tour> tours = new ArrayList<>();
             List<TimeSlot> slotsToUpdate = new ArrayList<>();
 
+            String[] leaderRoles = {
+                    "Department Head",
+                    "Guidance Counselor",
+                    "Vice Principal",
+                    "Principal",
+                    "Academic Coordinator",
+                    "Career Advisor",
+                    "Student Affairs Coordinator"
+            };
+
             for (int i = 0; i < numberOfTours; i++) {
                 try {
                     // Create form
@@ -306,7 +315,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                     form.setContactPhone(counselor.getPhoneNumber());
                     form.setExpectations("Sample expectations for tour " + (i + 1));
                     form.setSpecialRequirements("Sample requirements for tour " + (i + 1));
-                    form.setGroupLeaderRole("Guidance Counselor");
+                    form.setGroupLeaderRole(leaderRoles[random.nextInt(leaderRoles.length)]);
                     form.setGroupLeaderPhone(counselor.getPhoneNumber());
                     form.setGroupLeaderEmail(counselor.getEmail());
                     form.setVisitorNotes("Sample notes for tour " + (i + 1));
@@ -345,6 +354,9 @@ public class DatabaseInitializer implements CommandLineRunner {
                         tour.setExpectations(form.getExpectations());
                         tour.setSpecialRequirements(form.getSpecialRequirements());
                         tour.setVisitorNotes(form.getVisitorNotes());
+                        tour.setGroupLeaderRole(form.getGroupLeaderRole());
+                        tour.setGroupLeaderPhone(form.getGroupLeaderPhone());
+                        tour.setGroupLeaderEmail(form.getGroupLeaderEmail());
 
                         // Set status with weighted distribution
                         double statusRandom = random.nextDouble();

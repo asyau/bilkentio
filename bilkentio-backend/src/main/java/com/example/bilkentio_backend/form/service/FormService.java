@@ -44,46 +44,65 @@ public class FormService {
             throw new IllegalArgumentException("Form must have a linked time slot");
         }
 
+        boolean formExists = formRepository.existsBySchool_IdAndLinkedSlot_Id(
+                form.getSchool().getId(),
+                slot.getId());
+
+        if (formExists) {
+            throw new IllegalStateException("A form from your school has already been submitted for this time slot");
+        }
+
         slot.setStatus(SlotStatus.FORM_REQUESTED);
         slotRepository.save(slot);
 
         Form savedForm = formRepository.save(form);
         sendFormSubmissionEmail(savedForm);
-        
+
         return savedForm;
     }
 
     @Transactional
     public Form updateFormStatus(Long formId, FormState newState) {
         Form form = formRepository.findById(formId)
-            .orElseThrow(() -> new RuntimeException("Form not found"));
+                .orElseThrow(() -> new RuntimeException("Form not found"));
 
         System.out.println("Updating form " + formId + " state from " + form.getState() + " to " + newState);
         form.setState(newState);
         TimeSlot slot = form.getLinkedSlot();
 
-        if (newState == FormState.APPROVED) {
+        if (newState == FormState.DENIED) {
+            // Check if there are other pending forms for this slot
+            List<Form> otherPendingForms = formRepository.findByLinkedSlot_IdAndStateAndIdNot(
+                    slot.getId(),
+                    FormState.PENDING,
+                    formId);
+
+            // Only set to AVAILABLE if there are no other pending forms
+            if (otherPendingForms.isEmpty()) {
+                slot.setStatus(SlotStatus.AVAILABLE);
+            }
+            slotRepository.save(slot);
+        } else if (newState == FormState.APPROVED) {
             slot.setStatus(SlotStatus.UNAVAILABLE);
-            
+
             // Get all other pending forms for the same time slot
             List<Form> otherForms = formRepository.findByLinkedSlot_IdAndStateAndIdNot(
-                slot.getId(),
-                FormState.PENDING,
-                formId
-            );
-            
+                    slot.getId(),
+                    FormState.PENDING,
+                    formId);
+
             // Automatically deny other forms
             for (Form otherForm : otherForms) {
                 otherForm.setState(FormState.DENIED);
-                formRepository.save(otherForm);                
+                formRepository.save(otherForm);
                 sendFormStatusUpdateEmail(otherForm);
             }
         }
         slotRepository.save(slot);
         Form savedForm = formRepository.save(form);
-        
+
         sendFormStatusUpdateEmail(savedForm);
-        
+
         return savedForm;
     }
 
@@ -91,47 +110,43 @@ public class FormService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
         String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
         String time = form.getLinkedSlot().getTime().toString();
-        
+
         String emailContent = emailService.createFormSubmissionEmailBody(
-            form.getSubmittedBy().getNameSurname(),
-            date,
-            time,
-            form.getGroupSize(),
-            form.getSchool().getName(),
-            form.getContactPhone(),
-            form.getExpectations(),
-            form.getSpecialRequirements(),
-            form.getGroupLeaderRole(),
-            form.getGroupLeaderPhone(),
-            form.getGroupLeaderEmail(),
-            form.getVisitorNotes(),
-            form.getSchool().getCity()
-        );
+                form.getSubmittedBy().getNameSurname(),
+                date,
+                time,
+                form.getGroupSize(),
+                form.getSchool().getName(),
+                form.getContactPhone(),
+                form.getExpectations(),
+                form.getSpecialRequirements(),
+                form.getGroupLeaderRole(),
+                form.getGroupLeaderPhone(),
+                form.getGroupLeaderEmail(),
+                form.getVisitorNotes(),
+                form.getSchool().getCity());
 
         eventPublisher.publishEvent(new EmailEvent(
-            form.getGroupLeaderEmail(),
-            "Bilkent IO - Form Submission Confirmation",
-            emailContent
-        ));
+                form.getGroupLeaderEmail(),
+                "Bilkent IO - Form Submission Confirmation",
+                emailContent));
     }
 
     protected void sendFormStatusUpdateEmail(Form form) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy");
         String date = form.getLinkedSlot().getDay().getDate().format(dateFormatter);
         String time = form.getLinkedSlot().getTime().toString();
-        
+
         String emailContent = emailService.createFormStatusUpdateEmailBody(
-            form.getSubmittedBy().getNameSurname(),
-            date,
-            time,
-            form.getState().toString()
-        );
+                form.getSubmittedBy().getNameSurname(),
+                date,
+                time,
+                form.getState().toString());
 
         eventPublisher.publishEvent(new EmailEvent(
-            form.getGroupLeaderEmail(),
-            "Bilkent IO - Form Status Update",
-            emailContent
-        ));
+                form.getGroupLeaderEmail(),
+                "Bilkent IO - Form Status Update",
+                emailContent));
     }
 
     public List<Form> getPendingForms() {
@@ -165,5 +180,21 @@ public class FormService {
 
     public List<Form> getFormsBySchoolAndState(Long schoolId, FormState state) {
         return formRepository.findBySchool_IdAndState(schoolId, state);
+    }
+
+    public boolean isFormOwner(Long formId, String username) {
+        try {
+            Form form = formRepository.findById(formId)
+                .orElse(null);
+            if (form == null) {
+                return false;
+            }
+            String formUsername = form.getSubmittedBy().getUsername();
+            System.out.println("Comparing form username: " + formUsername + " with current username: " + username);
+            return formUsername.equals(username);
+        } catch (Exception e) {
+            System.err.println("Error checking form ownership: " + e.getMessage());
+            return false;
+        }
     }
 }

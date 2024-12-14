@@ -39,6 +39,9 @@ const Counselor = () => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [selectedTour, setSelectedTour] = useState(null);
   const [feedback, setFeedback] = useState({ feedback: '', rating: 0 });
+  const [showCancellationForm, setShowCancellationForm] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [tourToCancel, setTourToCancel] = useState(null);
 
   const StarRating = ({ rating, onRatingChange }) => {
     return (
@@ -190,6 +193,8 @@ const Counselor = () => {
         console.error('Error submitting form:', error);
         if (error.response?.status === 401) {
           navigate('/login');
+        } else if (error.response?.status === 409) {
+          alert('You already have a submitted form for this time slot.');
         } else {
           alert('Failed to submit form. Please try again.');
         }
@@ -319,6 +324,11 @@ const Counselor = () => {
       const response = await axios.get('http://localhost:8080/api/forms/my-forms', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('My Forms Response:', {
+        raw: response.data,
+        firstForm: response.data[0],
+        structure: response.data[0] ? Object.keys(response.data[0]) : []
+      });
       setMyForms(response.data);
     } catch (error) {
       console.error('Error fetching forms:', error);
@@ -384,6 +394,71 @@ const Counselor = () => {
       case 'GIVEN_FEEDBACK': return 'status-badge feedback';
       case 'CANCELLED': return 'status-badge cancelled';
       default: return 'status-badge';
+    }
+  };
+
+  const handleCancelForm = async (formId) => {
+    if (!window.confirm('Are you sure you want to cancel this form? The form will be automatically denied.')) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `http://localhost:8080/api/forms/${formId}/status`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { newState: 'DENIED' }
+        }
+      );
+      
+      // Refresh the forms list
+      fetchMyForms();
+    } catch (error) {
+      console.error('Error cancelling form:', error);
+      if (error.response?.status === 403) {
+        alert('You do not have permission to cancel this form.');
+      } else {
+        alert('Failed to cancel form. Please try again.');
+      }
+    }
+  };
+
+  const handleCancelTour = async (tour) => {
+    setTourToCancel(tour);
+    setShowCancellationForm(true);
+  };
+
+  const submitCancellation = async (e) => {
+    e.preventDefault();
+    if (!cancellationReason.trim()) {
+      alert('Please provide a reason for cancellation');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `http://localhost:8080/api/tours/${tourToCancel.id}/cancel`,
+        { reason: cancellationReason },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      // Refresh tours list
+      if (user) {
+        fetchTours(user.userId);
+      }
+      
+      // Reset form
+      setShowCancellationForm(false);
+      setTourToCancel(null);
+      setCancellationReason('');
+    } catch (error) {
+      console.error('Error cancelling tour:', error);
+      alert('Failed to cancel tour: ' + (error.response?.data || error.message));
     }
   };
 
@@ -456,15 +531,15 @@ const Counselor = () => {
               {loading ? (
                 <div className="loading-spinner">Loading...</div>
               ) : days.length > 0 ? (
-                days.map((day) => (
-                  <div key={day.id} className="day-column">
+                days.map((day, index) => (
+                  <div key={`${day.date}-${index}`} className="day-column">
                     <div className="day-header">
                       <div>{format(new Date(day.date), 'dd MMM')}</div>
                       <div>{format(new Date(day.date), 'EEEE')}</div>
                     </div>
-                    {day.slots && day.slots.map((slot) => (
+                    {day.slots && day.slots.map((slot, slotIndex) => (
                       <div 
-                        key={slot.id} 
+                        key={`${slot.id}-${slotIndex}`}
                         className={getSlotClass(slot)}
                         onClick={() => handleSlotClick(slot, day)}
                       >
@@ -507,7 +582,7 @@ const Counselor = () => {
                       </p>
                     )}
                   </div>
-                  <div>
+                  <div className="tour-actions">
                     <span className={getStatusBadgeClass(tour.status)}>
                       {tour.status.replace('_', ' ')}
                     </span>
@@ -522,6 +597,14 @@ const Counselor = () => {
                         Give Feedback
                       </button>
                     )}
+                    {(tour.status === 'GUIDES_PENDING' || tour.status === 'WAITING_TO_FINISH') && (
+                      <button 
+                        className="cancel-btn"
+                        onClick={() => handleCancelTour(tour)}
+                      >
+                        Cancel Tour
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -531,13 +614,27 @@ const Counselor = () => {
           <div className="my-forms-container">
             <h2>My Form Submissions</h2>
             <div className="forms-list">
-              {myForms.map(form => (
-                <div key={form.id} className="form-card">
+              {myForms.map((form, index) => (
+                <div 
+                  key={`form-${form.id || index}`}
+                  className="form-card"
+                >
                   <div className="form-header">
                     <h3>{form.schoolName || 'No School Name'}</h3>
-                    <span className={`status-badge ${form.state?.toLowerCase()}`}>
-                      {form.state}
-                    </span>
+                    <div className="form-header-actions">
+                      <span className={`status-badge ${form.state?.toLowerCase()}`}>
+                        {form.state || 'PENDING'}
+                      </span>
+                      {form.state === 'PENDING' && (
+                        <button
+                          className="deny-form-btn"
+                          onClick={() => handleCancelForm(form.id)}
+                        >
+                          <span className="material-icons">cancel</span>
+                          Cancel Form
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="form-details">
                     <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
@@ -602,6 +699,45 @@ const Counselor = () => {
                 </button>
                 <button type="submit" className="submit-btn">
                   Submit Feedback
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showCancellationForm && tourToCancel && (
+        <div className="form-overlay">
+          <div className="form-container">
+            <h3>Cancel Tour</h3>
+            <div className="selected-tour-info">
+              <p><strong>{tourToCancel.schoolName}</strong></p>
+              <p>Date: {tourToCancel.date} at {tourToCancel.time}</p>
+            </div>
+            <form onSubmit={submitCancellation}>
+              <div className="form-group">
+                <label>Reason for Cancellation:</label>
+                <textarea
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  required
+                  placeholder="Please provide a reason for cancellation"
+                />
+              </div>
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  className="cancel-btn" 
+                  onClick={() => {
+                    setShowCancellationForm(false);
+                    setTourToCancel(null);
+                    setCancellationReason('');
+                  }}
+                >
+                  Back
+                </button>
+                <button type="submit" className="submit-btn">
+                  Confirm Cancellation
                 </button>
               </div>
             </form>

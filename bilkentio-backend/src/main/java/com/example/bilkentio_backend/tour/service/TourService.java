@@ -10,11 +10,14 @@ import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.tour.repository.TourRepository;
 import com.example.bilkentio_backend.user.entity.User;
 import com.example.bilkentio_backend.guidanceCounselor.entity.GuidanceCounselor;
+import com.example.bilkentio_backend.common.EmailService;
+import com.example.bilkentio_backend.common.event.EmailEvent;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -33,6 +36,9 @@ public class TourService {
 
     @Autowired
     private FormRepository formRepository;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Tour createTourFromForm(Long formId, int requiredGuides) {
@@ -61,6 +67,9 @@ public class TourService {
         tour.setExpectations(form.getExpectations());
         tour.setSpecialRequirements(form.getSpecialRequirements());
         tour.setVisitorNotes(form.getVisitorNotes());
+        tour.setGroupLeaderRole(form.getGroupLeaderRole());
+        tour.setGroupLeaderPhone(form.getGroupLeaderPhone());
+        tour.setGroupLeaderEmail(form.getGroupLeaderEmail());
 
         return tourRepository.save(tour);
     }
@@ -103,8 +112,48 @@ public class TourService {
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
 
+        TourStatus oldStatus = tour.getStatus();
         tour.setStatus(newStatus);
+        
+        notifyStatusChange(tour, oldStatus, newStatus);
+        
         return tourRepository.save(tour);
+    }
+
+    private void notifyStatusChange(Tour tour, TourStatus oldStatus, TourStatus newStatus) {
+        String subject = "Tour Status Update";
+        
+        if (tour.getGroupLeaderEmail() != null && !tour.getGroupLeaderEmail().isEmpty()) {
+            String message = String.format(
+                "Your tour for %s on %s has been updated from %s to %s.",
+                tour.getSchoolName(),
+                tour.getDate(),
+                oldStatus,
+                newStatus
+            );
+            eventPublisher.publishEvent(new EmailEvent(
+                tour.getGroupLeaderEmail(),
+                subject,
+                message
+            ));
+        }
+
+        for (Guide guide : tour.getAssignedGuides()) {
+            if (guide.getEmail() != null && !guide.getEmail().isEmpty()) {
+                String message = String.format(
+                    "The tour for %s on %s has been updated from %s to %s.",
+                    tour.getSchoolName(),
+                    tour.getDate(),
+                    oldStatus,
+                    newStatus
+                );
+                eventPublisher.publishEvent(new EmailEvent(
+                    guide.getEmail(),
+                    subject,
+                    message
+                ));
+            }
+        }
     }
 
     @Transactional
@@ -149,8 +198,11 @@ public class TourService {
             throw new IllegalStateException("Cannot cancel a tour that has already started or finished");
         }
 
+        TourStatus oldStatus = tour.getStatus();
         tour.setStatus(TourStatus.CANCELLED);
         tour.setCancellationReason(cancellationReason);
+
+        notifyCancellation(tour, oldStatus, cancellationReason);
 
         Form form = tour.getForm();
         form.setState(FormState.DENIED);
@@ -159,6 +211,40 @@ public class TourService {
         tour.getAssignedGuides().clear();
 
         return tourRepository.save(tour);
+    }
+
+    private void notifyCancellation(Tour tour, TourStatus oldStatus, String reason) {
+        String subject = "Tour Cancelled";
+        
+        if (tour.getGroupLeaderEmail() != null && !tour.getGroupLeaderEmail().isEmpty()) {
+            String message = String.format(
+                "Your tour for %s on %s has been cancelled.\nReason: %s",
+                tour.getSchoolName(),
+                tour.getDate(),
+                reason
+            );
+            eventPublisher.publishEvent(new EmailEvent(
+                tour.getGroupLeaderEmail(),
+                subject,
+                message
+            ));
+        }
+
+        for (Guide guide : tour.getAssignedGuides()) {
+            if (guide.getEmail() != null && !guide.getEmail().isEmpty()) {
+                String message = String.format(
+                    "The tour for %s on %s has been cancelled.\nReason: %s",
+                    tour.getSchoolName(),
+                    tour.getDate(),
+                    reason
+                );
+                eventPublisher.publishEvent(new EmailEvent(
+                    guide.getEmail(),
+                    subject,
+                    message
+                ));
+            }
+        }
     }
 
 }
