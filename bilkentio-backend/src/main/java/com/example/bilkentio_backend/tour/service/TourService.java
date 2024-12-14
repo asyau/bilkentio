@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class TourService {
@@ -113,10 +114,18 @@ public class TourService {
                 .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
 
         TourStatus oldStatus = tour.getStatus();
+
+        if (newStatus == TourStatus.FINISHED) {
+            Set<Guide> assignedGuides = tour.getAssignedGuides();
+            for (Guide guide : assignedGuides) {
+                guide.increaseScore(1);
+            }
+        }
+
         tour.setStatus(newStatus);
-        
         notifyStatusChange(tour, oldStatus, newStatus);
-        
+
+        // Save the updated tour
         return tourRepository.save(tour);
     }
 
