@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.context.ApplicationEventPublisher;
 import com.example.bilkentio_backend.common.event.EmailEvent;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -166,5 +167,23 @@ public class UserService {
             emailContent
         ));
     }
-    
+
+    public boolean isUsernameAvailable(String username) {
+        return !userRepository.existsByUsername(username);
+    }
+
+    @Transactional
+    public boolean updateUsername(String currentUsername, String newUsername) {
+        if (isUsernameTaken(newUsername)) {
+            return false;
+        }
+
+        return userRepository.findByUsername(currentUsername)
+            .map(user -> {
+                user.setUsername(newUsername);
+                userRepository.save(user);
+                return true;
+            })
+            .orElse(false);
+    }
 }

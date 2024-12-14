@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import AdvisorInfoContainer from './AdvisorInfoContainer';
+import ProfileSettings from './ProfileSettings';
 import '../styles/Sidebar.css';
 import '../styles/GuideMode.css';
 
 const GuideSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const menuItems = [
     {
@@ -35,35 +37,45 @@ const GuideSidebar = () => {
   ];
 
   return (
-    
-    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-      <div className="logo-section">
-        {!isCollapsed && <h2>BilkentIO</h2>}
-      </div>
-      
-      <button 
-        className={`collapse-btn ${!isCollapsed ? 'is-active' : ''}`}
-        onClick={() => setIsCollapsed(!isCollapsed)}
-      >
-      
-        <div className="hamburger-icon">
-          <span className="line"></span>
-          <span className="line"></span>
-          <span className="line"></span>
+    <>
+      <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="logo-section">
+          {!isCollapsed && <h2>BilkentIO</h2>}
         </div>
-      </button>
-      {!isCollapsed && <AdvisorInfoContainer />} 
-      <nav className="sidebar-nav">
-        {menuItems.map((item, index) => (
-          <NavLink key={index} to={item.path} className="nav-item" title={item.title}>
-            <span className="material-icons">{item.icon}</span>
-            {!isCollapsed && <span>{item.title}</span>}
-          </NavLink>
-        ))}
-      </nav>
-
-     
-    </div>
+        
+        <button 
+          className={`collapse-btn ${!isCollapsed ? 'is-active' : ''}`}
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          <div className="hamburger-icon">
+            <span className="line"></span>
+            <span className="line"></span>
+            <span className="line"></span>
+          </div>
+        </button>
+        {!isCollapsed && <AdvisorInfoContainer />} 
+        <nav className="sidebar-nav">
+          {menuItems.map((item, index) => (
+            <NavLink key={index} to={item.path} className="nav-item" title={item.title}>
+              <span className="material-icons">{item.icon}</span>
+              {!isCollapsed && <span>{item.title}</span>}
+            </NavLink>
+          ))}
+          
+          <button 
+            className="nav-item"
+            onClick={() => setIsSettingsOpen(true)}
+          >
+            <span className="material-icons">settings</span>
+            {!isCollapsed && <span>Settings</span>}
+          </button>
+        </nav>
+      </div>
+      <ProfileSettings 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
+    </>
   );
 };
 

@@ -22,7 +22,8 @@ const PresidentSidebar = () => {
       title: 'Reports',
       path: '/president/reports',
       icon: 'description'
-    }
+    },
+    
   ];
 
   return <BaseSidebar logo="BilkentIO" menuItems={menuItems} />;

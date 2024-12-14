@@ -36,6 +36,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/api/users/update-username").authenticated()
+                .requestMatchers("/api/users/*/change-password").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR","GUIDE","GUİDE")
@@ -44,7 +46,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR")
                 .requestMatchers("/api/tours/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE","GUİDE","COUNSELOR")
                 .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
-                .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR")
+                .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR","COORDİNATOR")
                 .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
                 .requestMatchers("/api/schools/**").permitAll()  
                 .anyRequest().authenticated()
