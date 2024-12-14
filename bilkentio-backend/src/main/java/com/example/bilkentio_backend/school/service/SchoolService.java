@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SchoolService {
@@ -29,11 +30,11 @@ public class SchoolService {
     @Transactional
     public void importSchoolsFromCsv(String filePath) {
         List<School> schools = new ArrayList<>();
-        
+
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             // Skip header
             String line = br.readLine();
-            
+
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
                 if (values.length >= 3) {
@@ -44,10 +45,10 @@ public class SchoolService {
                     schools.add(school);
                 }
             }
-            
+
             schoolRepository.saveAll(schools);
             logger.info("Successfully imported {} schools", schools.size());
-            
+
         } catch (IOException e) {
             logger.error("Failed to import schools from CSV", e);
             throw new RuntimeException("Failed to import schools", e);
@@ -69,6 +70,11 @@ public class SchoolService {
     public List<School> getSchoolsByPriorityRank(Integer priorityRank) {
         return schoolRepository.findByPriorityRank(priorityRank);
     }
+
+    public Optional<School> findByName(String name) {
+        return schoolRepository.findByName(name);
+    }
+}
 
     public List<GuidanceCounselor> getSchoolCounselors(Long schoolId) {
         return guidanceCounselorRepository.findBySchoolId(schoolId);
