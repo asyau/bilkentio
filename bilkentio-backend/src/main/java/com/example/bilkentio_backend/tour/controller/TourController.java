@@ -54,12 +54,24 @@ public class TourController {
     }
 
     @PostMapping("/{tourId}/guides/{guideId}")
-    public ResponseEntity<TourDTO> assignGuide(
+    public ResponseEntity<?> assignGuide(
             @PathVariable Long tourId,
             @PathVariable Long guideId) {
-        return ResponseEntity.ok(TourDTO.fromEntity(
-            tourService.assignGuide(tourId, guideId)
-        ));
+        logger.info("Received request to assign guide {} to tour {}", guideId, tourId);
+        try {
+            Tour updatedTour = tourService.assignGuide(tourId, guideId);
+            logger.info("Successfully assigned guide {} to tour {}", guideId, tourId);
+            return ResponseEntity.ok(TourDTO.fromEntity(updatedTour));
+        } catch (EntityNotFoundException e) {
+            logger.error("Entity not found: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            logger.error("Invalid state: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error while assigning guide: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}/status")
