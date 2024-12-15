@@ -17,7 +17,7 @@ public class FormDTO {
     private Boolean agreeToTerms;
     private LocalDate date;
     private String time;
-    
     private String schoolName;
     private String city;
+
 } 
