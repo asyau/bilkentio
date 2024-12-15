@@ -1,143 +1,187 @@
 import React, { useState, useEffect } from 'react';
-import AdminSidebar from '../../components/AdminSidebar';
 import axios from 'axios';
+import { Table, Button, Badge, Modal, Form } from 'react-bootstrap';
 import '../../styles/Fair.css';
 
 const FairApplications = () => {
-    const [applications, setApplications] = useState([]);
-    const [filteredApplications, setFilteredApplications] = useState([]);
-    const [selectedCity, setSelectedCity] = useState('all');
-    const [rankingFilter, setRankingFilter] = useState('all');
-    const [searchTerm, setSearchTerm] = useState('');
+    const [fairs, setFairs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showAssignModal, setShowAssignModal] = useState(false);
+    const [selectedFairId, setSelectedFairId] = useState(null);
+    const [guides, setGuides] = useState([]);
+    const [selectedGuideId, setSelectedGuideId] = useState('');
+    const userRole = localStorage.getItem('userRole'); // Get user role from storage
 
     useEffect(() => {
-        fetchApplications();
-    }, []);
+        fetchFairs();
+        if (userRole === 'ROLE_COORDINATOR') {
+            fetchGuides();
+        }
+    }, [userRole]);
 
-    const fetchApplications = async () => {
+    const fetchFairs = async () => {
         try {
-            const response = await axios.get('http://localhost:8080/api/fairs/applications', {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            });
-            setApplications(response.data);
-            setFilteredApplications(response.data);
+            const response = await axios.get('/api/fairs');
+            setFairs(response.data);
+            setLoading(false);
         } catch (error) {
-            console.error('Error fetching applications:', error);
+            console.error('Error fetching fairs:', error);
+            setLoading(false);
         }
     };
 
-    const filterApplications = () => {
-        let filtered = [...applications];
-
-        if (selectedCity !== 'all') {
-            filtered = filtered.filter(app => app.city === selectedCity);
+    const fetchGuides = async () => {
+        try {
+            const response = await axios.get('/api/users/guides');
+            setGuides(response.data);
+        } catch (error) {
+            console.error('Error fetching guides:', error);
         }
+    };
 
-        if (rankingFilter !== 'all') {
-            switch (rankingFilter) {
-                case 'high':
-                    filtered = filtered.filter(app => app.schoolRank >= 8);
-                    break;
-                case 'medium':
-                    filtered = filtered.filter(app => app.schoolRank >= 5 && app.schoolRank < 8);
-                    break;
-                case 'low':
-                    filtered = filtered.filter(app => app.schoolRank < 5);
-                    break;
-            }
+    const handleAssignGuide = async () => {
+        try {
+            await axios.put(`/api/fairs/${selectedFairId}/assign-guide/${selectedGuideId}`);
+            setShowAssignModal(false);
+            fetchFairs(); // Refresh the list
+        } catch (error) {
+            console.error('Error assigning guide:', error);
         }
+    };
 
-        if (searchTerm) {
-            filtered = filtered.filter(app =>
-                app.schoolName.toLowerCase().includes(searchTerm.toLowerCase())
+    const handleGuideResponse = async (fairId, accepted) => {
+        try {
+            await axios.put(`/api/fairs/${fairId}/guide-response`, {
+                guideId: localStorage.getItem('userId'),
+                accepted: accepted
+            });
+            fetchFairs();
+        } catch (error) {
+            console.error('Error responding to fair assignment:', error);
+        }
+    };
+
+    const getStatusBadgeVariant = (status) => {
+        switch (status) {
+            case 'PENDING': return 'warning';
+            case 'GUIDE_ASSIGNED': return 'info';
+            case 'GUIDE_ACCEPTED': return 'success';
+            case 'GUIDE_REJECTED': return 'danger';
+            case 'COMPLETED': return 'primary';
+            case 'CANCELLED': return 'secondary';
+            default: return 'light';
+        }
+    };
+
+    const renderActionButtons = (fair) => {
+        if (userRole === 'ROLE_COORDINATOR' && fair.status === 'PENDING') {
+            return (
+                <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => {
+                        setSelectedFairId(fair.id);
+                        setShowAssignModal(true);
+                    }}
+                >
+                    Assign Guide
+                </Button>
+            );
+        } else if (userRole === 'ROLE_GUIDE' &&
+            fair.status === 'GUIDE_ASSIGNED' &&
+            fair.assignedGuideId === parseInt(localStorage.getItem('userId'))) {
+            return (
+                <>
+                    <Button
+                        variant="success"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => handleGuideResponse(fair.id, true)}
+                    >
+                        Accept
+                    </Button>
+                    <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleGuideResponse(fair.id, false)}
+                    >
+                        Reject
+                    </Button>
+                </>
             );
         }
-
-        setFilteredApplications(filtered);
+        return null;
     };
 
-    useEffect(() => {
-        filterApplications();
-    }, [selectedCity, rankingFilter, searchTerm]);
+    if (loading) return <div>Loading...</div>;
 
     return (
-        <div className="admin-layout">
-            <AdminSidebar />
-            <div className="admin-content">
-                <div className="applications-container">
-                    <h1>Fair Applications</h1>
+        <div className="fair-applications-container">
+            <h2>Fair Applications</h2>
+            <Table striped bordered hover>
+                <thead>
+                    <tr>
+                        <th>School Name</th>
+                        <th>City</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>School Rank</th>
+                        <th>Contact Person</th>
+                        <th>Expected Students</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {fairs.map(fair => (
+                        <tr key={fair.id}>
+                            <td>{fair.schoolName}</td>
+                            <td>{fair.city}</td>
+                            <td>{new Date(fair.date).toLocaleDateString()}</td>
+                            <td>
+                                <Badge bg={getStatusBadgeVariant(fair.status)}>
+                                    {fair.status}
+                                </Badge>
+                            </td>
+                            <td>{fair.schoolRank}</td>
+                            <td>{fair.contactPerson}</td>
+                            <td>{fair.expectedStudents}</td>
+                            <td>{renderActionButtons(fair)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
 
-                    <div className="filters-section">
-                        <input
-                            type="text"
-                            placeholder="Search schools..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                        />
-                        <select
-                            value={selectedCity}
-                            onChange={(e) => setSelectedCity(e.target.value)}
-                            className="filter-select"
-                        >
-                            <option value="all">All Cities</option>
-                            {cities.map(city => (
-                                <option key={city} value={city}>{city}</option>
-                            ))}
-                        </select>
-                        <select
-                            value={rankingFilter}
-                            onChange={(e) => setRankingFilter(e.target.value)}
-                            className="filter-select"
-                        >
-                            <option value="all">All Rankings</option>
-                            <option value="high">High Priority (8-10)</option>
-                            <option value="medium">Medium Priority (5-7)</option>
-                            <option value="low">Low Priority (1-4)</option>
-                        </select>
-                    </div>
-
-                    <div className="applications-grid">
-                        {filteredApplications.map(app => (
-                            <div key={app.id} className={`application-card ${app.status?.toLowerCase()}`}>
-                                <div className="card-header">
-                                    <h3>{app.schoolName}</h3>
-                                    <span className={`rank-badge rank-${Math.floor(app.schoolRank || 0)}`}>
-                                        {app.schoolRank ? `Rank: ${app.schoolRank.toFixed(1)}` : 'Unranked'}
-                                    </span>
-                                </div>
-                                <div className="card-content">
-                                    <p><span className="material-icons">location_on</span> {app.city}</p>
-                                    <p><span className="material-icons">event</span> {new Date(app.date).toLocaleDateString()}</p>
-                                    <p><span className="material-icons">group</span> {app.expectedStudents} students</p>
-                                    <p><span className="material-icons">person</span> {app.contactPerson}</p>
-                                    <p><span className="material-icons">email</span> {app.contactEmail}</p>
-                                    <p><span className="material-icons">phone</span> {app.contactPhone}</p>
-                                    <p><span className="material-icons">info</span> Status: {app.status}</p>
-                                </div>
-                                {app.status === 'PENDING' && (
-                                    <div className="card-actions">
-                                        <button
-                                            onClick={() => handleApplicationAction(app.id, 'APPROVED')}
-                                            className="accept-btn"
-                                        >
-                                            <span className="material-icons">check_circle</span>
-                                            Accept
-                                        </button>
-                                        <button
-                                            onClick={() => handleApplicationAction(app.id, 'DENIED')}
-                                            className="reject-btn"
-                                        >
-                                            <span className="material-icons">cancel</span>
-                                            Reject
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+            <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Assign Guide to Fair</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Select Guide</Form.Label>
+                            <Form.Select
+                                value={selectedGuideId}
+                                onChange={(e) => setSelectedGuideId(e.target.value)}
+                            >
+                                <option value="">Choose a guide...</option>
+                                {guides.map(guide => (
+                                    <option key={guide.id} value={guide.id}>
+                                        {guide.nameSurname}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAssignModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleAssignGuide}>
+                        Assign Guide
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

@@ -1,0 +1,37 @@
+.public-schedule-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.login-prompt {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.login-prompt button {
+    color: #004d95;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.text-button {
+    background: none;
+    border: none;
+    color: #004d95;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+    margin: 0;
+}
+
+.text-button:hover {
+    color: #003972;
+} 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdvisorSidebar from '../../components/AdvisorSidebar';
 import '../../styles/FormRequests.css';
+import '../../styles/Advisor.css';
 
 const FormRequests = () => {
   const navigate = useNavigate();
@@ -169,9 +170,9 @@ const FormRequests = () => {
   };
 
   return (
-    <div className="admin-layout">
+    <div className="advisor-container">
       <AdvisorSidebar />
-      <div className="admin-content">
+      <div className="advisor-content">
         <div className="form-requests-container">
           <div className="form-header">
             <div className="filter-section">

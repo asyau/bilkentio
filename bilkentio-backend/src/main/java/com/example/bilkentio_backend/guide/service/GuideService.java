@@ -8,6 +8,8 @@ import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.tour.dto.TourResponse;
 import com.example.bilkentio_backend.tour.entity.Tour;
 import com.example.bilkentio_backend.tour.dto.IndividualTourResponse;
+import com.example.bilkentio_backend.guide.dto.GuideProfileDTO;
+import com.example.bilkentio_backend.user.UserService;
 
 import java.util.List;
 import java.util.Map;
@@ -18,12 +20,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
-
 @Service
 public class GuideService {
 
     @Autowired
     private GuideRepository guideRepository;
+
+    @Autowired
+    private UserService userService;
 
     public List<Guide> getAllGuides() {
         return guideRepository.findAll();
@@ -71,89 +75,147 @@ public class GuideService {
 
     public Map<String, Object> getGuideStats(Long guideId) {
         Guide guide = guideRepository.findById(guideId)
-            .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
-            
+                .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
+
         Map<String, Object> stats = new HashMap<>();
-        
+
         stats.put("averageRating", guide.getAverageRating());
         stats.put("totalIndividualTours", guide.getIndividualTours().size());
         stats.put("totalGroupTours", guide.getJoinedTours().size());
         stats.put("reviews", guide.getAllReviews());
-        
+
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"));
         String currentYear = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
+        
+        // Calculate total hours
+        double totalHours = guide.getJoinedTours().stream()
+            .filter(tour -> tour.getTotalHours() != null)
+            .mapToDouble(Tour::getTotalHours)
+            .sum();
+        
+        // Calculate current month hours
+        LocalDate now = LocalDate.now();
+        double currentMonthHours = guide.getJoinedTours().stream()
+            .filter(tour -> {
+                if (tour.getTotalHours() == null) return false;
+                LocalDate tourDate = tour.getDate();
+                return tourDate.getMonth() == now.getMonth() && 
+                       tourDate.getYear() == now.getYear();
+            })
+            .mapToDouble(Tour::getTotalHours)
+            .sum();
         
         stats.put("currentMonthIndividualTours", guide.getIndividualTourCountForMonth(currentMonth));
         stats.put("currentMonthGroupTours", guide.getGroupTourCountForMonth(currentMonth));
         stats.put("currentYearIndividualTours", guide.getIndividualTourCountForYear(currentYear));
         stats.put("currentYearGroupTours", guide.getGroupTourCountForYear(currentYear));
+        stats.put("totalHours", totalHours);
+        stats.put("currentMonthHours", currentMonthHours);
 
         return stats;
     }
 
     public Map<String, Object> getGuideTours(Long guideId) {
         Guide guide = guideRepository.findById(guideId)
-            .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
-            
+                .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
+
         Map<String, Object> tours = new HashMap<>();
-        
+
         tours.put("groupTours", guide.getJoinedTours().stream()
-            .map(TourResponse::fromTour)
-            .collect(Collectors.toList()));
-            
+                .map(TourResponse::fromTour)
+                .collect(Collectors.toList()));
+
         tours.put("individualTours", guide.getIndividualTours().stream()
-            .map(IndividualTourResponse::fromTour)
-            .collect(Collectors.toList()));
-        
+                .map(IndividualTourResponse::fromTour)
+                .collect(Collectors.toList()));
+
         tours.put("completedGroupTours", guide.getJoinedTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
-                          tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
-            .map(TourResponse::fromTour)
-            .collect(Collectors.toList()));
-            
+                .filter(tour -> tour.getStatus() == TourStatus.FINISHED ||
+                        tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
+                .map(TourResponse::fromTour)
+                .collect(Collectors.toList()));
+
         tours.put("completedIndividualTours", guide.getIndividualTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
-                          tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
-            .map(IndividualTourResponse::fromTour)
-            .collect(Collectors.toList()));
-            
+                .filter(tour -> tour.getStatus() == TourStatus.FINISHED ||
+                        tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
+                .map(IndividualTourResponse::fromTour)
+                .collect(Collectors.toList()));
+
         tours.put("upcomingGroupTours", guide.getJoinedTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
-            .map(TourResponse::fromTour)
-            .collect(Collectors.toList()));
-            
+                .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
+                .map(TourResponse::fromTour)
+                .collect(Collectors.toList()));
+
         tours.put("upcomingIndividualTours", guide.getIndividualTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
-            .map(IndividualTourResponse::fromTour)
-            .collect(Collectors.toList()));
+                .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
+                .map(IndividualTourResponse::fromTour)
+                .collect(Collectors.toList()));
 
         return tours;
     }
 
     public Map<String, List<?>> getGuideUpcomingTours(Long guideId) {
         Guide guide = guideRepository.findById(guideId)
-            .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
-            
+                .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
+
         Map<String, List<?>> upcomingTours = new HashMap<>();
-        
+
         upcomingTours.put("groupTours", guide.getJoinedTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
-            .collect(Collectors.toList()));
-            
+                .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
+                .collect(Collectors.toList()));
+
         upcomingTours.put("individualTours", guide.getIndividualTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
-            .collect(Collectors.toList()));
+                .filter(tour -> tour.getStatus() == TourStatus.WAITING_TO_FINISH)
+                .collect(Collectors.toList()));
 
         return upcomingTours;
     }
 
     public List<Tour> getGuideCompletedTours(Long guideId) {
         Guide guide = guideRepository.findById(guideId)
-            .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
- 
+                .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
+
         return guide.getJoinedTours().stream()
-            .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
-                           tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
-            .collect(Collectors.toList());
+                .filter(tour -> tour.getStatus() == TourStatus.FINISHED ||
+                        tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
+                .collect(Collectors.toList());
     }
-} 
+
+    public GuideProfileDTO getGuideProfile(Long guideId) {
+        Guide guide = guideRepository.findById(guideId)
+                .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
+                
+        GuideProfileDTO profileDTO = GuideProfileDTO.fromEntity(guide);
+        
+        // Get current month and year
+        LocalDate now = LocalDate.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+        
+        // Calculate total hours from all completed tours
+        Double totalHours = guide.getJoinedTours().stream()
+                .filter(tour -> tour.getTotalHours() != null)
+                .mapToDouble(Tour::getTotalHours)
+                .sum();
+                
+        // Calculate hours for current month
+        Double currentMonthHours = guide.getJoinedTours().stream()
+                .filter(tour -> {
+                    LocalDate tourDate = tour.getDate();
+                    return tour.getTotalHours() != null &&
+                           tourDate.getMonthValue() == currentMonth &&
+                           tourDate.getYear() == currentYear;
+                })
+                .mapToDouble(Tour::getTotalHours)
+                .sum();
+        
+        profileDTO.setTotalTourHours(totalHours);
+        profileDTO.setCurrentMonthTourHours(currentMonthHours);
+        
+        return profileDTO;
+    }
+ 
+    public List<Guide> getAvailableGuides() {
+        return guideRepository.findAll();
+    }   
+}

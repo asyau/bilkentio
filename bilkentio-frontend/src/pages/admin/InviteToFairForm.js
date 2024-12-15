@@ -1,146 +1,159 @@
 import React, { useState } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { cities } from '../../constants/cities';
 import { schools } from '../../constants/schools';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
-import AdminSidebar from '../../components/AdminSidebar';
-import '../../styles/Fair.css';
 
 const InviteToFairForm = () => {
     const [formData, setFormData] = useState({
         schoolName: '',
         city: '',
-        fairDate: null,
+        fairDate: '',
         contactPerson: '',
         contactEmail: '',
         contactPhone: '',
-        notes: '',
-        expectedStudents: ''
+        expectedStudents: '',
+        notes: ''
     });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(
-                'http://localhost:8080/api/fairs/invite',
-                {
-                    ...formData,
-                    fairDate: formData.fairDate ? formData.fairDate.toISOString().split('T')[0] : null
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            alert('Invitation sent successfully!');
+            await axios.post('/api/fairs/invite', formData);
+            setSuccess('Fair invitation sent successfully!');
+            setError('');
             setFormData({
                 schoolName: '',
                 city: '',
-                fairDate: null,
+                fairDate: '',
                 contactPerson: '',
                 contactEmail: '',
                 contactPhone: '',
-                notes: '',
-                expectedStudents: ''
+                expectedStudents: '',
+                notes: ''
             });
         } catch (error) {
-            alert('Error sending invitation: ' + error.response?.data?.message || error.message);
+            setError('Failed to send fair invitation. Please try again.');
+            setSuccess('');
         }
     };
 
     return (
-        <div className="admin-layout">
-            <AdminSidebar />
-            <div className="admin-content">
-                <div className="invite-form-container">
-                    <h2>Invite School to Fair</h2>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>School Name</label>
-                            <select
-                                value={formData.schoolName}
-                                onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
-                                required
-                            >
-                                <option value="">Select School</option>
-                                {schools.map(school => (
-                                    <option key={school} value={school}>{school}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>City</label>
-                            <select
-                                value={formData.city}
-                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                required
-                            >
-                                <option value="">Select City</option>
-                                {cities.map(city => (
-                                    <option key={city} value={city}>{city}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Fair Date</label>
-                            <DatePicker
-                                selected={formData.fairDate}
-                                onChange={(date) => setFormData({ ...formData, fairDate: date })}
-                                dateFormat="yyyy-MM-dd"
-                                minDate={new Date()}
-                                className="date-picker"
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Contact Person</label>
-                            <input
-                                type="text"
-                                value={formData.contactPerson}
-                                onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Contact Email</label>
-                            <input
-                                type="email"
-                                value={formData.contactEmail}
-                                onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Contact Phone</label>
-                            <input
-                                type="tel"
-                                value={formData.contactPhone}
-                                onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Expected Students</label>
-                            <input
-                                type="number"
-                                value={formData.expectedStudents}
-                                onChange={(e) => setFormData({ ...formData, expectedStudents: e.target.value })}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Notes</label>
-                            <textarea
-                                value={formData.notes}
-                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                            />
-                        </div>
-                        <button type="submit" className="submit-btn">Send Invitation</button>
-                    </form>
-                </div>
-            </div>
+        <div className="fair-form-container">
+            <h2>Invite School to Fair</h2>
+            {error && <Alert variant="danger">{error}</Alert>}
+            {success && <Alert variant="success">{success}</Alert>}
+
+            <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                    <Form.Label>School Name</Form.Label>
+                    <Form.Select
+                        name="schoolName"
+                        value={formData.schoolName}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Select School</option>
+                        {schools.map(school => (
+                            <option key={school} value={school}>{school}</option>
+                        ))}
+                    </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <Form.Label>City</Form.Label>
+                    <Form.Select
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Select City</option>
+                        {cities.map(city => (
+                            <option key={city} value={city}>{city}</option>
+                        ))}
+                    </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <Form.Label>Fair Date</Form.Label>
+                    <Form.Control
+                        type="date"
+                        name="fairDate"
+                        value={formData.fairDate}
+                        onChange={handleChange}
+                        required
+                    />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <Form.Label>Contact Person</Form.Label>
+                    <Form.Control
+                        type="text"
+                        name="contactPerson"
+                        value={formData.contactPerson}
+                        onChange={handleChange}
+                        required
+                    />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <Form.Label>Contact Email</Form.Label>
+                    <Form.Control
+                        type="email"
+                        name="contactEmail"
+                        value={formData.contactEmail}
+                        onChange={handleChange}
+                        required
+                    />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <Form.Label>Contact Phone</Form.Label>
+                    <Form.Control
+                        type="tel"
+                        name="contactPhone"
+                        value={formData.contactPhone}
+                        onChange={handleChange}
+                        required
+                    />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <Form.Label>Expected Students</Form.Label>
+                    <Form.Control
+                        type="number"
+                        name="expectedStudents"
+                        value={formData.expectedStudents}
+                        onChange={handleChange}
+                        required
+                    />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                    <Form.Label>Notes</Form.Label>
+                    <Form.Control
+                        as="textarea"
+                        name="notes"
+                        value={formData.notes}
+                        onChange={handleChange}
+                        rows={3}
+                    />
+                </Form.Group>
+
+                <Button variant="primary" type="submit">
+                    Send Invitation
+                </Button>
+            </Form>
         </div>
     );
 };

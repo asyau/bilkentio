@@ -26,10 +26,10 @@
 
 .main-content {
   flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-  min-height: 100vh;
-
+  padding: 20px;
+  overflow-x: hidden;
+  width: 100%;
+  margin-left: 0;
 }
 
 .user-profile {
@@ -129,38 +129,59 @@
 
 .weekly-schedule {
   display: flex;
-  gap: 1.5rem;
+  gap: 0.5rem;
   background-color: #ffffff;
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  min-height: 400px;
+  height: fit-content;
+  min-height: 500px;
+  width: fit-content;
+  max-width: calc(100% - 20px);
+  margin: 0;
+  overflow-x: auto;
+  padding-bottom: 16px;
 }
 
 .day-column {
-  flex: 1;
-  min-width: 120px;
+  flex: 1 1 0;
+  width: calc((100% - 3rem) / 7);
+  min-width: 90px;
+  min-height: 450px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .day-header {
-  padding: 1.2rem;
+  width: 100%;
+  padding: 1rem;
   border-radius: 12px;
   background-color: #f8f9fa;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1rem;
   text-align: center;
   font-weight: 500;
+  font-size: 0.9em;
 }
 
 .time-slot {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem;
-  margin: 0.8rem 0;
+  padding: 8px;
+  margin: 8px 0;
   border-radius: 12px;
   transition: all 0.3s ease;
   cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 0.85em;
+  width: calc(100% - 4px);
+  box-sizing: border-box;
+  height: 42px;
+  min-height: 42px;
 }
 
 .time-slot.available {
@@ -646,4 +667,64 @@ textarea {
   color: #dc3545;
   margin-top: 8px;
   font-size: 0.9em;
+}
+
+.weekly-schedule::-webkit-scrollbar {
+  height: 8px;
+}
+
+.weekly-schedule::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.weekly-schedule::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.weekly-schedule::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding: 15px 40px;
+  display: flex;
+  gap: 15px;
+  z-index: 1000;
+  background: #004d95;
+  justify-content: flex-end;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-button {
+  padding: 8px 20px;
+  border: 1px solid white;
+  border-radius: 20px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.header-button:hover {
+  background: white;
+  color: #004d95;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 80px;
+}
+
+.logo {
+  width: 200px;
+  height: auto;
 }

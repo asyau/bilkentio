@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/days")
+@CrossOrigin(origins = "*")
 public class DayController {
     @Autowired
     private DayService dayService;
