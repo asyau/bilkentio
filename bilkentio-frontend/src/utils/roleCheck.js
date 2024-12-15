@@ -12,15 +12,12 @@ export const checkAdminRole = async () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     
-    console.log('Full response:', response.data);
-    console.log('Roles:', response.data.roles);
-    
     const hasAdminRole = response.data.roles.some(role => {
-      console.log('Checking role:', role);
-      return role === 'ROLE_ADMIN' || role.authority === 'ROLE_ADMIN';
+      const authority = role.authority || role;
+      return authority === 'ROLE_ADMIN' || 
+             authority === 'ROLE_COORDINATOR' || 
+             authority === 'ROLE_COORDİNATOR';
     });
-    
-    console.log('Has admin role:', hasAdminRole);
     
     return { isAuthorized: hasAdminRole, error: null };
   } catch (error) {

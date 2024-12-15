@@ -18,20 +18,19 @@ function Login() {
                 password,
             });
             const token = response.data.jwt;
+            console.log('Token:', token);
             localStorage.setItem('token', token);
 
             // Then, fetch user role
             const roleResponse = await axios.get('http://localhost:8080/auth/getRole', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
-            // Log the role response to understand its structure
-            console.log('Role Response:', roleResponse.data);
+            console.log('Role response:', roleResponse.data);
 
             // Check if roles exist and extract the first role
             if (roleResponse.data.roles && roleResponse.data.roles.length > 0) {
-                const userRole = roleResponse.data.roles[0].authority; // Access the authority property
-                console.log('User Role:', userRole); // Log the user role
+                const userRole = roleResponse.data.roles[0].authority;
+                console.log('User Role:', userRole);
 
                 // Navigate based on role
                 switch (userRole) {
@@ -42,18 +41,15 @@ function Login() {
                         navigate('/president');
                         break;
                     case 'ROLE_COORDINATOR':
-                        navigate('/coordinator/analytics');
-                        break;
                     case 'ROLE_COORDİNATOR':
                         navigate('/coordinator/analytics');
                         break;
                     case 'ROLE_ADVISOR':
-                        navigate('/advisor');
-                        break;
-                    case 'ROLE_GUİDE':
-                        navigate('/guide/dashboard');
+                    case 'ROLE_ADVİSOR':
+                        navigate('/advisor/AdvisorFormRequests');
                         break;
                     case 'ROLE_GUIDE':
+                    case 'ROLE_GUİDE':
                         navigate('/guide/dashboard');
                         break;
                     case 'ROLE_COUNSELOR':

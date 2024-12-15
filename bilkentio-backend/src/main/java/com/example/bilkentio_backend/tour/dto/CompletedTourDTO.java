@@ -18,6 +18,7 @@ public class CompletedTourDTO {
     private Integer rating;
     private TourStatus status;
     private boolean isIndividual;
+    private Double totalHours;
 
     public static CompletedTourDTO fromEntity(Tour tour) {
         CompletedTourDTO dto = new CompletedTourDTO();
@@ -32,6 +33,7 @@ public class CompletedTourDTO {
         dto.setRating(tour.getRating());
         dto.setStatus(tour.getStatus());
         dto.setIndividual(false);
+        dto.setTotalHours(tour.getTotalHours());
         return dto;
     }
 

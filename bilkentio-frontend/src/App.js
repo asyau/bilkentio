@@ -1,7 +1,8 @@
 // src/App.js
 import React, { useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './styles/styles.css';
+import axios from 'axios';
 
 
 import Landing from './pages/Landing';
@@ -59,6 +60,7 @@ function App() {
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* Admin Routes */}
+        <Route path="/admin/*" element={<AdminDashboard />} />
         <Route path="/admin">
           <Route path="analytics" element={<Analytics />} />
           <Route path="staff" element={<StaffManagement />} />
@@ -70,6 +72,23 @@ function App() {
           <Route path="fairs/applications" element={<ViewFairApplications />} />
         </Route>
 
+        {/* Other Role Routes */}
+        <Route path="/president/*" element={<PresidentDashboard />} />
+        <Route path="/coordinator/*" element={<CoordinatorDashboard />} />
+        <Route path="/advisor/*" element={<AdvisorFormRequests />} />
+        <Route path="/advisor/AdvisorFormRequests" element={<AdvisorFormRequests />} />
+        <Route path="/advisor/day-selection" element={<DaySelection />} />
+        <Route path="/advisor/settings" element={<ProfileSettings />} />
+        <Route path="/guide/*" element={<GuideDashboard />} />
+        <Route path="/counselor/*" element={<Counselor />} />
+        <Route path="/individual/*" element={<Individual />} />
+
+        {/* Settings Routes */}
+        <Route path="/admin/settings" element={<ProfileSettings />} />
+        <Route path="/president/settings" element={<ProfileSettings />} />
+        <Route path="/coordinator/settings" element={<ProfileSettings />} />
+        <Route path="/guide/settings" element={<ProfileSettings />} />
+
         {/* Guide Routes */}
         <Route path="/guide">
           <Route path="dashboard" element={<GuideDashboard />} />
@@ -77,28 +96,6 @@ function App() {
           <Route path="history" element={<TourHistory />} />
           <Route path="profile" element={<GuideProfile />} />
         </Route>
-
-
-        <Route path="/admin/settings" element={<ProfileSettings />} />
-        <Route path="/president/settings" element={<ProfileSettings />} />
-        <Route path="/coordinator/settings" element={<ProfileSettings />} />
-        <Route path="/advisor/settings" element={<ProfileSettings />} />
-        <Route path="/guide/settings" element={<ProfileSettings />} />
-
-        {/* Other Role-specific Routes */}
-        <Route path="/president/*" element={<PresidentDashboard />} />
-        <Route path="/coordinator/*" element={<CoordinatorDashboard />} />
-        <Route path="/advisor/*" element={<AdvisorFormRequests />} />
-        <Route path="/advisor/AdvisorFormRequests" element={<AdvisorFormRequests />} />
-        <Route path="/counselor/*" element={<Counselor />} />
-        <Route path="/individual/*" element={<Individual />} />
-        <Route path="/advisor/day-selection" element={<DaySelection />} />
-
-        {/* Legacy Routes - Keep if still needed */}
-        <Route path="/crud" element={<CRUD />} />
-        <Route path="/form-request" element={<FormRequests />} />
-        <Route path="/analytics" element={<Analytics />} />
-
 
         {/* Coordinator Routes */}
         <Route path="/coordinator">
