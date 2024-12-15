@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import AdvisorInfoContainer from './AdvisorInfoContainer';
 import ProfileSettings from './ProfileSettings';
 import '../styles/Sidebar.css';
@@ -8,6 +8,12 @@ import '../styles/GuideMode.css';
 const GuideSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   const menuItems = [
     {
@@ -68,6 +74,14 @@ const GuideSidebar = () => {
           >
             <span className="material-icons">settings</span>
             {!isCollapsed && <span>Settings</span>}
+          </button>
+
+          <button 
+            className="nav-item logout-btn"
+            onClick={handleLogout}
+          >
+            <span className="material-icons">logout</span>
+            {!isCollapsed && <span>Logout</span>}
           </button>
         </nav>
       </div>
