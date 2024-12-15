@@ -515,15 +515,15 @@ const Counselor = () => {
           <>
             <div className="schedule-header">
               <button className="nav-button prev-week" onClick={handlePrevWeek}>
-                <span className="material-icons">chevron_left</span>
-                Previous Week
+                <span className="material-icons" style={{color: '#333'}}>chevron_left</span>
+                <span style={{color: '#333'}}>Previous Week</span>
               </button>
               <span className="date-range">
                 {format(currentWeekStart, 'dd MMM yyyy')} - {format(addDays(currentWeekStart, 6), 'dd MMM yyyy')}
               </span>
               <button className="nav-button next-week" onClick={handleNextWeek}>
-                Next Week
-                <span className="material-icons">chevron_right</span>
+                <span style={{color: '#333'}}>Next Week</span>
+                <span className="material-icons" style={{color: '#333'}}>chevron_right</span>
               </button>
             </div>
             
@@ -537,21 +537,27 @@ const Counselor = () => {
                       <div>{format(new Date(day.date), 'dd MMM')}</div>
                       <div>{format(new Date(day.date), 'EEEE')}</div>
                     </div>
-                    {day.slots && day.slots.map((slot, slotIndex) => (
-                      <div 
-                        key={`${slot.id}-${slotIndex}`}
-                        className={getSlotClass(slot)}
-                        onClick={() => handleSlotClick(slot, day)}
-                      >
-                        <span>{slot.time}</span>
-                        {slot.status === 'FORM_REQUESTED' && (
-                          <span className="material-icons status-icon">description</span>
-                        )}
-                        {slot.status === 'UNAVAILABLE' && (
-                          <span className="material-icons status-icon">block</span>
-                        )}
-                      </div>
-                    ))}
+                    {day.slots && day.slots
+                        .sort((a, b) => {
+                            const timeA = parseInt(a.time.replace(':', ''));
+                            const timeB = parseInt(b.time.replace(':', ''));
+                            return timeA - timeB;
+                        })
+                        .map((slot, slotIndex) => (
+                            <div 
+                                key={`${slot.id}-${slotIndex}`}
+                                className={getSlotClass(slot)}
+                                onClick={() => handleSlotClick(slot, day)}
+                            >
+                                <span>{slot.time}</span>
+                                {slot.status === 'FORM_REQUESTED' && (
+                                    <span className="material-icons status-icon">description</span>
+                                )}
+                                {slot.status === 'UNAVAILABLE' && (
+                                    <span className="material-icons status-icon">block</span>
+                                )}
+                            </div>
+                        ))}
                   </div>
                 ))
               ) : (

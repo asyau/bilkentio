@@ -213,18 +213,16 @@ const FormRequests = () => {
     // Create calendar events for each group
     const events = Object.entries(groupedForms).map(([key, groupForms]) => {
       const form = groupForms[0]; // Use first form for date/time
-      const [startTime, endTime] = form.slotTime.split(' - ');
+      const startTime = form.slotTime; // Just use the time as is
 
       try {
         const startDateTime = new Date(`${form.slotDate}T${startTime}`);
-        const endDateTime = new Date(`${form.slotDate}T${endTime}`);
 
-        // Validate the dates
-        if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+        // Validate the date
+        if (isNaN(startDateTime.getTime())) {
           console.error('Invalid date created for:', {
             date: form.slotDate,
-            startTime,
-            endTime
+            startTime
           });
           return null;
         }
@@ -235,7 +233,7 @@ const FormRequests = () => {
             `${f.schoolName} (${f.groupSize} students)`
           ).join('\n'),
           start: startDateTime,
-          end: endDateTime,
+          end: startDateTime, // Set end time same as start time for a point-in-time event
           forms: groupForms,
           allDay: false,
           state: groupForms.some(f => f.state === 'PENDING') ? 'PENDING' : 
@@ -244,8 +242,7 @@ const FormRequests = () => {
       } catch (error) {
         console.error('Error creating event:', error, {
           date: form.slotDate,
-          startTime,
-          endTime
+          startTime
         });
         return null;
       }

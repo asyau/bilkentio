@@ -1,7 +1,8 @@
 // src/App.js
-import React from 'react';
+import React, { useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './styles/styles.css';
+
 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -17,6 +18,7 @@ import TourManagement from './pages/TourManagement';
 import TourDetails from './pages/TourDetails';
 import Counselor from './pages/Counselor';
 import Individual from './pages/individual';
+import ProfileSettings from './components/ProfileSettings';
 
 import DaySelection from './pages/advisor/DaySelection';
 
@@ -40,6 +42,8 @@ import CoordinatorTourManagement from './pages/coordinator/CoordinatorTourManage
 import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScores';
 
 import SchoolManagement from './pages/admin/SchoolManagement';
+import InviteToFairForm from './pages/admin/InviteToFairForm';
+import ViewFairApplications from './pages/admin/ViewFairApplications';
 import Analytics from './pages/Analytics';
 
 import ChatbotPage from './pages/ChatbotPage';
@@ -62,6 +66,8 @@ function App() {
           <Route path="tours" element={<TourManagement />} />
           <Route path="tours/:tourId" element={<TourDetails />} />
           <Route path="schools" element={<SchoolManagement />} />
+          <Route path="fairs/invite" element={<InviteToFairForm />} />
+          <Route path="fairs/applications" element={<ViewFairApplications />} />
         </Route>
 
         {/* Guide Routes */}
@@ -71,6 +77,13 @@ function App() {
           <Route path="history" element={<TourHistory />} />
           <Route path="profile" element={<GuideProfile />} />
         </Route>
+
+
+        <Route path="/admin/settings" element={<ProfileSettings />} />
+        <Route path="/president/settings" element={<ProfileSettings />} />
+        <Route path="/coordinator/settings" element={<ProfileSettings />} />
+        <Route path="/advisor/settings" element={<ProfileSettings />} />
+        <Route path="/guide/settings" element={<ProfileSettings />} />
 
         {/* Other Role-specific Routes */}
         <Route path="/president/*" element={<PresidentDashboard />} />

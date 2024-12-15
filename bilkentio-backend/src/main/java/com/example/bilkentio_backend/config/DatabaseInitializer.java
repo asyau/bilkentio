@@ -30,6 +30,7 @@ import com.example.bilkentio_backend.school.entity.School;
 import com.example.bilkentio_backend.day.enums.SlotStatus;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -181,7 +182,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         if (schoolService.getAllSchools().isEmpty()) {
             try {
                 schoolService.importSchoolsFromCsv(
-                        "/Users/barisyayci/Desktop/bilcant/SS.2.2/CS319/bilknetio/S3-T3-bilkentio/bilkentio-backend/src/main/resources/processed_schools.csv");
+                        "/Users/barisyayci/Desktop/bilcant/SS.2.2/CS319/bilkentIO/S3-T3-bilkentio/bilkentio-backend/src/main/resources/processed_schools.csv");
             } catch (Exception e) {
                 logger.error("Failed to initialize schools", e);
             }
@@ -375,12 +376,26 @@ public class DatabaseInitializer implements CommandLineRunner {
 
                             if (statusRandom < 0.4) {
                                 tour.setStatus(TourStatus.WAITING_TO_FINISH);
-                            } else if (statusRandom < 0.7) {
-                                tour.setStatus(TourStatus.FINISHED);
                             } else {
-                                tour.setStatus(TourStatus.GIVEN_FEEDBACK);
-                                tour.setFeedback("Sample feedback for tour " + (i + 1));
-                                tour.setRating(3 + random.nextInt(3));
+                                // For FINISHED and GIVEN_FEEDBACK status, add end time and total hours
+                                LocalTime startTime = LocalTime.parse(tour.getTime());
+                                // Generate random duration between 1 and 4 hours
+                                int additionalHours = 1 + random.nextInt(3);
+                                int additionalMinutes = random.nextInt(60);
+                                LocalTime endTime = startTime.plusHours(additionalHours).plusMinutes(additionalMinutes);
+
+                                tour.setEndTime(endTime);
+                                // Calculate and set total hours
+                                double totalHours = additionalHours + (additionalMinutes / 60.0);
+                                tour.setTotalHours(totalHours);
+
+                                if (statusRandom < 0.7) {
+                                    tour.setStatus(TourStatus.FINISHED);
+                                } else {
+                                    tour.setStatus(TourStatus.GIVEN_FEEDBACK);
+                                    tour.setFeedback("Sample feedback for tour " + (i + 1));
+                                    tour.setRating(3 + random.nextInt(3));
+                                }
                             }
                         }
                         tours.add(tour);

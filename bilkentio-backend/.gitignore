@@ -1,2 +1,7 @@
 target/
 target/
+# Ignore compiled Java files
+*.class
+
+# Ignore the entire target directory
+bilkentio-backend/target/

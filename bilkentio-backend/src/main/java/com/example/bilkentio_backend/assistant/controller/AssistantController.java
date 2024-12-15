@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/assistant")
+@CrossOrigin(origins = "*")
 public class AssistantController {
 
     @Autowired
@@ -17,8 +18,13 @@ public class AssistantController {
 
     @PostMapping("/chat")
     public ResponseEntity<ChatResponse> chat(@RequestBody ChatRequest request) {
+        String userId = request.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            userId = "anonymous";
+        }
+
         String response = assistantService.processMessage(
-            request.getUserId(), 
+            userId, 
             request.getMessage(), 
             request.getLanguage()
         );

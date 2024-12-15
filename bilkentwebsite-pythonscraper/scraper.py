@@ -75,6 +75,10 @@ class BilkentScraper:
         """Check if URL is from w3.bilkent.edu.tr and is either .html or a directory"""
         parsed = urlparse(url)
         
+        # Skip URLs containing specific patterns
+        if any(pattern in url for pattern in ["ayin-sorusu-", "toplanti-kararlari"]):
+            return False
+        
         # Skip specific paths and file types
         invalid_paths = [
             '/web/emblem',

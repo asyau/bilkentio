@@ -29,7 +29,9 @@ const CoordinatorSidebar = () => {
       title: 'View Puantaj Scores',
       path: '/coordinator/scores',
       icon: 'grade'
-    }
+    },
+    
+
   ];
 
   return <BaseSidebar logo="BilkentIO" menuItems={menuItems} />;

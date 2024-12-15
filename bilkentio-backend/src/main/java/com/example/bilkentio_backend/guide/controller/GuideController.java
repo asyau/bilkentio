@@ -114,8 +114,12 @@ public class GuideController {
 
     @GetMapping("/{guideId}/profile")
     public ResponseEntity<GuideProfileDTO> getGuideProfile(@PathVariable Long guideId) {
-        return guideService.getGuideById(guideId)
-            .map(guide -> ResponseEntity.ok(GuideProfileDTO.fromEntity(guide)))
-            .orElse(ResponseEntity.notFound().build());
+        try {
+            GuideProfileDTO profile = guideService.getGuideProfile(guideId);
+            return ResponseEntity.ok(profile);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
+    
 } 

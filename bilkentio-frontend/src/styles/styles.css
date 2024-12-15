@@ -245,3 +245,99 @@ select:focus {
   color: #003366;
   text-decoration: underline;
 }
+
+/* Add these styles for the schedule section */
+.schedule-section {
+    margin: 40px auto;
+    max-width: 1200px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.weekly-schedule {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.day-column {
+    flex: 1;
+    min-width: 150px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.day-header {
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+.time-slot {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.time-slot.available {
+    background: #e3f2fd;
+}
+
+.time-slot.unavailable {
+    background: #ffebee;
+    cursor: not-allowed;
+}
+
+.time-slot.form-requested {
+    background: #f0f4c3;
+}
+
+.status-icon {
+    font-size: 18px;
+}
+
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.nav-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    border: 1px solid #333;
+    background: white;
+    color: #333;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.nav-button:hover {
+    background: #333;
+    color: white;
+}
+
+.nav-button .material-icons {
+    color: inherit;
+}
+
+.date-range {
+    font-weight: 600;
+    color: #333;
+}
