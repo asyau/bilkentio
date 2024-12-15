@@ -46,7 +46,7 @@ const AdminSidebar = () => {
             {!isCollapsed && <span>School Management</span>}
           </NavLink>
 
-          <NavLink to="/form-request" className="nav-item" title="Accept/Reject Forms">
+          <NavLink to="/admin/form-requests" className="nav-item" title="Accept/Reject Forms">
             <span className="material-icons">description</span>
             {!isCollapsed && <span>Accept/Reject Forms</span>}
           </NavLink>

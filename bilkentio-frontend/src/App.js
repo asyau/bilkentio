@@ -65,6 +65,7 @@ function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="scores" element={<PuantajScores />} />
+          <Route path="form-requests" element={<FormRequests />} />
           <Route path="tours" element={<TourManagement />} />
           <Route path="tours/:tourId" element={<TourDetails />} />
           <Route path="schools" element={<SchoolManagement />} />
