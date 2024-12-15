@@ -15,6 +15,8 @@ public class GuideProfileDTO {
     private int totalCompletedTours;
     private int currentMonthTours;
     private int currentYearTours;
+    private Double totalTourHours;
+    private Double currentMonthTourHours;
 
     public static GuideProfileDTO fromEntity(Guide guide) {
         GuideProfileDTO dto = new GuideProfileDTO();

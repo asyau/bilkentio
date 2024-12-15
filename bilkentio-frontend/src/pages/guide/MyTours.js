@@ -279,6 +279,9 @@ const MyTours = () => {
                       <p><i className="material-icons">event</i> {tour.date}</p>
                       <p><i className="material-icons">schedule</i> {tour.time}</p>
                       <p><i className="material-icons">group</i> Group Size: {tour.groupSize}</p>
+                      {tour.totalHours && (
+                        <p><i className="material-icons">timer</i> Duration: {tour.totalHours.toFixed(1)} hours</p>
+                      )}
                       
                       <div className="group-leader-info">
                         <h4>Group Leader Information</h4>
@@ -313,6 +316,9 @@ const MyTours = () => {
                       <p><i className="material-icons">event</i> {tour.date}</p>
                       <p><i className="material-icons">schedule</i> {tour.time}</p>
                       <p><i className="material-icons">location_city</i> {tour.city}</p>
+                      {tour.totalHours && (
+                        <p><i className="material-icons">timer</i> Duration: {tour.totalHours.toFixed(1)} hours</p>
+                      )}
                     </div>
                     {tour.status === "WAITING_TO_FINISH" && (
                       <button

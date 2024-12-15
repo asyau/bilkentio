@@ -8,6 +8,7 @@ import com.example.bilkentio_backend.tour.enums.TourStatus;
 import com.example.bilkentio_backend.tour.dto.TourResponse;
 import com.example.bilkentio_backend.tour.entity.Tour;
 import com.example.bilkentio_backend.tour.dto.IndividualTourResponse;
+import com.example.bilkentio_backend.guide.dto.GuideProfileDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -155,5 +156,39 @@ public class GuideService {
             .filter(tour -> tour.getStatus() == TourStatus.FINISHED || 
                            tour.getStatus() == TourStatus.GIVEN_FEEDBACK)
             .collect(Collectors.toList());
+    }
+
+    public GuideProfileDTO getGuideProfile(Long guideId) {
+        Guide guide = guideRepository.findById(guideId)
+                .orElseThrow(() -> new IllegalArgumentException("Guide not found"));
+                
+        GuideProfileDTO profileDTO = GuideProfileDTO.fromEntity(guide);
+        
+        // Get current month and year
+        LocalDate now = LocalDate.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+        
+        // Calculate total hours from all completed tours
+        Double totalHours = guide.getJoinedTours().stream()
+                .filter(tour -> tour.getTotalHours() != null)
+                .mapToDouble(Tour::getTotalHours)
+                .sum();
+                
+        // Calculate hours for current month
+        Double currentMonthHours = guide.getJoinedTours().stream()
+                .filter(tour -> {
+                    LocalDate tourDate = tour.getDate();
+                    return tour.getTotalHours() != null &&
+                           tourDate.getMonthValue() == currentMonth &&
+                           tourDate.getYear() == currentYear;
+                })
+                .mapToDouble(Tour::getTotalHours)
+                .sum();
+        
+        profileDTO.setTotalTourHours(totalHours);
+        profileDTO.setCurrentMonthTourHours(currentMonthHours);
+        
+        return profileDTO;
     }
 } 

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import jakarta.persistence.EntityManager;
 import java.util.Set;
+import java.time.LocalTime;
 
 
 @Service
@@ -120,6 +121,11 @@ public class TourService {
                 .orElseThrow(() -> new EntityNotFoundException("Tour not found"));
 
         TourStatus oldStatus = tour.getStatus();
+
+        if (newStatus == TourStatus.FINISHED) {
+            tour.setEndTime(LocalTime.now());
+            tour.calculateTotalHours();
+        }
 
         if (newStatus == TourStatus.FINISHED) {
             Set<Guide> assignedGuides = tour.getAssignedGuides();

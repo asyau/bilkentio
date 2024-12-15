@@ -93,6 +93,18 @@ const Profile = () => {
             <p>{profile.currentYearTours}</p>
             <div className="stat-label">Tours in Current Year</div>
           </div>
+          <div className="stat-card">
+            <i className="material-icons stat-icon">timer</i>
+            <h3>Total Hours</h3>
+            <p>{profile.totalTourHours ? profile.totalTourHours.toFixed(1) : '0'}</p>
+            <div className="stat-label">Hours Guiding Tours</div>
+          </div>
+          <div className="stat-card">
+            <i className="material-icons stat-icon">schedule</i>
+            <h3>This Month</h3>
+            <p>{profile.currentMonthTourHours ? profile.currentMonthTourHours.toFixed(1) : '0'}</p>
+            <div className="stat-label">Hours This Month</div>
+          </div>
         </div>
       </div>
     </div>
