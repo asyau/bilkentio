@@ -14,6 +14,7 @@ const PuantajScores = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming', 'completed', or 'reviews'
+  const [sortBy, setSortBy] = useState('score'); // Add this state
 
   useEffect(() => {
     const initializeComponent = async () => {
@@ -147,6 +148,23 @@ const PuantajScores = () => {
     guide.nameSurname.toLowerCase().includes(searchTerm.toLowerCase()) ||
     guide.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getSortedGuides = () => {
+    return [...filteredGuides].sort((a, b) => {
+      switch (sortBy) {
+        case 'score':
+          return b.score - a.score;
+        case 'rating':
+          return (b.averageRating || 0) - (a.averageRating || 0);
+        case 'hours':
+          return (b.totalHours || 0) - (a.totalHours || 0);
+        case 'name':
+          return a.nameSurname.localeCompare(b.nameSurname);
+        default:
+          return 0;
+      }
+    });
+  };
 
   const renderTourCard = (tour, type = 'upcoming') => (
     <div key={tour.id} className={`tour-card ${type}`}>
@@ -294,19 +312,33 @@ const PuantajScores = () => {
         <div className="puantaj-container">
           <div className="dashboard-header">
             <h1>Guide Performance Dashboard</h1>
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search guides..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <span className="material-icons">search</span>
+            <div className="controls">
+              <div className="sort-controls">
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="sort-select"
+                >
+                  <option value="score">Sort by Score</option>
+                  <option value="rating">Sort by Rating</option>
+                  <option value="hours">Sort by Hours</option>
+                  <option value="name">Sort by Name</option>
+                </select>
+              </div>
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Search guides..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <span className="material-icons">search</span>
+              </div>
             </div>
           </div>
 
           <div className="guides-section">
-            {filteredGuides.map(guide => (
+            {getSortedGuides().map(guide => (
               <div 
                 key={guide.id}
                 className="guide-card"
@@ -370,38 +402,6 @@ const PuantajScores = () => {
                         <span className="value">{selectedGuide.averageRating?.toFixed(1) || '-'} ★</span>
                       </div>
                     </div>
-                    {guideDetails?.tours?.completed && (
-                      <>
-                        <div className="metric">
-                          <span className="material-icons">timer</span>
-                          <div className="metric-details">
-                            <span className="label">Total Hours</span>
-                            <span className="value">
-                              {guideDetails.tours.completed
-                                .reduce((total, tour) => total + (tour.totalHours || 0), 0)
-                                .toFixed(1)} hrs
-                            </span>
-                          </div>
-                        </div>
-                        <div className="metric">
-                          <span className="material-icons">schedule</span>
-                          <div className="metric-details">
-                            <span className="label">This Month</span>
-                            <span className="value">
-                              {guideDetails.tours.completed
-                                .filter(tour => {
-                                  const tourDate = new Date(tour.date);
-                                  const now = new Date();
-                                  return tourDate.getMonth() === now.getMonth() && 
-                                         tourDate.getFullYear() === now.getFullYear();
-                                })
-                                .reduce((total, tour) => total + (tour.totalHours || 0), 0)
-                                .toFixed(1)} hrs
-                            </span>
-                          </div>
-                        </div>
-                      </>
-                    )}
                   </div>
                   <button className="close-btn" onClick={() => setSelectedGuide(null)}>
                     <span className="material-icons">close</span>
