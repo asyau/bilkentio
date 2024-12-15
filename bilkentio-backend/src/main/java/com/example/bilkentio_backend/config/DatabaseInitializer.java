@@ -182,7 +182,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         if (schoolService.getAllSchools().isEmpty()) {
             try {
                 schoolService.importSchoolsFromCsv(
-                        "src/main/resources/processed_schools.csv");
+                        "/Users/asyaunal/bilio/S3-T3-bilkentio/bilkentio-backend/src/main/resources/processed_schools.csv");
             } catch (Exception e) {
                 logger.error("Failed to initialize schools", e);
             }
@@ -383,7 +383,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                                 int additionalHours = 1 + random.nextInt(3);
                                 int additionalMinutes = random.nextInt(60);
                                 LocalTime endTime = startTime.plusHours(additionalHours).plusMinutes(additionalMinutes);
-                                
+
                                 tour.setEndTime(endTime);
                                 // Calculate and set total hours
                                 double totalHours = additionalHours + (additionalMinutes / 60.0);

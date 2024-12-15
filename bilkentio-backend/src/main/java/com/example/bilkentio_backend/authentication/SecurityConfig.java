@@ -35,32 +35,39 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                 .requestMatchers("/api/users/update-username").authenticated()
                 .requestMatchers("/api/users/*/change-password").authenticated()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR")
+                .requestMatchers("/api/assistant/**").permitAll()
                 .requestMatchers("/api/users/**").permitAll()
-                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR","GUIDE","GUİDE")
-                .requestMatchers(HttpMethod.GET, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE", "COUNSELOR")
-                .requestMatchers(HttpMethod.POST, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
-                .requestMatchers(HttpMethod.PUT, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
-                .requestMatchers("/api/tours/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE","GUİDE","COUNSELOR")
-                .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
-                .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR","COORDİNATOR")
-                .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
-                .requestMatchers("/api/schools/**").permitAll()  
+                .requestMatchers("/api/days/**").permitAll()
+                .requestMatchers("/api/schools/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/fairs/**").hasAnyRole("ADMIN", "COORDINATOR", "COUNSELOR")
+                .requestMatchers(HttpMethod.POST, "/api/fairs/**").hasAnyRole("ADMIN", "COORDINATOR", "COUNSELOR")
+                .requestMatchers(HttpMethod.PUT, "/api/fairs/**").hasAnyRole("ADMIN", "COORDINATOR")
+                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "GUIDE", "GUİDE")
+                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "GUIDE", "GUİDE")
+                .requestMatchers(HttpMethod.GET, "/api/forms/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "GUIDE", "COUNSELOR")
+                .requestMatchers(HttpMethod.POST, "/api/forms/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "COUNSELOR")
+                .requestMatchers(HttpMethod.PUT, "/api/forms/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "COUNSELOR")
+                .requestMatchers("/api/tours/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "GUIDE", "GUİDE", "COUNSELOR")
+                .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "GUIDE")
+                .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR")
+                .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "PRESIDENT")
+                .requestMatchers("/api/schools/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -72,7 +79,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Adjust this to your frontend URL
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",
+            "https://8562-139-179-40-158.ngrok-free.app",
+            "http://8562-139-179-40-158.ngrok-free.app"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

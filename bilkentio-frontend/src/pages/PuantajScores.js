@@ -72,6 +72,33 @@ const PuantajScores = () => {
       .sort((a, b) => new Date(a.month) - new Date(b.month));
   };
 
+  const processMonthlyHours = (tours) => {
+    console.log('Processing tours:', tours);
+    const monthlyData = {};
+    const currentDate = new Date();
+    const lastYear = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1));
+
+    tours.forEach((tour) => {
+      const tourDate = new Date(tour.date);
+      if (tourDate >= lastYear) {
+        const monthKey = tourDate.toLocaleString("default", {
+          month: "short",
+          year: "numeric",
+        });
+
+        // Use totalHours from backend
+        if (tour.totalHours) {
+          monthlyData[monthKey] = (monthlyData[monthKey] || 0) + tour.totalHours;
+        }
+      }
+    });
+
+    console.log('Monthly data:', monthlyData);
+    return Object.entries(monthlyData)
+      .map(([month, hours]) => ({ month, hours: Number(hours.toFixed(1)) }))
+      .sort((a, b) => new Date(a.month) - new Date(b.month));
+  };
+
   const getLastMonthTours = (tours) => {
     const currentDate = new Date();
     const lastMonth = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
@@ -115,8 +142,15 @@ const PuantajScores = () => {
           ...stats.data,
           lastMonthTours: getLastMonthTours(allCompletedTours),
           totalTours: allCompletedTours.length,
-          totalHours: stats.data.totalHours || 0,
-          currentMonthHours: stats.data.currentMonthHours || 0
+          totalHours: allCompletedTours.reduce((sum, tour) => sum + (tour.totalHours || 0), 0),
+          currentMonthHours: allCompletedTours
+            .filter(tour => {
+              const tourDate = new Date(tour.date);
+              const now = new Date();
+              return tourDate.getMonth() === now.getMonth() && 
+                     tourDate.getFullYear() === now.getFullYear();
+            })
+            .reduce((sum, tour) => sum + (tour.totalHours || 0), 0)
         },
         reviews: reviews.data || [],
         tours: {
@@ -126,7 +160,8 @@ const PuantajScores = () => {
             individualTours: upcomingIndividuals || []
           }
         },
-        monthlyStats: processMonthlyStats(allCompletedTours)
+        monthlyStats: processMonthlyStats(allCompletedTours),
+        monthlyHours: processMonthlyHours(allCompletedTours)
       });
     } catch (error) {
       console.error('Error fetching guide details:', error);
@@ -225,43 +260,9 @@ const PuantajScores = () => {
         );
       case 'completed':
         return (
-          <>
-            {guideDetails?.tours?.completed && (
-              <div className="tour-stats">
-                <div className="stat-item">
-                  <span className="material-icons">timer</span>
-                  <div className="stat-details">
-                    <h4>Total Tour Hours</h4>
-                    <p>
-                      {guideDetails.tours.completed
-                        .reduce((total, tour) => total + (tour.totalHours || 0), 0)
-                        .toFixed(1)} hours
-                    </p>
-                  </div>
-                </div>
-                <div className="stat-item">
-                  <span className="material-icons">schedule</span>
-                  <div className="stat-details">
-                    <h4>This Month's Hours</h4>
-                    <p>
-                      {guideDetails.tours.completed
-                        .filter(tour => {
-                          const tourDate = new Date(tour.date);
-                          const now = new Date();
-                          return tourDate.getMonth() === now.getMonth() && 
-                                 tourDate.getFullYear() === now.getFullYear();
-                        })
-                        .reduce((total, tour) => total + (tour.totalHours || 0), 0)
-                        .toFixed(1)} hours
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            <div className="tours-grid">
-              {guideDetails.tours.completed.map(tour => renderTourCard(tour, 'completed'))}
-            </div>
-          </>
+          <div className="tours-grid">
+            {guideDetails.tours.completed.map(tour => renderTourCard(tour, 'completed'))}
+          </div>
         );
       case 'reviews':
         return (
@@ -455,6 +456,20 @@ const PuantajScores = () => {
                           <Tooltip />
                           <Legend />
                           <Line type="monotone" dataKey="tours" stroke="#6c63ff" name="Tours" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    <div className="monthly-chart">
+                      <h4>Monthly Tour Hours</h4>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={guideDetails.monthlyHours}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line type="monotone" dataKey="hours" stroke="#82ca9d" name="Hours" />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>

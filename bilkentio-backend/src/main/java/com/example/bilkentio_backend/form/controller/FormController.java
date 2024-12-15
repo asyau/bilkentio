@@ -17,8 +17,6 @@ import com.example.bilkentio_backend.form.dto.FormResponseDTO;
 import com.example.bilkentio_backend.day.repository.SlotRepository;
 import com.example.bilkentio_backend.form.dto.FormSubmissionDTO;
 
-
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +38,7 @@ public class FormController {
             // Get current user and validate
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
             // Validate user is a GuidanceCounselor and get school
             if (!(user instanceof GuidanceCounselor)) {
@@ -50,7 +48,7 @@ public class FormController {
 
             // Get the time slot
             TimeSlot slot = slotRepository.findById(submissionDTO.getSlotId())
-                .orElseThrow(() -> new RuntimeException("Time slot not found"));
+                    .orElseThrow(() -> new RuntimeException("Time slot not found"));
 
             // Create and populate the form
             Form form = new Form();
@@ -71,57 +69,57 @@ public class FormController {
             return ResponseEntity.ok(savedForm);
         } catch (IllegalStateException e) {
             return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(new FormResponseDTO(e.getMessage()));
+                    .status(HttpStatus.CONFLICT)
+                    .body(new FormResponseDTO(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new FormResponseDTO("Failed to submit form: " + e.getMessage()));
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new FormResponseDTO("Failed to submit form: " + e.getMessage()));
         }
     }
 
     @PutMapping("/{formId}/status")
-    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN') or " +
-                 "(hasRole('ROLE_COUNSELOR') and @formService.isFormOwner(#formId, principal.username))")
+    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN', 'COORDINATOR', 'COORDİNATOR') or " +
+            "(hasRole('ROLE_COUNSELOR') and @formService.isFormOwner(#formId, principal.username))")
     public ResponseEntity<?> updateFormStatus(
             @PathVariable Long formId,
             @RequestParam FormState newState) {
         // Only allow counselors to set status to DENIED
         if (SecurityContextHolder.getContext().getAuthentication()
-            .getAuthorities().stream()
-            .anyMatch(a -> a.getAuthority().equals("ROLE_COUNSELOR")) 
-            && newState != FormState.DENIED) {
+                .getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COUNSELOR"))
+                && newState != FormState.DENIED) {
             return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body("Counselors can only deny their own forms");
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("Counselors can only deny their own forms");
         }
         Form updatedForm = formService.updateFormStatus(formId, newState);
         return ResponseEntity.ok(updatedForm);
     }
 
     @GetMapping("/pending")
-    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN', 'COORDINATOR', 'COORDİNATOR')")
     public ResponseEntity<List<Form>> getPendingForms() {
         List<Form> forms = formService.getPendingForms();
         return ResponseEntity.ok(forms);
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN', 'COORDINATOR', 'COORDİNATOR')")
     public ResponseEntity<List<Form>> getAllForms() {
         List<Form> forms = formService.getAllForms();
         return ResponseEntity.ok(forms);
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('COUNSELOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('COUNSELOR', 'ADMIN', 'COORDINATOR', 'COORDİNATOR')")
     public ResponseEntity<List<Form>> getUserForms(@PathVariable Long userId) {
         List<Form> forms = formService.getFormsBySubmitter(userId);
         return ResponseEntity.ok(forms);
     }
 
     @GetMapping("/state/{state}")
-    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN', 'COORDINATOR', 'COORDİNATOR')")
     public ResponseEntity<List<Form>> getFormsByState(@PathVariable FormState state) {
         List<Form> forms = formService.getFormsByState(state);
         System.out.println("Found " + forms.size() + " forms with state: " + state);
@@ -129,14 +127,14 @@ public class FormController {
     }
 
     @GetMapping("/my-forms")
-    @PreAuthorize("hasAnyRole('COUNSELOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('COUNSELOR', 'ADMIN', 'COORDINATOR', 'COORDİNATOR')")
     public ResponseEntity<List<Form>> getMyForms() {
         List<Form> forms = formService.getMyForms();
         return ResponseEntity.ok(forms);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN', 'COUNSELOR')")
+    @PreAuthorize("hasAnyRole('ADVISOR', 'ADMIN', 'COORDINATOR', 'COORDİNATOR', 'COUNSELOR')")
     public ResponseEntity<Form> getFormById(@PathVariable Long id) {
         return formService.getFormById(id)
                 .map(ResponseEntity::ok)

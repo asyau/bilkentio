@@ -3,6 +3,10 @@ package com.example.bilkentio_backend.fair.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.example.bilkentio_backend.fair.enums.FairStatus;
+import com.example.bilkentio_backend.user.entity.User;
 
 @Entity
 @Data
@@ -21,8 +25,9 @@ public class Fair {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private FairStatus status = FairStatus.PENDING;
 
     private Double schoolRank;
 
@@ -40,8 +45,21 @@ public class Fair {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
-    private Long assignedGuideId;
+    @Column(columnDefinition = "TEXT")
+    private String rejectionReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_guide_id")
+    private User assignedGuide;
+
+    private LocalDateTime guideAssignedAt;
+    private LocalDateTime guideResponseAt;
+    private Boolean guideAccepted;
 
     @Column(nullable = false)
     private LocalDate submissionDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requested_by_id")
+    private User requestedBy;
 }

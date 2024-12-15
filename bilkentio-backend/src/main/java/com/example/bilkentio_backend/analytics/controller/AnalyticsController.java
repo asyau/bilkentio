@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/analytics")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('COORDINATOR') or hasRole('COORDİNATOR')")
 public class AnalyticsController {
 
     @Autowired

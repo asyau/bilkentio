@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function Register() {
     const [username, setUsername] = useState('');
@@ -18,6 +19,7 @@ function Register() {
     const [cities, setCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
     const [email, setEmail] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCities = async () => {
@@ -224,6 +226,9 @@ function Register() {
                     </div>
                     <button type="submit" className="landing-button">Register</button>
                 </form>
+                <div className="login-prompt">
+                    <p>Already have an account? <button onClick={() => navigate('/login')} className="text-button">Login here</button></p>
+                </div>
             </div>
         </div>
     );

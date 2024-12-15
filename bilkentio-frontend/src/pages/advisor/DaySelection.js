@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdvisorSidebar from '../../components/AdvisorSidebar'; 
 import '../../styles/DaySelection.css';
+import '../../styles/Advisor.css';
 
 const DaySelection = () => {
   const [selectedDay, setSelectedDay] = useState('');
@@ -75,45 +76,56 @@ const DaySelection = () => {
 
   if (loading) {
     return (
-      <div className="day-selection-container">
-        <div className="loading">Loading...</div>
+      <div className="advisor-container">
+        <AdvisorSidebar />
+        <div className="advisor-content">
+          <div className="day-selection-container">
+            <div className="loading">Loading...</div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="day-selection-page">
+    <div className="advisor-container">
       <AdvisorSidebar />
-      <div className="day-selection-content">
-        <h2>Select Your Responsible Day</h2>
-        {!isEditing && selectedDay ? (
-          <div className="current-day-section">
-            <p className="selected-day-info">
-              You are currently responsible for: <strong>{selectedDay.charAt(0) + selectedDay.slice(1).toLowerCase()}</strong>
-            </p>
-            <button 
-              className="change-day-button"
-              onClick={() => setIsEditing(true)}
-            >
-              Change Day
-            </button>
-          </div>
-        ) : (
-          <>
-            <p>Please select the day you will be responsible for throughout the semester:</p>
-            <div className="day-options">
-              {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'].map((day) => (
-                <button
-                  key={day}
-                  className={`day-button ${selectedDay === day ? 'selected' : ''}`}
-                  onClick={() => handleDaySelect(day)}
-                >
-                  {day.charAt(0) + day.slice(1).toLowerCase()}
-                </button>
-              ))}
+      <div className="advisor-content">
+        <div className="day-selection-container">
+          <div className="day-selection-page">
+            <div className="day-selection-content">
+              <h2>Select Your Responsible Day</h2>
+              {!isEditing && selectedDay ? (
+                <div className="current-day-section">
+                  <p className="selected-day-info">
+                    You are currently responsible for: <strong>{selectedDay.charAt(0) + selectedDay.slice(1).toLowerCase()}</strong>
+                  </p>
+                  <button 
+                    className="change-day-button"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Change Day
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p>Please select the day you will be responsible for throughout the semester:</p>
+                  <div className="day-options">
+                    {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'].map((day) => (
+                      <button
+                        key={day}
+                        className={`day-button ${selectedDay === day ? 'selected' : ''}`}
+                        onClick={() => handleDaySelect(day)}
+                      >
+                        {day.charAt(0) + day.slice(1).toLowerCase()}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );

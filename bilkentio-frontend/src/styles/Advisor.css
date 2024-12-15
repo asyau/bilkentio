@@ -1,0 +1,24 @@
+.advisor-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.advisor-content {
+    flex: 1;
+    padding: 20px;
+    margin-left: 300px;  /* Added to account for sidebar width */
+}
+
+.form-requests-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+}
+
+.day-selection-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+} 
