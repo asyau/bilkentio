@@ -35,7 +35,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/**", "/api/auth/**").permitAll()
                 .requestMatchers("/api/users/update-username").authenticated()
                 .requestMatchers("/api/users/*/change-password").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -72,7 +72,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Adjust this to your frontend URL
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",
+            "https://8562-139-179-40-158.ngrok-free.app",
+            "http://8562-139-179-40-158.ngrok-free.app"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

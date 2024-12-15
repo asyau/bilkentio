@@ -31,9 +31,9 @@ import com.example.bilkentio_backend.common.event.EmailEvent;
 import java.util.Collections;
 import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping({"/auth", "/api/auth"})
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -68,6 +68,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
+            logger.info("Login attempt for user: {}", loginRequest.getUsername());
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
@@ -78,6 +79,7 @@ public class AuthController {
             System.out.println(jwt);
             return ResponseEntity.ok(new AuthenticationResponse(jwt));
         } catch (BadCredentialsException e) {
+            logger.error("Login failed for user: {}", loginRequest.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
     }
