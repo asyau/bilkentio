@@ -6,6 +6,7 @@ import com.example.bilkentio_backend.user.entity.User;
 import com.example.bilkentio_backend.school.entity.School;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -44,6 +45,15 @@ public class Form {
     @Enumerated(EnumType.STRING)
     private FormState state = FormState.PENDING;
 
+    private int schoolPriority;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.school != null) {
+            this.schoolPriority = school.getPriorityRank();
+        }
+    }
+
     @ManyToOne
     @JoinColumn(name = "linked_slot_id")
     @JsonBackReference("slot-form")
@@ -73,6 +83,7 @@ public class Form {
     public String getFormattedSubmissionDate() {
         return submissionDate != null ? submissionDate.toString() : null;
     }
+
 
     // Convenience methods to get school information
     public String getSchoolName() {
