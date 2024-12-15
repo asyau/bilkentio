@@ -42,6 +42,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/assistant/**").permitAll()
                 .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers("/api/days/**").permitAll()
+                .requestMatchers("/api/schools/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/fairs/**").hasAnyRole("ADMIN", "COORDINATOR", "COUNSELOR")
+                .requestMatchers(HttpMethod.POST, "/api/fairs/**").hasAnyRole("ADMIN", "COORDINATOR", "COUNSELOR")
+                .requestMatchers(HttpMethod.PUT, "/api/fairs/**").hasAnyRole("ADMIN", "COORDINATOR")
+                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "GUIDE", "GUİDE")
                 .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "GUIDE", "GUİDE")
                 .requestMatchers(HttpMethod.GET, "/api/forms/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "GUIDE", "COUNSELOR")
                 .requestMatchers(HttpMethod.POST, "/api/forms/**").hasAnyRole("ADMIN", "COORDINATOR", "COORDİNATOR", "ADVISOR", "COUNSELOR")
@@ -57,12 +62,12 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 

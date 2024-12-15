@@ -1,6 +1,8 @@
 package com.example.bilkentio_backend.fair.dto;
 
 import com.example.bilkentio_backend.fair.entity.Fair;
+import com.example.bilkentio_backend.fair.enums.FairStatus;
+
 import lombok.Data;
 import java.time.LocalDate;
 
@@ -10,7 +12,7 @@ public class FairResponseDTO {
     private String schoolName;
     private String city;
     private LocalDate date;
-    private String status;
+    private FairStatus status;
     private Double schoolRank;
     private String contactPerson;
     private String contactEmail;
@@ -33,7 +35,8 @@ public class FairResponseDTO {
         dto.setContactPhone(fair.getContactPhone());
         dto.setExpectedStudents(fair.getExpectedStudents());
         dto.setNotes(fair.getNotes());
-        dto.setAssignedGuideId(fair.getAssignedGuideId());
+        // In the fromEntity method
+        dto.setAssignedGuideId(fair.getAssignedGuide() != null ? fair.getAssignedGuide().getId() : null);
         dto.setSubmissionDate(fair.getSubmissionDate());
         return dto;
     }

@@ -75,9 +75,9 @@ function Login() {
     return (
         <div className="login-container">
             <div className="logo-container">
-                <img 
-                    src="https://upload.wikimedia.org/wikipedia/tr/e/ee/Bilkent%C3%9Cniversitesi-logo.png" 
-                    alt="Bilkent University Logo" 
+                <img
+                    src="https://upload.wikimedia.org/wikipedia/tr/e/ee/Bilkent%C3%9Cniversitesi-logo.png"
+                    alt="Bilkent University Logo"
                     className="logo"
                 />
             </div>
