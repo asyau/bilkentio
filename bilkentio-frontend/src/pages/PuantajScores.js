@@ -27,7 +27,22 @@ const PuantajScores = () => {
         const response = await axios.get('http://localhost:8080/api/guides', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
-        setGuides(response.data);
+        
+        // Fetch stats for each guide
+        const guidesWithStats = await Promise.all(
+          response.data.map(async (guide) => {
+            const statsResponse = await axios.get(`http://localhost:8080/api/guides/${guide.id}/stats`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            return {
+              ...guide,
+              totalHours: statsResponse.data.totalHours || 0,
+              currentMonthHours: statsResponse.data.currentMonthHours || 0
+            };
+          })
+        );
+        
+        setGuides(guidesWithStats);
       } catch (error) {
         console.error('Error fetching guides:', error);
       } finally {
@@ -98,7 +113,9 @@ const PuantajScores = () => {
         stats: {
           ...stats.data,
           lastMonthTours: getLastMonthTours(allCompletedTours),
-          totalTours: allCompletedTours.length
+          totalTours: allCompletedTours.length,
+          totalHours: stats.data.totalHours || 0,
+          currentMonthHours: stats.data.currentMonthHours || 0
         },
         reviews: reviews.data || [],
         tours: {
@@ -313,16 +330,10 @@ const PuantajScores = () => {
                       <span className="material-icons">grade</span>
                       <span>{guide.averageRating?.toFixed(1) || '-'}</span>
                     </div>
-                    {guideDetails?.tours?.completed && (
-                      <div className="stat">
-                        <span className="material-icons">timer</span>
-                        <span>
-                          {guideDetails.tours.completed
-                            .reduce((total, tour) => total + (tour.totalHours || 0), 0)
-                            .toFixed(1)} hrs
-                        </span>
-                      </div>
-                    )}
+                    <div className="stat">
+                      <span className="material-icons">timer</span>
+                      <span>{guide.totalHours?.toFixed(1) || '0'} hrs</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -416,6 +427,20 @@ const PuantajScores = () => {
                         <div className="stat-info">
                           <h4>Total Tours</h4>
                           <p>{guideDetails.stats.totalTours || 0}</p>
+                        </div>
+                      </div>
+                      <div className="stat-card">
+                        <span className="material-icons">timer</span>
+                        <div className="stat-info">
+                          <h4>Total Hours</h4>
+                          <p>{guideDetails.stats.totalHours.toFixed(1)}</p>
+                        </div>
+                      </div>
+                      <div className="stat-card">
+                        <span className="material-icons">schedule</span>
+                        <div className="stat-info">
+                          <h4>This Month Hours</h4>
+                          <p>{guideDetails.stats.currentMonthHours.toFixed(1)}</p>
                         </div>
                       </div>
                     </div>

@@ -84,10 +84,30 @@ public class GuideService {
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"));
         String currentYear = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
         
+        // Calculate total hours
+        double totalHours = guide.getJoinedTours().stream()
+            .filter(tour -> tour.getTotalHours() != null)
+            .mapToDouble(Tour::getTotalHours)
+            .sum();
+        
+        // Calculate current month hours
+        LocalDate now = LocalDate.now();
+        double currentMonthHours = guide.getJoinedTours().stream()
+            .filter(tour -> {
+                if (tour.getTotalHours() == null) return false;
+                LocalDate tourDate = tour.getDate();
+                return tourDate.getMonth() == now.getMonth() && 
+                       tourDate.getYear() == now.getYear();
+            })
+            .mapToDouble(Tour::getTotalHours)
+            .sum();
+        
         stats.put("currentMonthIndividualTours", guide.getIndividualTourCountForMonth(currentMonth));
         stats.put("currentMonthGroupTours", guide.getGroupTourCountForMonth(currentMonth));
         stats.put("currentYearIndividualTours", guide.getIndividualTourCountForYear(currentYear));
         stats.put("currentYearGroupTours", guide.getGroupTourCountForYear(currentYear));
+        stats.put("totalHours", totalHours);
+        stats.put("currentMonthHours", currentMonthHours);
 
         return stats;
     }
