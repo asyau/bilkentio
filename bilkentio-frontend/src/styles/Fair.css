@@ -461,3 +461,183 @@
     max-width: 1400px;
     margin: 0 auto;
 }
+
+/* Add these styles */
+.fair-modal {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 1050 !important;
+    width: 90% !important;
+    max-width: 800px !important;
+}
+
+.fair-modal .modal-content {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.fair-modal .modal-header {
+    padding: 1.5rem 2rem !important;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.fair-modal .modal-title {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+}
+
+.fair-modal .modal-body {
+    padding: 2rem !important;
+}
+
+.fair-modal .custom-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.fair-modal .modal-footer {
+    padding: 1.5rem 2rem !important;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.fair-modal .close {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.fair-modal .close:hover {
+    opacity: 1;
+}
+
+.fair-modal .custom-select {
+    padding: 0.75rem !important;
+    font-size: 1.1rem !important;
+    border-radius: 8px !important;
+    border: 1px solid #ced4da !important;
+}
+
+.fair-modal .form-label {
+    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    color: #2c3e50 !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* Style for the backdrop */
+.modal-backdrop.show {
+    opacity: 0.7 !important;
+}
+
+/* Button styles */
+.fair-modal .btn {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1.1rem !important;
+    border-radius: 8px !important;
+}
+
+.fair-modal .btn-primary {
+    background-color: #3498db !important;
+    border-color: #3498db !important;
+}
+
+.fair-modal .btn-secondary {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+}
+
+.fair-modal .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.custom-close-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #666;
+}
+
+.custom-close-button:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.custom-close-button .material-icons {
+    font-size: 20px;
+}
+
+.custom-close-button .close-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Remove the default close button styles */
+.fair-modal .modal-header .close {
+    display: none;
+}
+
+/* Adjust header spacing */
+.fair-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem !important;
+}
+
+/* Add styles for the reject modal textarea */
+.fair-modal .custom-textarea {
+    padding: 0.75rem !important;
+    font-size: 1.1rem !important;
+    border-radius: 8px !important;
+    border: 1px solid #ced4da !important;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.fair-modal .custom-textarea:focus {
+    border-color: #3498db !important;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+}
+
+/* Style for the reject button */
+.fair-modal .reject-btn {
+    background-color: #e74c3c !important;
+    border-color: #e74c3c !important;
+}
+
+.fair-modal .reject-btn:hover {
+    background-color: #c0392b !important;
+    border-color: #c0392b !important;
+}
+
+.fair-modal .cancel-btn:hover {
+    background-color: #95a5a6 !important;
+    border-color: #95a5a6 !important;
+}
+
+/* Add hover effect for the textarea */
+.fair-modal .custom-textarea:hover {
+    border-color: #bdc3c7 !important;
+}
+
+/* Placeholder style */
+.fair-modal .custom-textarea::placeholder {
+    color: #95a5a6;
+    font-size: 1rem;
+}

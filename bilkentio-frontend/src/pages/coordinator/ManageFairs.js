@@ -263,16 +263,33 @@ const ManageFairs = () => {
                         })}
                     </div>
 
-                    <Modal show={showAssignModal} onHide={() => setShowAssignModal(false)} centered>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Assign Guide to Fair</Modal.Title>
+                    <Modal 
+                        show={showAssignModal} 
+                        onHide={() => setShowAssignModal(false)} 
+                        centered
+                        className="fair-modal"
+                        size="lg"
+                    >
+                        <Modal.Header>
+                            <Modal.Title>
+                                <span className="modal-title">Assign Guide to Fair</span>
+                            </Modal.Title>
+                            <button 
+                                type="button" 
+                                className="custom-close-button" 
+                                onClick={() => setShowAssignModal(false)}
+                            >
+                                <span className="material-icons">close</span>
+                                <span className="close-text">Close</span>
+                            </button>
                         </Modal.Header>
-                        <Modal.Body>
+                        <Modal.Body className="custom-modal-body">
                             <Form.Group>
                                 <Form.Label>Select Guide</Form.Label>
                                 <Form.Select
                                     value={selectedGuideId}
                                     onChange={(e) => setSelectedGuideId(e.target.value)}
+                                    className="custom-select"
                                 >
                                     <option value="">Choose a guide...</option>
                                     {guides.map(guide => (
@@ -297,11 +314,27 @@ const ManageFairs = () => {
                         </Modal.Footer>
                     </Modal>
 
-                    <Modal show={showRejectModal} onHide={() => setShowRejectModal(false)} centered>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Reject Fair Request</Modal.Title>
+                    <Modal 
+                        show={showRejectModal} 
+                        onHide={() => setShowRejectModal(false)} 
+                        centered
+                        className="fair-modal"
+                        size="lg"
+                    >
+                        <Modal.Header>
+                            <Modal.Title>
+                                <span className="modal-title">Reject Fair Request</span>
+                            </Modal.Title>
+                            <button 
+                                type="button" 
+                                className="custom-close-button" 
+                                onClick={() => setShowRejectModal(false)}
+                            >
+                                <span className="material-icons">close</span>
+                                <span className="close-text">Close</span>
+                            </button>
                         </Modal.Header>
-                        <Modal.Body>
+                        <Modal.Body className="custom-modal-body">
                             <Form.Group>
                                 <Form.Label>Reason for Rejection</Form.Label>
                                 <Form.Control
@@ -310,16 +343,22 @@ const ManageFairs = () => {
                                     value={rejectReason}
                                     onChange={(e) => setRejectReason(e.target.value)}
                                     placeholder="Please provide a reason for rejection..."
+                                    className="custom-textarea"
                                 />
                             </Form.Group>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={() => setShowRejectModal(false)}>
+                            <Button 
+                                variant="secondary" 
+                                onClick={() => setShowRejectModal(false)}
+                                className="cancel-btn"
+                            >
                                 Cancel
                             </Button>
                             <Button
                                 variant="danger"
                                 onClick={() => handleRejectFair(selectedFairId)}
+                                className="reject-btn"
                             >
                                 Reject Fair
                             </Button>
