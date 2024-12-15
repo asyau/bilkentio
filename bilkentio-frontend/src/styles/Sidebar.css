@@ -37,13 +37,14 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.8rem 1rem;
-  color: #5f6368;
+  padding: 12px 20px;
   text-decoration: none;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  color: inherit;
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .nav-item:hover {
@@ -54,6 +55,16 @@
 .nav-item.active {
   background-color: #e8f0fe;
   color: #1a73e8;
+}
+
+.nav-item.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  margin-top: auto;
+}
+
+.nav-item.logout-btn:hover {
+  background-color: #c82333;
 }
 
 .collapse-btn {
