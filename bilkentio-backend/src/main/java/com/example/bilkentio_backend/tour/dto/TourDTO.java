@@ -6,6 +6,7 @@ import com.example.bilkentio_backend.guide.entity.Guide;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,8 @@ public class TourDTO {
     private String groupLeaderRole;
     private String groupLeaderPhone;
     private String groupLeaderEmail;
+    private LocalTime endTime;
+    private Double totalHours;
 
     public static TourDTO fromEntity(Tour tour) {
         TourDTO dto = new TourDTO();
@@ -55,6 +58,8 @@ public class TourDTO {
         dto.setGroupLeaderRole(tour.getGroupLeaderRole());
         dto.setGroupLeaderPhone(tour.getGroupLeaderPhone());
         dto.setGroupLeaderEmail(tour.getGroupLeaderEmail());
+        dto.setEndTime(tour.getEndTime());
+        dto.setTotalHours(tour.getTotalHours());
 
         if (tour.getAssignedGuides() != null) {
             dto.setAssignedGuides(tour.getAssignedGuides().stream()

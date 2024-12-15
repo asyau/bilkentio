@@ -11,6 +11,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -87,6 +89,12 @@ public class Tour {
     @Column
     private String groupLeaderEmail;
 
+    @Column(nullable = true)
+    private LocalTime endTime;
+
+    @Column(nullable = true)
+    private Double totalHours;
+
     // Convenience methods to get school information
     public String getSchoolName() {
         return school != null ? school.getName() : null;
@@ -94,5 +102,21 @@ public class Tour {
 
     public String getCity() {
         return school != null ? school.getCity() : null;
+    }
+
+    // Helper method to calculate total hours
+    public void calculateTotalHours() {
+        if (this.time != null && this.endTime != null) {
+            try {
+                LocalTime startTime = LocalTime.parse(this.time);
+                Duration duration = Duration.between(startTime, this.endTime);
+                this.totalHours = duration.toMinutes() / 60.0; // Convert to decimal hours
+            } catch (Exception e) {
+                // If there's any parsing error, leave totalHours as null
+                this.totalHours = null;
+            }
+        } else {
+            this.totalHours = null;
+        }
     }
 } 

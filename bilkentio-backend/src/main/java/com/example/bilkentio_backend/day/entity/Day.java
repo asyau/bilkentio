@@ -24,16 +24,19 @@ public class Day {
 
     public void initializeSlots() {
         slots = new ArrayList<>();
-        TimeSlot slot1 = new TimeSlot("11:00 - 12:00");
-        TimeSlot slot2 = new TimeSlot("13:00 - 14:00");
-        TimeSlot slot3 = new TimeSlot("16:00 - 17:00");
-        
+        TimeSlot slot1 = new TimeSlot("09:00");
+        TimeSlot slot2 = new TimeSlot("11:00");
+        TimeSlot slot3 = new TimeSlot("13:30");
+        TimeSlot slot4 = new TimeSlot("16:00");
+
         slot1.setDay(this);
         slot2.setDay(this);
         slot3.setDay(this);
-        
+        slot4.setDay(this);
+
         slots.add(slot1);
         slots.add(slot2);
         slots.add(slot3);
+        slots.add(slot4);
     }
 }

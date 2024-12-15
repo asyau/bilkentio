@@ -14,6 +14,7 @@ const PuantajScores = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming', 'completed', or 'reviews'
+  const [sortBy, setSortBy] = useState('score'); // Add this state
 
   useEffect(() => {
     const initializeComponent = async () => {
@@ -27,7 +28,22 @@ const PuantajScores = () => {
         const response = await axios.get('http://localhost:8080/api/guides', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
-        setGuides(response.data);
+        
+        // Fetch stats for each guide
+        const guidesWithStats = await Promise.all(
+          response.data.map(async (guide) => {
+            const statsResponse = await axios.get(`http://localhost:8080/api/guides/${guide.id}/stats`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            return {
+              ...guide,
+              totalHours: statsResponse.data.totalHours || 0,
+              currentMonthHours: statsResponse.data.currentMonthHours || 0
+            };
+          })
+        );
+        
+        setGuides(guidesWithStats);
       } catch (error) {
         console.error('Error fetching guides:', error);
       } finally {
@@ -79,6 +95,8 @@ const PuantajScores = () => {
         axios.get(`http://localhost:8080/api/guides/${guideId}/tours/upcoming`, { headers })
       ]);
 
+      
+
       // Filter completed individual tours
       const completedIndividuals = completedIndividualTours.data.filter(
         tour => tour.status === 'FINISHED' || tour.status === 'GIVEN_FEEDBACK'
@@ -96,7 +114,9 @@ const PuantajScores = () => {
         stats: {
           ...stats.data,
           lastMonthTours: getLastMonthTours(allCompletedTours),
-          totalTours: allCompletedTours.length
+          totalTours: allCompletedTours.length,
+          totalHours: stats.data.totalHours || 0,
+          currentMonthHours: stats.data.currentMonthHours || 0
         },
         reviews: reviews.data || [],
         tours: {
@@ -129,6 +149,23 @@ const PuantajScores = () => {
     guide.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getSortedGuides = () => {
+    return [...filteredGuides].sort((a, b) => {
+      switch (sortBy) {
+        case 'score':
+          return b.score - a.score;
+        case 'rating':
+          return (b.averageRating || 0) - (a.averageRating || 0);
+        case 'hours':
+          return (b.totalHours || 0) - (a.totalHours || 0);
+        case 'name':
+          return a.nameSurname.localeCompare(b.nameSurname);
+        default:
+          return 0;
+      }
+    });
+  };
+
   const renderTourCard = (tour, type = 'upcoming') => (
     <div key={tour.id} className={`tour-card ${type}`}>
       <div className="tour-date">
@@ -145,15 +182,29 @@ const PuantajScores = () => {
         {tour.schoolName && <p><span className="material-icons">school</span> {tour.schoolName}</p>}
         {tour.groupSize && <p><span className="material-icons">group</span> {tour.groupSize} people</p>}
         {tour.interests && <p><span className="material-icons">interests</span> {tour.interests}</p>}
+        {tour.totalHours && (
+          <p>
+            <span className="material-icons">schedule</span>
+            {tour.totalHours.toFixed(1)} hours
+          </p>
+        )}
       </div>
-      {type === 'completed' && tour.rating && (
+      {type === 'completed' && (
         <div className="tour-feedback">
-          <div className="rating">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className={`star ${i < tour.rating ? 'filled' : ''}`}>★</span>
-            ))}
-          </div>
+          {tour.rating && (
+            <div className="rating">
+              {[...Array(5)].map((_, i) => (
+                <span key={i} className={`star ${i < tour.rating ? 'filled' : ''}`}>★</span>
+              ))}
+            </div>
+          )}
           {tour.feedback && <p className="feedback-text">"{tour.feedback}"</p>}
+          {tour.totalHours && (
+            <div className="tour-duration">
+              <span className="material-icons">timer</span>
+              Total Duration: {tour.totalHours.toFixed(1)} hours
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -174,9 +225,43 @@ const PuantajScores = () => {
         );
       case 'completed':
         return (
-          <div className="tours-grid">
-            {guideDetails.tours.completed.map(tour => renderTourCard(tour, 'completed'))}
-          </div>
+          <>
+            {guideDetails?.tours?.completed && (
+              <div className="tour-stats">
+                <div className="stat-item">
+                  <span className="material-icons">timer</span>
+                  <div className="stat-details">
+                    <h4>Total Tour Hours</h4>
+                    <p>
+                      {guideDetails.tours.completed
+                        .reduce((total, tour) => total + (tour.totalHours || 0), 0)
+                        .toFixed(1)} hours
+                    </p>
+                  </div>
+                </div>
+                <div className="stat-item">
+                  <span className="material-icons">schedule</span>
+                  <div className="stat-details">
+                    <h4>This Month's Hours</h4>
+                    <p>
+                      {guideDetails.tours.completed
+                        .filter(tour => {
+                          const tourDate = new Date(tour.date);
+                          const now = new Date();
+                          return tourDate.getMonth() === now.getMonth() && 
+                                 tourDate.getFullYear() === now.getFullYear();
+                        })
+                        .reduce((total, tour) => total + (tour.totalHours || 0), 0)
+                        .toFixed(1)} hours
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="tours-grid">
+              {guideDetails.tours.completed.map(tour => renderTourCard(tour, 'completed'))}
+            </div>
+          </>
         );
       case 'reviews':
         return (
@@ -227,19 +312,33 @@ const PuantajScores = () => {
         <div className="puantaj-container">
           <div className="dashboard-header">
             <h1>Guide Performance Dashboard</h1>
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search guides..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <span className="material-icons">search</span>
+            <div className="controls">
+              <div className="sort-controls">
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="sort-select"
+                >
+                  <option value="score">Sort by Score</option>
+                  <option value="rating">Sort by Rating</option>
+                  <option value="hours">Sort by Hours</option>
+                  <option value="name">Sort by Name</option>
+                </select>
+              </div>
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Search guides..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <span className="material-icons">search</span>
+              </div>
             </div>
           </div>
 
           <div className="guides-section">
-            {filteredGuides.map(guide => (
+            {getSortedGuides().map(guide => (
               <div 
                 key={guide.id}
                 className="guide-card"
@@ -262,6 +361,10 @@ const PuantajScores = () => {
                     <div className="stat">
                       <span className="material-icons">grade</span>
                       <span>{guide.averageRating?.toFixed(1) || '-'}</span>
+                    </div>
+                    <div className="stat">
+                      <span className="material-icons">timer</span>
+                      <span>{guide.totalHours?.toFixed(1) || '0'} hrs</span>
                     </div>
                   </div>
                 </div>
@@ -324,6 +427,20 @@ const PuantajScores = () => {
                         <div className="stat-info">
                           <h4>Total Tours</h4>
                           <p>{guideDetails.stats.totalTours || 0}</p>
+                        </div>
+                      </div>
+                      <div className="stat-card">
+                        <span className="material-icons">timer</span>
+                        <div className="stat-info">
+                          <h4>Total Hours</h4>
+                          <p>{guideDetails.stats.totalHours.toFixed(1)}</p>
+                        </div>
+                      </div>
+                      <div className="stat-card">
+                        <span className="material-icons">schedule</span>
+                        <div className="stat-info">
+                          <h4>This Month Hours</h4>
+                          <p>{guideDetails.stats.currentMonthHours.toFixed(1)}</p>
                         </div>
                       </div>
                     </div>
