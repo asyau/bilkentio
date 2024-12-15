@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import CoordinatorSidebar from '../../components/CoordinatorSidebar';
-import '../../styles/FormRequests.css';
+import CoordinatorSidebar from '../components/CoordinatorSidebar';
+import '../styles/FormRequests.css';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
@@ -30,6 +30,9 @@ const FormRequests = () => {
   const [user, setUser] = useState(null);
   const [expandedFormId, setExpandedFormId] = useState(null);
   const [view, setView] = useState('calendar');
+  const [selectedPriority, setSelectedPriority] = useState('ALL');
+  const [selectedCity, setSelectedCity] = useState('ALL');
+  const [sortOrder, setSortOrder] = useState('none'); // 'none', 'asc', 'desc'
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -291,6 +294,48 @@ const FormRequests = () => {
     return { style };
   };
 
+  const getFilteredAndSortedForms = () => {
+    let filteredForms = [...forms];
+
+    // Filter by priority
+    if (selectedPriority !== 'ALL') {
+      filteredForms = filteredForms.filter(form => {
+        const priority = form.schoolPriority;
+        switch (selectedPriority) {
+          case 'HIGH':
+            return priority < 6;
+          case 'MEDIUM':
+            return priority >= 6 && priority <= 10;
+          case 'LOW':
+            return priority > 15;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filter by city
+    if (selectedCity !== 'ALL') {
+      filteredForms = filteredForms.filter(form => form.city === selectedCity);
+    }
+
+    // Sort by submission date
+    if (sortOrder !== 'none') {
+      filteredForms.sort((a, b) => {
+        const dateA = new Date(a.submissionDate);
+        const dateB = new Date(b.submissionDate);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      });
+    }
+
+    return filteredForms;
+  };
+
+  const getUniqueCities = () => {
+    const cities = new Set(forms.map(form => form.city).filter(Boolean));
+    return ['ALL', ...Array.from(cities)];
+  };
+
   return (
     <div className="admin-layout">
       <CoordinatorSidebar />
@@ -298,47 +343,85 @@ const FormRequests = () => {
         <div className="form-requests-container">
           <div className="form-header">
             <div className="filter-section">
-              <div className="view-toggle">
-                <button 
-                  className={`view-btn ${view === 'list' ? 'active' : ''}`}
-                  onClick={() => setView('list')}
-                >
-                  <span className="material-icons">view_list</span>
-                  List View
-                </button>
-                <button 
-                  className={`view-btn ${view === 'calendar' ? 'active' : ''}`}
-                  onClick={() => setView('calendar')}
-                >
-                  <span className="material-icons">calendar_today</span>
-                  Calendar View
-                </button>
-              </div>
-              <div className="status-filters">
-                <button 
-                  className={`filter-btn ${selectedStatus === 'ALL' ? 'active' : ''}`}
-                  onClick={() => setSelectedStatus('ALL')}
-                >
-                  All Forms
-                </button>
-                <button 
-                  className={`filter-btn ${selectedStatus === 'PENDING' ? 'active' : ''}`}
-                  onClick={() => setSelectedStatus('PENDING')}
-                >
-                  Pending
-                </button>
-                <button 
-                  className={`filter-btn ${selectedStatus === 'APPROVED' ? 'active' : ''}`}
-                  onClick={() => setSelectedStatus('APPROVED')}
-                >
-                  Approved
-                </button>
-                <button 
-                  className={`filter-btn ${selectedStatus === 'DENIED' ? 'active' : ''}`}
-                  onClick={() => setSelectedStatus('DENIED')}
-                >
-                  Denied
-                </button>
+              <div className="all-filters">
+                <div className="view-toggle">
+                  <button 
+                    className={`view-btn ${view === 'list' ? 'active' : ''}`}
+                    onClick={() => setView('list')}
+                  >
+                    <span className="material-icons">view_list</span>
+                    List View
+                  </button>
+                  <button 
+                    className={`view-btn ${view === 'calendar' ? 'active' : ''}`}
+                    onClick={() => setView('calendar')}
+                  >
+                    <span className="material-icons">calendar_today</span>
+                    Calendar View
+                  </button>
+                </div>
+
+                <div className="filters-row">
+                  <div className="status-filters">
+                    <button 
+                      className={`filter-btn ${selectedStatus === 'ALL' ? 'active' : ''}`}
+                      onClick={() => setSelectedStatus('ALL')}
+                    >
+                      All Forms
+                    </button>
+                    <button 
+                      className={`filter-btn ${selectedStatus === 'PENDING' ? 'active' : ''}`}
+                      onClick={() => setSelectedStatus('PENDING')}
+                    >
+                      Pending
+                    </button>
+                    <button 
+                      className={`filter-btn ${selectedStatus === 'APPROVED' ? 'active' : ''}`}
+                      onClick={() => setSelectedStatus('APPROVED')}
+                    >
+                      Approved
+                    </button>
+                    <button 
+                      className={`filter-btn ${selectedStatus === 'DENIED' ? 'active' : ''}`}
+                      onClick={() => setSelectedStatus('DENIED')}
+                    >
+                      Denied
+                    </button>
+                  </div>
+
+                  <div className="additional-filters">
+                    <select 
+                      value={selectedPriority} 
+                      onChange={(e) => setSelectedPriority(e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="ALL">All Priorities</option>
+                      <option value="HIGH">High Priority</option>
+                      <option value="MEDIUM">Medium Priority</option>
+                      <option value="LOW">Low Priority</option>
+                    </select>
+
+                    <select 
+                      value={selectedCity} 
+                      onChange={(e) => setSelectedCity(e.target.value)}
+                      className="filter-select"
+                    >
+                      {getUniqueCities().map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+
+                    <select 
+                      value={sortOrder} 
+                      onChange={(e) => setSortOrder(e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="none">Sort by Date</option>
+                      <option value="asc">Oldest First</option>
+                      <option value="desc">Newest First</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -384,7 +467,7 @@ const FormRequests = () => {
                 </div>
               ) : (
                 <div className="forms-list">
-                  {forms.map((form, index) => {
+                  {getFilteredAndSortedForms().map((form, index) => {
                     const isExpanded = expandedFormId === form.id;
                     return (
                       <div 
@@ -412,6 +495,7 @@ const FormRequests = () => {
                             <p><strong>Leader:</strong> {form.groupLeaderRole || 'Not specified'}</p>
                             <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
                             <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
+                            <p><strong>School Priority:</strong> {form.schoolPriority || 'Not specified'}</p>
                             <p><strong>City:</strong> {form.city || 'Not specified'}</p>
                             {form.expectations && (
                               <p><strong>Expectations:</strong> {form.expectations}</p>

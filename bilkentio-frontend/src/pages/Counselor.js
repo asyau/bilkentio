@@ -691,7 +691,7 @@ const Counselor = () => {
                         )}
                       </div>
                     </div>
-                    <div className="form-details">
+                    <div>
                       <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
                       <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
                       <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
