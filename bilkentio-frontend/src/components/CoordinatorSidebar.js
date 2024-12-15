@@ -3,8 +3,6 @@ import BaseSidebar from './BaseSidebar';
 
 const CoordinatorSidebar = () => {
   const menuItems = [
-    
-    
     {
       title: 'Analytics',
       path: '/coordinator/analytics',
@@ -19,6 +17,11 @@ const CoordinatorSidebar = () => {
       title: 'Staff Management',
       path: '/coordinator/staff',
       icon: 'groups'
+    },
+    {
+      title: 'Manage Fairs',
+      path: '/coordinator/fairs',
+      icon: 'event'
     },
     {
       title: 'Tour Management',

@@ -38,10 +38,10 @@ import CoordinatorFormRequests from './pages/coordinator/CoordinatorFormRequests
 import CoordinatorStaffManagement from './pages/coordinator/CoordinatorStaffManagement';
 import CoordinatorTourManagement from './pages/coordinator/CoordinatorTourManagement';
 import CoordinatorPuantajScores from './pages/coordinator/CoordinatorPuantajScores';
+import ManageFairs from './pages/coordinator/ManageFairs';
 
 import SchoolManagement from './pages/admin/SchoolManagement';
 import InviteToFairForm from './pages/admin/InviteToFairForm';
-import ViewFairApplications from './pages/admin/ViewFairApplications';
 import Analytics from './pages/Analytics';
 
 function App() {
@@ -62,8 +62,7 @@ function App() {
           <Route path="tours" element={<TourManagement />} />
           <Route path="tours/:tourId" element={<TourDetails />} />
           <Route path="schools" element={<SchoolManagement />} />
-          <Route path="fairs/invite" element={<InviteToFairForm />} />
-          <Route path="fairs/applications" element={<ViewFairApplications />} />
+          <Route path="fairs" element={<ManageFairs />} />
         </Route>
 
         {/* Guide Routes */}
@@ -88,7 +87,6 @@ function App() {
         <Route path="/form-request" element={<FormRequests />} />
         <Route path="/analytics" element={<Analytics />} />
 
-
         {/* Coordinator Routes */}
         <Route path="/coordinator">
           <Route path="dashboard" element={<CoordinatorDashboard />} />
@@ -97,6 +95,7 @@ function App() {
           <Route path="staff" element={<CoordinatorStaffManagement />} />
           <Route path="tours" element={<CoordinatorTourManagement />} />
           <Route path="scores" element={<CoordinatorPuantajScores />} />
+          <Route path="fairs" element={<ManageFairs />} />
         </Route>
       </Routes>
     </Router>

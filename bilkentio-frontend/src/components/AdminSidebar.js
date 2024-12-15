@@ -54,18 +54,13 @@ const AdminSidebar = () => {
             {!isCollapsed && <span>Tour Management</span>}
           </NavLink>
 
-          <NavLink to="/admin/fairs/invite" className="nav-item" title="Invite to Fair">
-            <span className="material-icons">add_circle</span>
-            {!isCollapsed && <span>Invite to Fair</span>}
+          <NavLink to="/admin/fairs" className="nav-item" title="Manage Fairs">
+            <span className="material-icons">event</span>
+            {!isCollapsed && <span>Manage Fairs</span>}
           </NavLink>
 
-          <NavLink to="/admin/fairs/applications" className="nav-item" title="View Applications">
-            <span className="material-icons">list_alt</span>
-            {!isCollapsed && <span>View Applications</span>}
-          </NavLink>
-         
         </nav>
-        
+
         <button className="logout-btn" onClick={handleLogout}>
           <span className="material-icons">logout</span>
           {!isCollapsed && <span>Log Out</span>}

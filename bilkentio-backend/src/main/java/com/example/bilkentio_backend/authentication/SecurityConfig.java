@@ -32,33 +32,38 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/users/**").permitAll()
-                .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR","GUIDE","GUİDE")
-                .requestMatchers(HttpMethod.GET, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE", "COUNSELOR")
-                .requestMatchers(HttpMethod.POST, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
-                .requestMatchers(HttpMethod.PUT, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
-                .requestMatchers("/api/tours/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE","GUİDE","COUNSELOR")
-                .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
-                .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR")
-                .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
-                .requestMatchers("/api/schools/**").permitAll()  
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/schools/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/fairs/**")
+                        .hasAnyRole("ADMIN", "COORDINATOR", "COUNSELOR")
+                        .requestMatchers(HttpMethod.POST, "/api/fairs/**")
+                        .hasAnyRole("ADMIN", "COORDINATOR", "COUNSELOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/fairs/**").hasAnyRole("ADMIN", "COORDINATOR")
+                        .requestMatchers("/api/advisors/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE", "GUİDE")
+                        .requestMatchers(HttpMethod.GET, "/api/forms/**")
+                        .hasAnyRole("ADMIN", "ADVISOR", "GUIDE", "COUNSELOR")
+                        .requestMatchers(HttpMethod.POST, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/forms/**").hasAnyRole("ADMIN", "ADVISOR", "COUNSELOR")
+                        .requestMatchers("/api/tours/**").hasAnyRole("ADMIN", "ADVISOR", "GUIDE", "GUİDE", "COUNSELOR")
+                        .requestMatchers("/api/guides/**").hasAnyRole("ADMIN", "GUIDE")
+                        .requestMatchers("/api/coordinators/**").hasAnyRole("ADMIN", "COORDINATOR")
+                        .requestMatchers("/api/presidents/**").hasAnyRole("ADMIN", "PRESIDENT")
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 

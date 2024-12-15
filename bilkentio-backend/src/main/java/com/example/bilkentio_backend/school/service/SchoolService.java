@@ -74,9 +74,8 @@ public class SchoolService {
     public Optional<School> findByName(String name) {
         return schoolRepository.findByName(name);
     }
-}
 
     public List<GuidanceCounselor> getSchoolCounselors(Long schoolId) {
         return guidanceCounselorRepository.findBySchoolId(schoolId);
     }
-} 
+}

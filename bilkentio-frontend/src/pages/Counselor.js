@@ -3,7 +3,10 @@ import React, { useState, useEffect } from 'react';
 import '../styles/GuideMode.css';
 import axios from 'axios';
 import { format, addDays } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Routes, Route } from 'react-router-dom';
+import { Form, Button, Alert } from 'react-bootstrap';
+import { cities } from '../constants/cities';
+import FairRequest from './counselor/FairRequest';
 
 const schools = [
   'TED Ankara College',
@@ -12,17 +15,6 @@ const schools = [
   'Ankara Science High School',
   'Other'
 ];
-
-const cities = [
-    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya', 'Ardahan', 'Artvin', 
-    'Aydın', 'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 
-    'Bursa', 'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 
-    'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkâri', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul', 
-    'İzmir', 'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kırıkkale', 'Kırklareli', 'Kırşehir', 
-    'Kilis', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 
-    'Niğde', 'Ordu', 'Osmaniye', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Şanlıurfa', 'Şırnak', 
-    'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak'
-  ];
 
 const Counselor = () => {
   const navigate = useNavigate();
@@ -42,6 +34,18 @@ const Counselor = () => {
   const [showCancellationForm, setShowCancellationForm] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
   const [tourToCancel, setTourToCancel] = useState(null);
+  const [formData, setFormData] = useState({
+    schoolName: '',
+    city: '',
+    fairDate: '',
+    contactPerson: '',
+    contactEmail: '',
+    contactPhone: '',
+    expectedStudents: '',
+    notes: ''
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const StarRating = ({ rating, onRatingChange }) => {
     return (
@@ -94,7 +98,7 @@ const Counselor = () => {
       const response = await axios.get(`http://localhost:8080/api/days/week?date=${formattedDate}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && Array.isArray(response.data)) {
         setDays(response.data);
       } else {
@@ -125,7 +129,7 @@ const Counselor = () => {
   };
 
   const getSlotClass = (slot) => {
-    switch(slot.status) {
+    switch (slot.status) {
       case 'UNAVAILABLE':
         return 'time-slot unavailable';
       case 'FORM_REQUESTED':
@@ -140,13 +144,13 @@ const Counselor = () => {
       alert('This slot is not available');
       return;
     }
-    
+
     if (slot.status === 'FORM_REQUESTED') {
       if (!window.confirm('A form has already been requested for this slot. Would you still like to apply?')) {
         return;
       }
     }
-    
+
     setSelectedSlot({ ...slot, day });
     setShowForm(true);
   };
@@ -177,12 +181,12 @@ const Counselor = () => {
           ...formData,
           slotId: selectedSlot.id,
         }, {
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
-        
+
         console.log('Form submitted:', response.data);
         fetchWeekDays(currentWeekStart);
         if (user) {
@@ -206,7 +210,7 @@ const Counselor = () => {
         <div className="form-container">
           <h2>Tour Request Form</h2>
           <p className="selected-slot">Selected Time: {slot.time} on {slot.date}</p>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Number of Participants *</label>
@@ -215,7 +219,7 @@ const Counselor = () => {
                 required
                 min="1"
                 value={formData.groupSize}
-                onChange={(e) => setFormData({...formData, groupSize: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, groupSize: e.target.value })}
               />
             </div>
 
@@ -225,7 +229,7 @@ const Counselor = () => {
                 type="tel"
                 required
                 value={formData.contactPhone}
-                onChange={(e) => setFormData({...formData, contactPhone: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
               />
             </div>
 
@@ -273,7 +277,7 @@ const Counselor = () => {
               <label>Tour Expectations</label>
               <textarea
                 value={formData.expectations}
-                onChange={(e) => setFormData({...formData, expectations: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, expectations: e.target.value })}
                 placeholder="What would you like to see or learn about during the tour?"
               />
             </div>
@@ -282,7 +286,7 @@ const Counselor = () => {
               <label>Special Requirements</label>
               <textarea
                 value={formData.specialRequirements}
-                onChange={(e) => setFormData({...formData, specialRequirements: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, specialRequirements: e.target.value })}
                 placeholder="Any accessibility requirements or special accommodations needed?"
               />
             </div>
@@ -293,7 +297,7 @@ const Counselor = () => {
                   type="checkbox"
                   required
                   checked={formData.agreeToTerms}
-                  onChange={(e) => setFormData({...formData, agreeToTerms: e.target.checked})}
+                  onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
                 />
                 I agree to the terms and conditions *
               </label>
@@ -401,7 +405,7 @@ const Counselor = () => {
     if (!window.confirm('Are you sure you want to cancel this form? The form will be automatically denied.')) {
       return;
     }
-    
+
     try {
       const token = localStorage.getItem('token');
       await axios.put(
@@ -412,7 +416,7 @@ const Counselor = () => {
           params: { newState: 'DENIED' }
         }
       );
-      
+
       // Refresh the forms list
       fetchMyForms();
     } catch (error) {
@@ -451,7 +455,7 @@ const Counselor = () => {
       if (user) {
         fetchTours(user.userId);
       }
-      
+
       // Reset form
       setShowCancellationForm(false);
       setTourToCancel(null);
@@ -462,6 +466,45 @@ const Counselor = () => {
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('/api/fairs/request', {
+        ...formData,
+        counselorId: localStorage.getItem('userId'),
+        fairDate: new Date(formData.fairDate).toISOString().split('T')[0]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      setSuccess('Fair request submitted successfully!');
+      setError('');
+      setFormData({
+        schoolName: '',
+        city: '',
+        fairDate: '',
+        contactPerson: '',
+        contactEmail: '',
+        contactPhone: '',
+        expectedStudents: '',
+        notes: ''
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error submitting fair request');
+      setSuccess('');
+    }
+  };
+
   return (
     <div className="guide-mode-container">
       <div className="sidebar">
@@ -469,21 +512,19 @@ const Counselor = () => {
           <span className="material-icons profile-icon">account_circle</span>
           <h3>Welcome, {user?.sub || 'User'}!</h3>
         </div>
-        
+
         <nav className="sidebar-nav">
-          <button 
-            className={`sidebar-btn ${!showTourHistory ? 'active' : ''}`} 
-            onClick={() => setShowTourHistory(false)}
+          <button
+            className="sidebar-btn"
+            onClick={() => navigate('/counselor')}
           >
             <span className="material-icons">calendar_today</span>
             See Schedule
           </button>
-          <button 
-            className={`sidebar-btn ${showTourHistory ? 'active' : ''}`}
+          <button
+            className="sidebar-btn"
             onClick={() => {
-              setShowTourHistory(true);
-              setShowMyForms(false);
-              console.log(user)
+              navigate('/counselor/tour-history');
               if (user) {
                 fetchTours(user.userId);
               }
@@ -492,18 +533,22 @@ const Counselor = () => {
             <span className="material-icons">history</span>
             Tour History
           </button>
-          <button 
-            className={`sidebar-btn ${showMyForms ? 'active' : ''}`}
-            onClick={() => {
-              setShowMyForms(true);
-              setShowTourHistory(false);
-            }}
+          <button
+            className="sidebar-btn"
+            onClick={() => navigate('/counselor/my-forms')}
           >
             <span className="material-icons">history</span>
             My Forms
           </button>
+          <button
+            className="sidebar-btn"
+            onClick={() => navigate('/counselor/request-fair')}
+          >
+            <span className="material-icons">event_available</span>
+            Request Fair
+          </button>
         </nav>
-        
+
         <button className="logout-btn" onClick={handleLogout}>
           <span className="material-icons">logout</span>
           Log out
@@ -511,155 +556,159 @@ const Counselor = () => {
       </div>
 
       <div className="main-content">
-        {!showTourHistory && !showMyForms ? (
-          <>
-            <div className="schedule-header">
-              <button className="nav-button prev-week" onClick={handlePrevWeek}>
-                <span className="material-icons">chevron_left</span>
-                Previous Week
-              </button>
-              <span className="date-range">
-                {format(currentWeekStart, 'dd MMM yyyy')} - {format(addDays(currentWeekStart, 6), 'dd MMM yyyy')}
-              </span>
-              <button className="nav-button next-week" onClick={handleNextWeek}>
-                Next Week
-                <span className="material-icons">chevron_right</span>
-              </button>
-            </div>
-            
-            <div className="weekly-schedule">
-              {loading ? (
-                <div className="loading-spinner">Loading...</div>
-              ) : days.length > 0 ? (
-                days.map((day, index) => (
-                  <div key={`${day.date}-${index}`} className="day-column">
-                    <div className="day-header">
-                      <div>{format(new Date(day.date), 'dd MMM')}</div>
-                      <div>{format(new Date(day.date), 'EEEE')}</div>
-                    </div>
-                    {day.slots && day.slots.map((slot, slotIndex) => (
-                      <div 
-                        key={`${slot.id}-${slotIndex}`}
-                        className={getSlotClass(slot)}
-                        onClick={() => handleSlotClick(slot, day)}
-                      >
-                        <span>{slot.time}</span>
-                        {slot.status === 'FORM_REQUESTED' && (
-                          <span className="material-icons status-icon">description</span>
-                        )}
-                        {slot.status === 'UNAVAILABLE' && (
-                          <span className="material-icons status-icon">block</span>
-                        )}
+        <Routes>
+          <Route path="/" element={
+            <div className="schedule-view">
+              <div className="schedule-header">
+                <button className="nav-button prev-week" onClick={handlePrevWeek}>
+                  <span className="material-icons">chevron_left</span>
+                  Previous Week
+                </button>
+                <span className="date-range">
+                  {format(currentWeekStart, 'dd MMM yyyy')} - {format(addDays(currentWeekStart, 6), 'dd MMM yyyy')}
+                </span>
+                <button className="nav-button next-week" onClick={handleNextWeek}>
+                  Next Week
+                  <span className="material-icons">chevron_right</span>
+                </button>
+              </div>
+              <div className="weekly-schedule">
+                {loading ? (
+                  <div className="loading-spinner">Loading...</div>
+                ) : days.length > 0 ? (
+                  days.map((day, index) => (
+                    <div key={`${day.date}-${index}`} className="day-column">
+                      <div className="day-header">
+                        <div>{format(new Date(day.date), 'dd MMM')}</div>
+                        <div>{format(new Date(day.date), 'EEEE')}</div>
                       </div>
-                    ))}
-                  </div>
-                ))
-              ) : (
-                <div className="no-days-message">No available days for this week</div>
-              )}
-            </div>
-          </>
-        ) : showTourHistory ? (
-          <div className="tour-history-container">
-            <h2>My Tours</h2>
-            <div className="tour-list">
-              {tours.map(tour => (
-                <div key={tour.id} className="tour-item">
-                  <div className="tour-info">
-                    <h3>{tour.schoolName}</h3>
-                    <p>Date: {tour.date} at {tour.time}</p>
-                    <p>Group Size: {tour.groupSize}</p>
-                    <p>Guides: {tour.assignedGuides?.length || 0}/{tour.requiredGuides}</p>
-                    {tour.feedback && (
-                      <div className="feedback-status">
-                        <p>Feedback: {tour.feedback}</p>
-                        <p>Rating: {tour.rating}/5</p>
-                      </div>
-                    )}
-                    {tour.status === 'CANCELLED' && tour.cancellationReason && (
-                      <p className="cancellation-reason">
-                        <strong>Cancelled:</strong> {tour.cancellationReason}
-                      </p>
-                    )}
-                  </div>
-                  <div className="tour-actions">
-                    <span className={getStatusBadgeClass(tour.status)}>
-                      {tour.status.replace('_', ' ')}
-                    </span>
-                    {tour.status === 'FINISHED' && !tour.feedback && (
-                      <button 
-                        className="feedback-btn"
-                        onClick={() => {
-                          setSelectedTour(tour);
-                          setShowFeedbackForm(true);
-                        }}
-                      >
-                        Give Feedback
-                      </button>
-                    )}
-                    {(tour.status === 'GUIDES_PENDING' || tour.status === 'WAITING_TO_FINISH') && (
-                      <button 
-                        className="cancel-btn"
-                        onClick={() => handleCancelTour(tour)}
-                      >
-                        Cancel Tour
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="my-forms-container">
-            <h2>My Form Submissions</h2>
-            <div className="forms-list">
-              {myForms.map((form, index) => (
-                <div 
-                  key={`form-${form.id || index}`}
-                  className="form-card"
-                >
-                  <div className="form-header">
-                    <h3>{form.schoolName || 'No School Name'}</h3>
-                    <div className="form-header-actions">
-                      <span className={`status-badge ${form.state?.toLowerCase()}`}>
-                        {form.state || 'PENDING'}
-                      </span>
-                      {form.state === 'PENDING' && (
-                        <button
-                          className="deny-form-btn"
-                          onClick={() => handleCancelForm(form.id)}
+                      {day.slots && day.slots.map((slot, slotIndex) => (
+                        <div
+                          key={`${slot.id}-${slotIndex}`}
+                          className={getSlotClass(slot)}
+                          onClick={() => handleSlotClick(slot, day)}
                         >
-                          <span className="material-icons">cancel</span>
-                          Cancel Form
+                          <span>{slot.time}</span>
+                          {slot.status === 'FORM_REQUESTED' && (
+                            <span className="material-icons status-icon">description</span>
+                          )}
+                          {slot.status === 'UNAVAILABLE' && (
+                            <span className="material-icons status-icon">block</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ))
+                ) : (
+                  <div className="no-days-message">No available days for this week</div>
+                )}
+              </div>
+            </div>
+          } />
+          <Route path="/request-fair" element={<FairRequest />} />
+          <Route path="/tour-history" element={
+            <div className="tour-history-container">
+              <h2>My Tours</h2>
+              <div className="tour-list">
+                {tours.map(tour => (
+                  <div key={tour.id} className="tour-item">
+                    <div className="tour-info">
+                      <h3>{tour.schoolName}</h3>
+                      <p>Date: {tour.date} at {tour.time}</p>
+                      <p>Group Size: {tour.groupSize}</p>
+                      <p>Guides: {tour.assignedGuides?.length || 0}/{tour.requiredGuides}</p>
+                      {tour.feedback && (
+                        <div className="feedback-status">
+                          <p>Feedback: {tour.feedback}</p>
+                          <p>Rating: {tour.rating}/5</p>
+                        </div>
+                      )}
+                      {tour.status === 'CANCELLED' && tour.cancellationReason && (
+                        <p className="cancellation-reason">
+                          <strong>Cancelled:</strong> {tour.cancellationReason}
+                        </p>
+                      )}
+                    </div>
+                    <div className="tour-actions">
+                      <span className={getStatusBadgeClass(tour.status)}>
+                        {tour.status.replace('_', ' ')}
+                      </span>
+                      {tour.status === 'FINISHED' && !tour.feedback && (
+                        <button
+                          className="feedback-btn"
+                          onClick={() => {
+                            setSelectedTour(tour);
+                            setShowFeedbackForm(true);
+                          }}
+                        >
+                          Give Feedback
+                        </button>
+                      )}
+                      {(tour.status === 'GUIDES_PENDING' || tour.status === 'WAITING_TO_FINISH') && (
+                        <button
+                          className="cancel-btn"
+                          onClick={() => handleCancelTour(tour)}
+                        >
+                          Cancel Tour
                         </button>
                       )}
                     </div>
                   </div>
-                  <div className="form-details">
-                    <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
-                    <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
-                    <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
-                    <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
-                    <p><strong>Leader Role:</strong> {form.groupLeaderRole || 'Not specified'}</p>
-                    <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
-                    <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
-                    <p><strong>City:</strong> {form.city || 'Not specified'}</p>
-                    {form.expectations && (
-                      <p><strong>Expectations:</strong> {form.expectations}</p>
-                    )}
-                    {form.specialRequirements && (
-                      <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
-                    )}
-                    {form.visitorNotes && (
-                      <p><strong>Notes:</strong> {form.visitorNotes}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          } />
+          <Route path="/my-forms" element={
+            <div className="my-forms-container">
+              <h2>My Form Submissions</h2>
+              <div className="forms-list">
+                {myForms.map((form, index) => (
+                  <div
+                    key={`form-${form.id || index}`}
+                    className="form-card"
+                  >
+                    <div className="form-header">
+                      <h3>{form.schoolName || 'No School Name'}</h3>
+                      <div className="form-header-actions">
+                        <span className={`status-badge ${form.state?.toLowerCase()}`}>
+                          {form.state || 'PENDING'}
+                        </span>
+                        {form.state === 'PENDING' && (
+                          <button
+                            className="deny-form-btn"
+                            onClick={() => handleCancelForm(form.id)}
+                          >
+                            <span className="material-icons">cancel</span>
+                            Cancel Form
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="form-details">
+                      <p><strong>Date:</strong> {form.slotDate || 'Not specified'}</p>
+                      <p><strong>Time:</strong> {form.slotTime || 'Not specified'}</p>
+                      <p><strong>Group Size:</strong> {form.groupSize || 'Not specified'}</p>
+                      <p><strong>Contact:</strong> {form.contactPhone || 'Not specified'}</p>
+                      <p><strong>Leader Role:</strong> {form.groupLeaderRole || 'Not specified'}</p>
+                      <p><strong>Leader Phone:</strong> {form.groupLeaderPhone || 'Not specified'}</p>
+                      <p><strong>Leader Email:</strong> {form.groupLeaderEmail || 'Not specified'}</p>
+                      <p><strong>City:</strong> {form.city || 'Not specified'}</p>
+                      {form.expectations && (
+                        <p><strong>Expectations:</strong> {form.expectations}</p>
+                      )}
+                      {form.specialRequirements && (
+                        <p><strong>Special Requirements:</strong> {form.specialRequirements}</p>
+                      )}
+                      {form.visitorNotes && (
+                        <p><strong>Notes:</strong> {form.visitorNotes}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          } />
+        </Routes>
       </div>
 
       {showForm && (
@@ -688,7 +737,7 @@ const Counselor = () => {
               </div>
               <div className="form-group">
                 <label>Rating:</label>
-                <StarRating 
+                <StarRating
                   rating={feedback.rating}
                   onRatingChange={(rating) => setFeedback({ ...feedback, rating })}
                 />
@@ -725,9 +774,9 @@ const Counselor = () => {
                 />
               </div>
               <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="cancel-btn" 
+                <button
+                  type="button"
+                  className="cancel-btn"
                   onClick={() => {
                     setShowCancellationForm(false);
                     setTourToCancel(null);

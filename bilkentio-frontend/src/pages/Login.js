@@ -41,7 +41,10 @@ function Login() {
                     case 'ROLE_PRESIDENT':
                         navigate('/president');
                         break;
-                    case 'ROLE_COORDINATOR', 'ROLE_COORDİNATOR':
+                    case 'ROLE_COORDINATOR':
+                        navigate('/coordinator/analytics');
+                        break;
+                    case 'ROLE_COORDİNATOR':
                         navigate('/coordinator/analytics');
                         break;
                     case 'ROLE_ADVISOR':
@@ -76,9 +79,9 @@ function Login() {
     return (
         <div className="login-container">
             <div className="logo-container">
-                <img 
-                    src="https://upload.wikimedia.org/wikipedia/tr/e/ee/Bilkent%C3%9Cniversitesi-logo.png" 
-                    alt="Bilkent University Logo" 
+                <img
+                    src="https://upload.wikimedia.org/wikipedia/tr/e/ee/Bilkent%C3%9Cniversitesi-logo.png"
+                    alt="Bilkent University Logo"
                     className="logo"
                 />
             </div>

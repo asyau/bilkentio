@@ -38,7 +38,7 @@ public class UserService {
     @Autowired
     private GuideRepository guideRepository;
 
-     @Autowired
+    @Autowired
     private AdvisorRepository advisorRepository; // Add this
 
     @Autowired
@@ -70,22 +70,22 @@ public class UserService {
 
     public Optional<User> updateUser(Long id, User updatedUser) {
         return userRepository.findById(id)
-            .map(user -> {
-                user.setUsername(updatedUser.getUsername());
-                user.setNameSurname(updatedUser.getNameSurname());
-                
-                // Update role if provided
-                if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
-                    user.setRoles(updatedUser.getRoles());
-                }
-                
-                // Update password if provided
-                if (updatedUser.getPassword() != null) {
-                    user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-                }
-                
-                return userRepository.save(user);
-            });
+                .map(user -> {
+                    user.setUsername(updatedUser.getUsername());
+                    user.setNameSurname(updatedUser.getNameSurname());
+
+                    // Update role if provided
+                    if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
+                        user.setRoles(updatedUser.getRoles());
+                    }
+
+                    // Update password if provided
+                    if (updatedUser.getPassword() != null) {
+                        user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+                    }
+
+                    return userRepository.save(user);
+                });
     }
 
     public boolean deleteUser(Long id) {
@@ -116,22 +116,26 @@ public class UserService {
     }
 
     public User createUserWithRole(User newUser, String role) {
-        // Create the appropriate entity based on role
-        System.out.println(role.toLowerCase());
+        // Normalize the role string: convert to lowercase and replace Turkish
+        // characters
+        String normalizedRole = role.toLowerCase()
+                .replace("ı", "i")
+                .replace("İ", "i");
 
-        User user = switch (role.toLowerCase()) {
-            case "admin", "admın" -> new Admin();
-            case "advisor", "advısor" -> new Advisor();
-            case "guide", "guıde" -> new Guide();
-            case "president", "presıdent" -> new President();
-            case "coordinator", "coordınator" -> new Coordinator();
-            case "ındıvıdual", "individual" -> new Individual();
-            case "counselor" -> new GuidanceCounselor();
+        // Create the appropriate entity based on normalized role
+        User user = switch (normalizedRole) {
+            case "admin" -> new Admin();
+            case "advisor" -> new Advisor();
+            case "guide" -> new Guide();
+            case "president" -> new President();
+            case "coordinator" -> new Coordinator();
+            case "individual" -> new Individual();
+            case "counselor", "guidance counselor" -> new GuidanceCounselor();
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         };
 
-        String rawPassword = newUser.getPassword(); // Store the raw password before encoding
-        
+        String rawPassword = newUser.getPassword();
+
         // Set common properties
         user.setUsername(newUser.getUsername());
         user.setPassword(passwordEncoder.encode(rawPassword));
@@ -139,7 +143,7 @@ public class UserService {
         user.setEmail(newUser.getEmail());
         user.setPhoneNumber(newUser.getPhoneNumber());
 
-        // Set role
+        // Set role using the original role parameter for consistency with existing data
         String roleWithPrefix = "ROLE_" + role.toUpperCase();
         user.setRoles(Collections.singleton(roleWithPrefix));
 
@@ -154,17 +158,18 @@ public class UserService {
     @Async
     protected void sendCredentialsEmail(User user, String rawPassword, String role) {
         String emailContent = emailService.createCredentialsEmailBody(
-            user.getNameSurname(),
-            user.getUsername(),
-            rawPassword,
-            role
-        );
+                user.getNameSurname(),
+                user.getUsername(),
+                rawPassword,
+                role);
 
         eventPublisher.publishEvent(new EmailEvent(
-            user.getEmail(),
-            "Bilkent IO - Your Account Credentials",
-            emailContent
-        ));
+                user.getEmail(),
+                "Bilkent IO - Your Account Credentials",
+                emailContent));
     }
-    
+
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
 }
