@@ -14,4 +14,5 @@ public class FormSubmissionDTO {
     private String visitorNotes;
     private Boolean agreeToTerms;
     private Long slotId;
+    private int schoolPriority;
 } 

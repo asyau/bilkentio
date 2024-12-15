@@ -182,7 +182,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         if (schoolService.getAllSchools().isEmpty()) {
             try {
                 schoolService.importSchoolsFromCsv(
-                        "/Users/barisyayci/Desktop/bilcant/SS.2.2/CS319/bilknetio/S3-T3-bilkentio/bilkentio-backend/src/main/resources/processed_schools.csv");
+                        "src/main/resources/processed_schools.csv");
             } catch (Exception e) {
                 logger.error("Failed to initialize schools", e);
             }
